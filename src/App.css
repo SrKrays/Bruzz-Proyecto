@@ -1,0 +1,578 @@
+/* ============================================================
+   App.css — REEMPLAZAR COMPLETAMENTE
+   ✅ Layout flex para cards L1 (efecto expand al hover)
+   ✅ Animación de expansión suave al pasar el mouse / tap
+   ✅ Instagram button
+   ✅ Responsive mobile / tablet
+============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --black:       #0a0a0a;
+  --dark:        #111111;
+  --green:       #1a4a2e;
+  --green-mid:   #2d6b45;
+  --green-light: #3d8a5a;
+  --gold:        #f5c842;
+  --gold-dim:    #c9a230;
+  --cream:       #f0ead8;
+  --muted:       #888880;
+  --fast: 200ms cubic-bezier(.4, 0, .2, 1);
+  --mid:  400ms cubic-bezier(.4, 0, .2, 1);
+  --expand: 480ms cubic-bezier(.22, 1, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--black);
+  color: var(--cream);
+  min-height: 100vh;
+}
+
+button {
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+
+/* ── LAYOUT PRINCIPAL ───────────────────────────────────── */
+
+.bruzz-app {
+  background: var(--black);
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.wave {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 200px;
+  background: var(--green);
+  clip-path: ellipse(120% 100% at 50% 0%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.header {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 22px 20px 6px;
+}
+
+.logo-ring img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.tagline {
+  font-size: 13px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 6px;
+  font-weight: 300;
+}
+
+
+/* ── PANTALLAS ──────────────────────────────────────────── */
+
+.screen-body {
+  position: relative;
+  z-index: 2;
+  padding: 14px 16px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp var(--mid) both; }
+
+
+/* ── BACK ROW ───────────────────────────────────────────── */
+
+.back-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid rgba(245,200,66,0.35);
+  border-radius: 20px;
+  color: var(--gold);
+  font-size: 20px;
+  padding: 5px 14px;
+  transition: background var(--fast);
+  white-space: nowrap;
+}
+.back-btn:hover { background: rgba(245,200,66,0.1); }
+
+.screen-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 50px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   L1 — CATEGORÍAS PRINCIPALES
+   Flex horizontal con efecto EXPAND al hover / tap
+════════════════════════════════════════════════════════════ */
+
+.intro-label {
+  font-size: 21px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Contenedor flex horizontal */
+.card-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  height: 62vh;          /* altura fija: todo entra en pantalla */
+  min-height: 300px;
+  max-height: 560px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Cada card empieza compacta y se expande al hover */
+.card-grid .nav-card {
+  flex: 1;               /* reparto igualitario por defecto */
+  aspect-ratio: unset;   /* dejamos que la altura la controle el padre */
+  transition:
+    flex var(--expand),
+    border-color var(--fast),
+    box-shadow   var(--fast);
+}
+
+/* Al hacer hover / focus → card se expande */
+.card-grid .nav-card:hover,
+.card-grid .nav-card:focus-visible {
+  flex: 3.2;             /* ocupa ~3x el espacio de las otras */
+  border-color: var(--gold);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+  transform: none;       /* sin translateY en este layout */
+}
+
+/* Cuando alguna card está expandida, las demás se achican más */
+.card-grid:has(.nav-card:hover) .nav-card:not(:hover),
+.card-grid:has(.nav-card:focus-visible) .nav-card:not(:focus-visible) {
+  flex: 0.6;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   L2 — SUBCATEGORÍAS
+   Grid clásico (más compacto)
+════════════════════════════════════════════════════════════ */
+
+.card-grid.wide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  height: auto;
+  max-width: 100%;
+  max-height: none;
+}
+
+.card-grid.wide .nav-card {
+  flex: unset;
+  aspect-ratio: 16 / 8;
+  transition:
+    border-color var(--fast),
+    transform    var(--fast),
+    box-shadow   var(--fast);
+}
+
+.card-grid.wide .nav-card:hover {
+  flex: unset;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+}
+
+.card-grid.wide:has(.nav-card:hover) .nav-card:not(:hover) {
+  flex: unset;
+}
+
+.nav-card.full-width {
+  grid-column: 1 / -1;
+  aspect-ratio: 21 / 6;
+}
+
+/* En desktop L2: 3 columnas */
+@media (min-width: 900px) {
+  .card-grid.wide {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .card-grid.wide .nav-card {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+
+/* ── CARD BASE (compartida) ─────────────────────────────── */
+
+.nav-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(245,200,66,0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 12px;
+  text-align: left;
+}
+
+/* Imagen de fondo */
+.card-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--expand);
+  z-index: 0;
+}
+
+/* Al expandirse → zoom suave en la imagen */
+.nav-card:hover .card-bg-img,
+.nav-card:focus-visible .card-bg-img {
+  transform: scale(1.06);
+}
+
+/* Overlay degradado */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.25) 55%,
+    rgba(0,0,0,0.05) 100%
+  );
+  z-index: 1;
+}
+
+/* Textos */
+.card-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  line-height: 1.2;
+  /* Ocultar texto en cards comprimidas L1 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: opacity var(--expand), max-height var(--expand);
+}
+
+.card-desc {
+  font-size: 23px;
+  color: rgba(255,255,255,0.85);
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  margin-top: 3px;
+  line-height: 1.35;
+  /* Descripción solo visible cuando la card está expandida */
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity var(--expand), max-height var(--expand);
+  white-space: normal;
+}
+
+/* Al expandir → mostrar descripción */
+.nav-card:hover .card-desc,
+.nav-card:focus-visible .card-desc {
+  opacity: 1;
+  max-height: 60px;
+}
+
+
+/* ── ITEMS L3 ───────────────────────────────────────────── */
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.item-card {
+  background: var(--dark);
+  border-left: 3px solid var(--green-mid);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color var(--fast), background var(--fast);
+  animation: fadeUp var(--mid) both;
+}
+.item-card:hover {
+  border-left-color: var(--gold);
+  background: #1a1a1a;
+}
+
+.item-card--img {
+  padding: 0;
+  overflow: hidden;
+  border-left: none;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.item-img-wrap { position: relative; width: 85px; flex-shrink: 0; }
+.item-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.item-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, transparent 60%, var(--dark) 100%);
+}
+
+.item-info { flex: 1; padding: 13px 14px; }
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.item-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+.item-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.item-desc {
+  font-size: 20px;
+  color: #ffffff;
+  margin-top: 5px;
+  line-height: 1.55;
+}
+
+
+/* ── BARRA INFERIOR (compartir + instagram) ─────────────── */
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.share-btn {
+  background: rgba(245,200,66,0.12);
+  border: 1.5px solid rgba(245,200,66,0.6);
+  border-radius: 24px;
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
+  letter-spacing: 0.5px;
+  transition: background var(--fast), border-color var(--fast), transform var(--fast);
+}
+.share-btn:hover {
+  background: rgba(245,200,66,0.2);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+/* Botón Instagram */
+.ig-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(245,200,66,0.6);
+  background: rgba(245,200,66,0.08);
+  color: var(--gold);
+  transition: background var(--fast), border-color var(--fast), transform var(--fast);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.ig-btn:hover {
+  background: rgba(245,200,66,0.2);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+.ig-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* ── UTILIDADES ─────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  background: rgba(245,200,66,0.14);
+  color: var(--gold);
+  border: 1px solid rgba(245,200,66,0.3);
+  border-radius: 20px;
+  font-size: 9px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.section-sep {
+  font-size: 26px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin: 16px 0 6px;
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(61,138,90,0.25);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (hasta 480px)
+   En móvil el expand es por TAP (active state)
+════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  .wave { height: 155px; }
+  .header { padding: 16px 12px 4px; }
+  .logo-ring img { width: 70px; height: 70px; }
+  .tagline { font-size: 9px; letter-spacing: 3px; }
+
+  .screen-body { padding: 10px 10px 16px; }
+
+  /* L1 flex vertical en móvil — más intuitivo con el dedo */
+  .card-grid {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    gap: 6px;
+  }
+
+  .card-grid .nav-card {
+    flex: 1;
+    min-height: 72px;
+    max-height: 72px;
+    transition: max-height var(--expand), flex var(--expand), border-color var(--fast);
+  }
+
+  /* En móvil el expand es :active (tap) además de hover */
+  .card-grid .nav-card:hover,
+  .card-grid .nav-card:active {
+    flex: 1;
+    max-height: 200px;
+  }
+
+  /* Quitar la reducción de hermanas en móvil (vertical no hace falta) */
+  .card-grid:has(.nav-card:hover) .nav-card:not(:hover) {
+    flex: 1;
+  }
+
+  .card-name { font-size: 15px; white-space: nowrap; }
+  .card-desc { font-size: 11px; }
+
+  /* L2 en móvil: 2 columnas normales */
+  .card-grid.wide {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .card-grid.wide .nav-card { aspect-ratio: 4 / 3; }
+  .nav-card.full-width { aspect-ratio: 16 / 6; }
+
+  .screen-title { font-size: 17px; }
+  .back-btn { font-size: 11px; padding: 4px 10px; }
+  .back-row { margin-bottom: 8px; }
+
+  .item-img-wrap { width: 72px; }
+  .item-name  { font-size: 15px; }
+  .item-price { font-size: 14px; }
+  .item-desc  { font-size: 12px; }
+  .item-info  { padding: 10px 12px; }
+
+  .bottom-bar { margin-top: 16px; gap: 10px; }
+  .share-btn  { font-size: 13px; padding: 9px 18px; }
+  .ig-btn     { width: 40px; height: 40px; }
+  .ig-btn svg { width: 20px; height: 20px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET (481px – 900px)
+════════════════════════════════════════════════════════════ */
+@media (min-width: 481px) and (max-width: 900px) {
+
+  .wave { height: 172px; }
+  .logo-ring img { width: 80px; height: 80px; }
+  .tagline { font-size: 11px; }
+
+  .card-grid {
+    height: 55vh;
+    min-height: 280px;
+    max-height: 420px;
+    max-width: 100%;
+    gap: 7px;
+  }
+
+  .card-name { font-size: 16px; }
+  .card-desc { font-size: 11px; }
+
+  .card-grid.wide {
+    grid-template-columns: 1fr 1fr;
+  }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 9; }
+}

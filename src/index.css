@@ -1,0 +1,31 @@
+/* ============================================================
+   index.css — REEMPLAZAR COMPLETAMENTE
+   
+   🔧 FIX: El #root tenía width: 1126px fijo → causaba el
+   "rectángulo" centrado. Ahora ocupa 100% de la pantalla.
+============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #0a0a0a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ✅ CORRECCIÓN PRINCIPAL — antes: width: 1126px → causaba el rectángulo */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
