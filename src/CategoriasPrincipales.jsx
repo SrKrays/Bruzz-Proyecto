@@ -1,7 +1,3 @@
-// CategoriasPrincipales.jsx — REEMPLAZAR COMPLETAMENTE
-// ✅ Botón Instagram al lado de Compartir Carta
-// ✅ Sin iconos emoji
-
 import { CATEGORIAS } from './menuData';
 
 // SVG del logo de Instagram (stroke, sin fill)
@@ -15,7 +11,7 @@ function IgIcon() {
   );
 }
 
-const IG_URL = 'https://www.instagram.com/TU_USUARIO/'; // 🔁 Reemplazá con tu @
+const IG_URL = 'https://www.instagram.com/bruzzok/'; 
 
 export default function CategoriasPrincipales({ onNavigate }) {
   return (
