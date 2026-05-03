@@ -158,7 +158,6 @@ export const MENU = {
     ],
   },
 
-  // ✅ tragos: lista única con separador (sin subcategorías)
   tragos: {
     title: 'Tragos', back: 'home',
     imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80',

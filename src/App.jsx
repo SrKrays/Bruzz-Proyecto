@@ -1,24 +1,24 @@
-// App.jsx — REEMPLAZAR COMPLETAMENTE
-// ✅ Tragos va directo a items (ya no tiene subcategorías)
+// ============================================================
+//  App.jsx — v2.0
+//  ✅ Estado del carrito centralizado y pasado a Items
+// ============================================================
 
 import { useState, useCallback } from 'react';
 import './App.css';
 import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
 import Subcategorias         from './Subcategorias';
-import Items                 from './Items';
+import Items, { CartChip }  from './Items';
 
-// Secciones que tienen subcategorías propias
-// ✅ 'tragos' fue removido — ahora va directo a items
 const SUBCATEGORIA_SCREENS = new Set(['comidas', 'bebidas']);
 
 export default function App() {
-  const [screen, setScreen]   = useState('home');
-  const [menuKey, setMenuKey] = useState(null);
+  const [screen, setScreen]       = useState('home');
+  const [menuKey, setMenuKey]      = useState(null);
+  const [cart, setCart]            = useState([]);
+  const [showCheckout, setShowCheckout] = useState(false);
 
-  const navigate = useCallback((screenId) => {
-    setScreen(screenId);
-  }, []);
+  const navigate = useCallback((screenId) => setScreen(screenId), []);
 
   const showItems = useCallback((key) => {
     setMenuKey(key);
@@ -26,21 +26,39 @@ export default function App() {
   }, []);
 
   const handleCategoria = useCallback((screenId) => {
-    // Postres → directo a items
-    if (screenId === 'postres') {
-      setMenuKey('postres');
-      setScreen('items');
-      return;
-    }
-    // Tragos → directo a items (menuKey 'tragos' en MENU)
-    if (screenId === 'tragos') {
-      setMenuKey('tragos');
-      setScreen('items');
-      return;
-    }
-    // Comidas y Bebidas → pantalla de subcategorías
+    if (screenId === 'postres') { setMenuKey('postres'); setScreen('items'); return; }
+    if (screenId === 'tragos')  { setMenuKey('tragos');  setScreen('items'); return; }
     setScreen(screenId);
   }, []);
+
+  // ── Carrito: agregar (con qty y note opcionales) ─────
+  const handleCartAdd = useCallback((item) => {
+    const qty  = item.qty  ?? 1;
+    const note = item.note ?? '';
+    // Clave única: nombre + nota (para misma pizza con distintas notas)
+    const key  = item.name + '||' + note;
+    setCart((prev) => {
+      const exists = prev.find((c) => c._key === key);
+      if (exists) {
+        return prev.map((c) =>
+          c._key === key ? { ...c, qty: c.qty + qty } : c
+        );
+      }
+      return [...prev, { _key: key, name: item.name, price: item.price, note, qty }];
+    });
+  }, []);
+
+  // ── Carrito: quitar una unidad ───────────────────────
+  const handleCartRemove = useCallback((key) => {
+    setCart((prev) =>
+      prev
+        .map((c) => (c._key === key ? { ...c, qty: c.qty - 1 } : c))
+        .filter((c) => c.qty > 0)
+    );
+  }, []);
+
+  // ── Carrito: vaciar ──────────────────────────────────
+  const handleCartClear = useCallback(() => setCart([]), []);
 
   const renderScreen = () => {
     if (screen === 'home') {
@@ -56,7 +74,19 @@ export default function App() {
       );
     }
     if (screen === 'items') {
-      return <Items menuKey={menuKey} onNavigate={navigate} />;
+      return (
+        <Items
+          menuKey={menuKey}
+          onNavigate={navigate}
+          cart={cart}
+          onCartAdd={handleCartAdd}
+          onCartRemove={handleCartRemove}
+          onCartClear={handleCartClear}
+          showCheckout={showCheckout}
+          onOpenCheckout={() => setShowCheckout(true)}
+          onCloseCheckout={() => setShowCheckout(false)}
+        />
+      );
     }
     return <CategoriasPrincipales onNavigate={handleCategoria} />;
   };
@@ -69,6 +99,7 @@ export default function App() {
           <img src={logo} alt="Bruzz Pizza & Beer" />
         </div>
         <p className="tagline">Carta Digital · 2025</p>
+        <CartChip cart={cart} onOpen={() => setShowCheckout(true)} />
       </header>
       {renderScreen()}
     </div>
