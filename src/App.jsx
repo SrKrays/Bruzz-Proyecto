@@ -8,7 +8,7 @@ import './App.css';
 import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
 import Subcategorias         from './Subcategorias';
-import Items, { CartChip }  from './Items';
+import Items, { CartChip, CartPanel }  from './Items';
 
 const SUBCATEGORIA_SCREENS = new Set(['comidas', 'bebidas']);
 
@@ -17,6 +17,7 @@ export default function App() {
   const [menuKey, setMenuKey]      = useState(null);
   const [cart, setCart]            = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [cartOpen, setCartOpen]         = useState(false);
 
   const navigate = useCallback((screenId) => setScreen(screenId), []);
 
@@ -85,6 +86,9 @@ export default function App() {
           showCheckout={showCheckout}
           onOpenCheckout={() => setShowCheckout(true)}
           onCloseCheckout={() => setShowCheckout(false)}
+          cartOpen={cartOpen}
+          onOpenCart={() => setCartOpen(true)}
+          onCloseCart={() => setCartOpen(false)}
         />
       );
     }
@@ -99,9 +103,23 @@ export default function App() {
           <img src={logo} alt="Bruzz Pizza & Beer" />
         </div>
         <p className="tagline">Carta Digital · 2025</p>
-        <CartChip cart={cart} onOpen={() => setShowCheckout(true)} />
+        <CartChip cart={cart} onOpen={() => setCartOpen(true)} />
       </header>
       {renderScreen()}
+      {cartOpen && (
+        <CartPanel
+          cart={cart}
+          onClose={() => setCartOpen(false)}
+          onCartAdd={handleCartAdd}
+          onCartRemove={handleCartRemove}
+          onCartClear={handleCartClear}
+          onCheckout={() => {
+            setCartOpen(false);
+            setShowCheckout(true);
+            if (screen !== 'items') { setScreen('items'); }
+          }}
+        />
+      )}
     </div>
   );
 }
