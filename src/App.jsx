@@ -1,9 +1,4 @@
-// ============================================================
-//  App.jsx — v2.0
-//  ✅ Estado del carrito centralizado y pasado a Items
-// ============================================================
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback , useEffect } from 'react';
 import './App.css';
 import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
@@ -18,6 +13,33 @@ export default function App() {
   const [cart, setCart]            = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen]         = useState(false);
+
+  useEffect(() => {
+  console.log(
+`%c
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣎⠉⠉⠉⠉⠉⠉⠉⠉⣱⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⠀⠀⠀⠀⠀⠀⠀⠀⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠚⠒⠒⠒⠒⠒⠒⠒⠒⠓⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢀⣀⣀⣀⠀⢠⡤⢄⣸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⡠⢤⡄⠀⣀⣀⣀⡀⠀
+⡰⠕⠀⠐⠂⠍⡆⠙⣭⣛⡀⠤⠤⠤⠤⠤⠤⠤⠄⢐⣛⣭⠋⢰⡩⠐⠂⠐⠫⢆
+⢣⢄⠀⠀⢀⢠⢛⠞⠁⠀⠉⠉⠁⠒⠒⠒⠒⠈⠉⠉⠀⠈⠳⡛⡄⡀⠀⠀⡠⡜
+⠈⠳⣕⠀⣰⣻⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣝⣆⠀⣪⠞⠀
+⠀⠀⠀⠉⢠⠇⠀⠀⠀⣀⣀⣀⠀⠀⠀⠀⠀⠀⣀⣀⣀⠀⠀⠀⠸⡄⠉⠀⠀⠀
+⠀⠀⠀⠀⢸⠀⠀⢠⡾⠿⠿⠿⣿⣄⠀⠀⣠⣿⠿⠿⠿⢷⡀⠀⠀⡇⠀⠀⠀⠀
+⠀⠀⠀⠀⢸⠀⠀⠈⢀⣶⠛⠛⢦⠙⠀⠐⠋⡶⠛⠛⣷⡀⠀⠀⠀⡇⠀⠀⠀⠀
+⠀⠀⠀⠀⡸⠃⠀⠀⠸⣷⡈⡃⣸⠇⠀⠀⠸⣇⢹⠁⣾⠇⠀⠀⠘⢇⠀⠀⠀⠀
+⠀⠀⠀⢸⠁⠀⠀⠀⢀⣩⠿⢿⡭⠤⢶⣶⣤⣭⡿⠿⣉⣀⠀⠀⠀⠈⡆⠀⠀⠀
+⠀⠀⠀⠘⢆⡀⢀⡞⠁⠀⠀⠀⠙⠛⠿⠿⠛⠋⠀⠀⠀⠈⢳⡀⠀⡰⠃⠀⠀⠀
+⠀⠀⠀⠀⠀⢹⢾⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡗⡏⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠸⡄⢷⣀⠀⠀⠀⠀⠀⣠⣄⠀⠀⠀⠀⠀⢀⡾⢠⠃⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢣⠈⠫⣹⡒⠚⢉⠉⢉⡉⠉⣉⠓⢒⣏⠝⠁⡞⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠳⡀⠈⠙⠒⠛⠤⠼⠧⠤⠛⠒⠋⠁⣀⠞⠁⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⠓⠦⠤⣤⣀⣠⣄⣀⣠⠤⠴⠚⠁⠀⠀⠀⠀⠀⠀⠀⠀
+
+% Cardenas Mateo 2026`,
+'color: #00ffcc; font-family: monospace; font-size: 10px;',
+  );
+}, []);
 
   const navigate = useCallback((screenId) => setScreen(screenId), []);
 
@@ -102,7 +124,7 @@ export default function App() {
         <div className="logo-ring">
           <img src={logo} alt="Bruzz Pizza & Beer" />
         </div>
-        <p className="tagline">Carta Digital · 2025</p>
+        <p className="tagline">Carta Digital · 2026</p>
         <CartChip cart={cart} onOpen={() => setCartOpen(true)} />
       </header>
       {renderScreen()}
@@ -116,8 +138,10 @@ export default function App() {
           onCheckout={() => {
             setCartOpen(false);
             setShowCheckout(true);
-            if (screen !== 'items') { setScreen('items'); }
+            if (screen !== 'items') { setScreen('items');
+             }
           }}
+
         />
       )}
     </div>
