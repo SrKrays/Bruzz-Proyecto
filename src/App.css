@@ -61,7 +61,7 @@ button {
   padding: 22px 20px 6px;
 }
 
-/* ── CART FAB HEADER — idéntico al FAB de abajo, siempre visible ── */
+/* ── CART FAB HEADER ── */
 .cart-fab-header {
   position: absolute;
   top: 50%;
@@ -210,24 +210,26 @@ button {
 
 
 /* ════════════════════════════════════════════════════════════
-   L2 — SUBCATEGORÍAS
+   L2 — SUBCATEGORÍAS (cards fijas, sin animación de expand)
 ════════════════════════════════════════════════════════════ */
 
 .card-grid.wide {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;          
-height: auto;
+  gap: 8px;
+  height: auto;
   max-width: 100%;
   max-height: none;
 }
 
+/* Card fija — mismo tamaño siempre, sin expand */
 .card-grid.wide .nav-card {
   flex: unset;
-  aspect-ratio: 14 / 8;
-  transition: border-color var(--fast), transform var(--fast), box-shadow var(--fast);
+  aspect-ratio: 16 / 11;
+  transition: border-color var(--fast), box-shadow var(--fast);
 }
 
+/* Hover solo cambia borde, NO el tamaño */
 .card-grid.wide .nav-card:hover {
   flex: unset;
   border-color: var(--gold);
@@ -239,14 +241,20 @@ height: auto;
   flex: unset;
 }
 
+/* Desc siempre visible en subcats */
+.card-grid.wide .card-desc {
+  opacity: 1 !important;
+  max-height: 60px !important;
+}
+
 .nav-card.full-width {
   grid-column: 1 / -1;
-  aspect-ratio: 21 / 6;
+  aspect-ratio: 21 / 7;
 }
 
 @media (min-width: 900px) {
   .card-grid.wide { grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .card-grid.wide .nav-card { aspect-ratio: 16 / 8; }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 9; }
 }
 
 
@@ -318,7 +326,6 @@ height: auto;
   padding-bottom: 100px;
 }
 
-/* Separador de sección */
 .section-sep {
   font-size: 11px;
   letter-spacing: 3.5px;
@@ -330,7 +337,6 @@ height: auto;
   border-bottom: 1px solid rgba(61,138,90,0.25);
 }
 
-/* Card contenedor */
 .exp-card {
   background: var(--dark);
   border: 1px solid rgba(245,200,66,0.14);
@@ -354,7 +360,6 @@ height: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.45);
 }
 
-/* Cabecera siempre visible */
 .exp-card-head {
   display: flex;
   align-items: center;
@@ -395,8 +400,9 @@ height: auto;
   display: block;
 }
 
+/* Desc preview +20% sobre los 17px anteriores = ~20px */
 .exp-card-desc-preview {
-  font-size: 17px;
+  font-size: 20px;
   color: var(--muted);
   margin-top: 3px;
   line-height: 1.4;
@@ -435,7 +441,6 @@ height: auto;
   color: var(--gold);
 }
 
-/* Cuerpo expandible */
 .exp-card-body {
   max-height: 0;
   overflow: hidden;
@@ -453,23 +458,21 @@ height: auto;
   padding-top: 14px;
 }
 
-/* Imagen grande en el cuerpo */
 .exp-card-img-wrap {
   position: relative;
   width: 100%;
-  height: 185px;           /* mobile/tablet: se mantiene */
+  height: 185px;
   border-radius: 12px;
   overflow: hidden;
   background: #111;
 }
 
-/* PC: imagen más alta y sin zoom para ver el plato completo */
 @media (min-width: 901px) {
   .exp-card-img-wrap {
     height: 280px;
   }
   .exp-card-img {
-    object-fit: contain;    /* muestra el producto completo sin recortar */
+    object-fit: contain;
     object-position: center center;
     background: #111;
   }
@@ -491,14 +494,13 @@ height: auto;
   background: linear-gradient(to top, rgba(17,17,17,0.7) 0%, transparent 60%);
 }
 
-/* Descripción completa */
+/* Desc completa +20% sobre los 19px anteriores = ~23px */
 .exp-card-full-desc {
-  font-size: 19px;
+  font-size: 23px;
   color: rgba(255,255,255,0.75);
   line-height: 1.6;
 }
 
-/* Observaciones */
 .exp-obs-label {
   display: flex;
   justify-content: space-between;
@@ -530,7 +532,6 @@ height: auto;
 .exp-textarea::placeholder { color: rgba(255,255,255,0.28); }
 .exp-textarea:focus { border-color: rgba(245,200,66,0.45); }
 
-/* Footer: cantidad + botón agregar */
 .exp-footer {
   display: flex;
   align-items: center;
@@ -721,7 +722,7 @@ height: auto;
 
 
 /* ════════════════════════════════════════════════════════════
-   🛒 FAB CARRITO FIJO (siempre visible en pantalla items)
+   🛒 FAB CARRITO FIJO
 ════════════════════════════════════════════════════════════ */
 
 .cart-fab-fixed {
@@ -769,10 +770,7 @@ height: auto;
   line-height: 1;
 }
 
-.cart-fab-fixed-badge.zero {
-  color: var(--muted);
-}
-
+.cart-fab-fixed-badge.zero { color: var(--muted); }
 .cart-fab-fixed--empty .cart-fab-fixed-icon { filter: grayscale(1); opacity: 0.5; }
 
 
@@ -791,9 +789,7 @@ height: auto;
 
 .cart-panel {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; right: 0; bottom: 0;
   width: min(340px, 92vw);
   z-index: 210;
   background: #161616;
@@ -833,7 +829,6 @@ height: auto;
 }
 .cart-panel-close:hover { color: var(--cream); }
 
-/* Estado vacío */
 .cart-panel-empty {
   flex: 1;
   display: flex;
@@ -853,7 +848,6 @@ height: auto;
   line-height: 1.55;
 }
 
-/* Lista de ítems */
 .cart-panel-list {
   list-style: none;
   display: flex;
@@ -939,7 +933,6 @@ height: auto;
   background: rgba(224,82,82,0.1);
 }
 
-/* Total */
 .cart-panel-total {
   display: flex;
   justify-content: space-between;
@@ -958,7 +951,6 @@ height: auto;
   color: var(--gold);
 }
 
-/* Botones */
 .cart-panel-order-btn {
   background: #25d366;
   color: #fff;
@@ -1124,7 +1116,6 @@ height: auto;
 
 .checkout-address-wrap { display: flex; flex-direction: column; gap: 10px; }
 
-/* Botón verificar ubicación */
 .verify-location-btn {
   display: flex;
   align-items: center;
@@ -1140,11 +1131,7 @@ height: auto;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background var(--fast),
-    border-color var(--fast),
-    transform var(--fast),
-    filter var(--fast);
+  transition: background var(--fast), border-color var(--fast), transform var(--fast), filter var(--fast);
   text-decoration: none;
 }
 .verify-location-btn:hover:not(:disabled) {
@@ -1156,19 +1143,11 @@ height: auto;
   transform: translateY(0);
   filter: brightness(0.95);
 }
-.verify-location-btn--off {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-.verify-location-icon {
-  font-size: 15px;
-  line-height: 1;
-}
+.verify-location-btn--off { opacity: 0.35; cursor: not-allowed; }
+.verify-location-icon { font-size: 15px; line-height: 1; }
 
 .checkout-zona-label { font-size: 13px; font-weight: 600; color: var(--cream); margin-top: 4px; }
-
 .checkout-zona-opts { display: flex; gap: 8px; margin-top: 4px; }
-
 .checkout-zona-opts .checkout-opt-btn {
   flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 12px 14px;
 }
@@ -1216,13 +1195,12 @@ height: auto;
   .card-name { font-size: 15px; white-space: nowrap; }
   .card-desc { font-size: 11px; }
 
+  /* SUBCATEGORÍAS MOBILE — todas igual de grandes, sin expand */
   .card-grid.wide { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .card-grid.wide .nav-card { aspect-ratio: 16 / 13; }   /* +40% más alto que 16/9 */
-  .nav-card.full-width { aspect-ratio: 16 / 11; }
-
-  /* Texto en subcats mobile más legible */
-  .card-grid.wide .card-name { font-size: 22px; }
-  .card-grid.wide .card-desc { font-size: 14px; }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 11; }
+  .nav-card.full-width { aspect-ratio: 16 / 9; }
+  .card-grid.wide .card-name { font-size: 20px; white-space: normal; }
+  .card-grid.wide .card-desc { font-size: 13px; }
 
   .screen-title { font-size: 17px; }
   .back-btn { font-size: 11px; padding: 4px 10px; }
@@ -1238,7 +1216,7 @@ height: auto;
   .cart-fab-header-icon { font-size: 18px; }
   .cart-fab-header-badge { font-size: 11px; }
   .cart-panel { width: 100%; border-left: none; border-top: 1px solid rgba(245,200,66,0.2); border-radius: 20px 20px 0 0; top: auto; bottom: 0; max-height: 85vh; }
-  
+
   @keyframes slideInRight {
     from { transform: translateY(100%); opacity: 0; }
     to   { transform: translateY(0);    opacity: 1; }
@@ -1267,8 +1245,9 @@ height: auto;
   .card-name { font-size: 16px; }
   .card-desc { font-size: 11px; }
 
+  /* SUBCATEGORÍAS TABLET — todas igual de grandes, sin expand */
   .card-grid.wide { grid-template-columns: 1fr 1fr; }
-  .card-grid.wide .nav-card { aspect-ratio: 16 / 14; }    /* +40% más alto que 16/10 */
-  .card-grid.wide .card-name { font-size: 26px; }
-  .card-grid.wide .card-desc { font-size: 15px; }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 11; }
+  .card-grid.wide .card-name { font-size: 24px; white-space: normal; }
+  .card-grid.wide .card-desc { font-size: 14px; }
 }

@@ -138,7 +138,7 @@ export const MENU = {
       { name: 'Agua con gas',  price: '$3.700', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/agua.jpg' },
       { name: 'Agua Saborisada',  price: '$3.900', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/AGUAs.jpg' },
       { name: 'Coca cola 500ml', price: '$3.900', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/cocajpg.jpg' },
-      { name: 'Coca cola Zero 500ml', price: '$3.900', desc: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/cocajpg.jpg', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/cocajpg.jpg' },
+      { name: 'Coca cola Zero 500ml', price: '$3.900', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/cocajpg.jpg' },
       { name: 'Fanta', price: '$3.900', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/FANTA.jpg' },
       { name: 'Srite', price: '$3.900', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Sprite.jpg' },
       { name: 'Coca Cola 1.5L', price: '$7.800', desc: '', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/cocajpg.jpg' },
