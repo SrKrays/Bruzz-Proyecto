@@ -1,6 +1,5 @@
 import { CATEGORIAS } from './menuData';
 
-// SVG del logo de Instagram (stroke, sin fill)
 function IgIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">

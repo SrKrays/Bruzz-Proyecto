@@ -396,7 +396,7 @@ height: auto;
 }
 
 .exp-card-desc-preview {
-  font-size: 12px;
+  font-size: 17px;
   color: var(--muted);
   margin-top: 3px;
   line-height: 1.4;
@@ -493,7 +493,7 @@ height: auto;
 
 /* Descripción completa */
 .exp-card-full-desc {
-  font-size: 13px;
+  font-size: 19px;
   color: rgba(255,255,255,0.75);
   line-height: 1.6;
 }
@@ -1217,12 +1217,12 @@ height: auto;
   .card-desc { font-size: 11px; }
 
   .card-grid.wide { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .card-grid.wide .nav-card { aspect-ratio: 16 / 9; }   
-  .nav-card.full-width { aspect-ratio: 16 / 8; }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 13; }   /* +40% más alto que 16/9 */
+  .nav-card.full-width { aspect-ratio: 16 / 11; }
 
   /* Texto en subcats mobile más legible */
-  .card-grid.wide .card-name { font-size: 18px; }
-  .card-grid.wide .card-desc { font-size: 12px; }
+  .card-grid.wide .card-name { font-size: 22px; }
+  .card-grid.wide .card-desc { font-size: 14px; }
 
   .screen-title { font-size: 17px; }
   .back-btn { font-size: 11px; padding: 4px 10px; }
@@ -1268,7 +1268,7 @@ height: auto;
   .card-desc { font-size: 11px; }
 
   .card-grid.wide { grid-template-columns: 1fr 1fr; }
-  .card-grid.wide .nav-card { aspect-ratio: 16 / 10; }    /* ← más alto que 16/9 */
-  .card-grid.wide .card-name { font-size: 22px; }
-  .card-grid.wide .card-desc { font-size: 13px; }
+  .card-grid.wide .nav-card { aspect-ratio: 16 / 14; }    /* +40% más alto que 16/10 */
+  .card-grid.wide .card-name { font-size: 26px; }
+  .card-grid.wide .card-desc { font-size: 15px; }
 }

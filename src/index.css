@@ -1,9 +1,3 @@
-/* ============================================================
-   index.css — REEMPLAZAR COMPLETAMENTE
-   
-   🔧 FIX: El #root tenía width: 1126px fijo → causaba el
-   "rectángulo" centrado. Ahora ocupa 100% de la pantalla.
-============================================================ */
 
 *, *::before, *::after {
   box-sizing: border-box;

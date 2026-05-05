@@ -1,10 +1,3 @@
-// ============================================================
-//  Items.jsx — v3.0
-//  ✅ 1. Veggie: selector de medallón obligatorio + acoplamiento por qty
-//  ✅ 2. Carrito flotante lateral: siempre visible, gris vacío, panel expandible
-//  ✅ 3. Expandable card (inline) en lugar de modal — animación smooth
-// ============================================================
-
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { MENU, POSTRES } from './menuData';
 
@@ -431,8 +424,6 @@ function CheckoutScreen({ cart, onBack, onClear }) {
     const body = [
       '¡Hola! Te paso el resumen de mi pedido 🍕',
       '',
-      `Pedido: #${num} / ${code}`,
-      `Tienda: Bruzz Pizza & Beer`,
       `Fecha: ${fecha}`,
       `Nombre: ${name.trim()}`,
       `Teléfono: ${phone.trim()}`,
@@ -448,7 +439,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
       'Espero tu respuesta para confirmar 🙌',
     ].join('\n');
 
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank');
+    window.open(`https://wa.me/${3543630784}?text=${encodeURIComponent(body)}`, '_blank');
     onClear();
     onBack();
   };
