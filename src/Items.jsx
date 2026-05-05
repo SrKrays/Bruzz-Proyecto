@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { MENU, POSTRES } from './menuData';
 
-const WHATSAPP_NUMBER = '3543630784';
+const WHATSAPP_NUMBER = 543543512248;
 
 // ── Medallones de la Veggie ───────────────────────────────
 const MEDALLONES = [
@@ -21,12 +21,6 @@ function formatARS(n) {
   return '$' + Math.round(n).toLocaleString('es-AR');
 }
 
-function generateOrderId() {
-  const num  = Math.floor(10000 + Math.random() * 90000);
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const seg  = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return { num, code: `${seg(4)}-${seg(4)}-${seg(4)}` };
-}
 
 function formatDate() {
   const d   = new Date();
@@ -397,7 +391,6 @@ function CheckoutScreen({ cart, onBack, onClear }) {
 
   const handleSend = () => {
     if (!validate()) return;
-    const { num, code } = generateOrderId();
     const fecha         = formatDate();
     const mapsUrl       = entrega === 'envio' && direccion.trim()
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion.trim())}`
@@ -439,7 +432,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
       'Espero tu respuesta para confirmar 🙌',
     ].join('\n');
 
-    window.open(`https://wa.me/${3543630784}?text=${encodeURIComponent(body)}`, '_blank');
+    window.open(`https://wa.me/${543543512248}?text=${encodeURIComponent(body)}`, '_blank');
     onClear();
     onBack();
   };
