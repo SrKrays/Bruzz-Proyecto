@@ -47,10 +47,10 @@ export const MENU = {
     imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
     items: [
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
-      { name: 'Pepe',               price: '$23.300', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano',                                                       imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80' },
+      { name: 'Pepe',               price: '$23.300', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano',                                                       imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/pepe.jpg' },
       { name: 'Prosciutto Cotto',   price: '$22.000', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahacas fresca, olivas verdes, orégano.',                                     imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/prosutto.jpg' },
       { name: 'Fungo',              price: '$24.700', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.',                                    imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/fungo.jpg' },
-      { name: 'Rúcula',             price: '$23.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.',                                    imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80' },
+      { name: 'Rúcula',             price: '$23.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.',                                    imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Rucula.jpg' },
       { name: 'Quattro Formaggi',   price: '$22.000', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.',                                                      imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80' },
       { name: 'Margherita',         price: '$18.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, albahaca fresca, aceite de oliva.',                                                 imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=8₀' },
       { name: 'Pizza Bruzz',        price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cebolla caramelizada con un toque de roquefort, morrón, lomo ahumado, orégano.', badge: '✦ Firma',          imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/bruzz.jpg' },
@@ -82,13 +82,13 @@ export const MENU = {
     items: [
       { name: 'Simple',         price: '$12.000', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.',                                                                                 imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/HSimple.jpg' },
       { name: 'Completa',       price: '$13.900', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.',                                                                                 imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Completa.jpg' },
-      { name: 'Hamb Bruzz',     price: '$14.600', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', badge: '✦ Firma',                       imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Hbruzz.jpg' },
+      { name: 'Hamb Bruzz',     price: '$14.600', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', badge: '✦ Firma',                       imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/bruzz.jpg' },
       { name: 'Veggie',         price: '$12.600', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas' , imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80' , },
       { name: 'Medallón extra', price: '$2.000',  desc: 'Extra Carne para una Gran Hamburguesa.',   imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80' },
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
       { name: 'Combo Simple',   price: '$14.600', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/HSimple.jpg' },
       { name: 'Combo Completa', price: '$16.300', desc: 'Hamburguesa completa mas gaseosa de 500lml.',   imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Completa.jpg'  },
-      { name: 'Combo Bruzz',    price: '$17.000', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Hbruzz.jpg' },
+      { name: 'Combo Bruzz',    price: '$17.000', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/bruzz.jpg' },
       { name: 'Combo Veggie',   price: '$15.100', desc: 'Hamburguesa vegana mas gaseosa de 500ml', imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80' },
       {sep:'BAMBINO: Burger + Gaseosa + Helado + Jugete todo en UNO'},
       { name: 'Hamburgesa Bambino',   price: '$14.600', desc: 'Burger Simple + Gaseosa + Helado + Jugete todo en UNO', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/0c9c52e9a3063c7c8171e358c8a0282c.jpg' },
@@ -98,12 +98,12 @@ export const MENU = {
 
   lomitos: {
     title: 'Lomitos', back: 'comidas',
-    imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/lomito/a74f20fa48e15e1c4bc971a6b0b41875.jpg',
+    imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg',
     items: [
-      { name: 'Simple',            price: '$21.600', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/lomito/a74f20fa48e15e1c4bc971a6b0b41875.jpg' },
-      { name: 'Completo',          price: '$22.500', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/lomito/a74f20fa48e15e1c4bc971a6b0b41875.jpg' },
-      { name: 'Americano',         price: '$23.000', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas..', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/lomito/a74f20fa48e15e1c4bc971a6b0b41875.jpg' },
-      { name: 'Bife extra (100g)', price: '$6.500',  desc: 'Lomo 100%.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/lomito/a74f20fa48e15e1c4bc971a6b0b41875.jpg' },
+      { name: 'Simple',            price: '$21.600', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Completo',          price: '$22.500', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Americano',         price: '$23.000', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas..', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Bife extra (100g)', price: '$6.500',  desc: 'Lomo 100%.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
     ],
   },
 
@@ -114,7 +114,7 @@ export const MENU = {
       { name: 'Tostato',     price: '$9.300',  desc: 'Pan artesanal, lactonesa de la casa, jamón cocido, queso dambo y papas fritas.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/pagweb/eeeeeeeeee.jpg' },
       { name: 'Macerata',    price: '$11.900', desc: 'Pan artesanal, lactonesa de la casa, queso dambo, jamón crudo, tomates frescos, rúcula, y papas fritas.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/maserata.jpg' },
       { name: 'Vegetariano', price: '$14.900', desc: 'Pan de focaccia, salsa Bruzz, lechuga, tomate fresco, zucchini y berenjena grillado, queso dambo y papas fritas.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/pagweb/eeeeeeeeee.jpg' },
-      { name: 'Ternera',     price: '$19.900', desc: 'Pan de focaccia, lactonesa de albahaca, rúcula, tomates frescos, ternera desmenuzada en vino tinto y papas fritas.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/ternera.jpg' },
+      { name: 'Ternera',     price: '$19.900', desc: 'Pan de focaccia, lactonesa de albahaca, rúcula, tomates frescos, ternera desmenuzada en vino tinto y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/ternera.jpg' },
     ],
   },
 
