@@ -5,11 +5,10 @@ const WHATSAPP_NUMBER = 543543512248;
 
 // ── Medallones de la Veggie ───────────────────────────────
 const MEDALLONES = [
-  { id: 'remolacha', name: 'Remolacha',  desc: 'Base de remolacha, avena y especias. Jugoso y colorido.' },
-  { id: 'quinoa',    name: 'Quinoa',     desc: 'Mezcla de quinoa, zanahoria y hierbas. Liviano y proteico.' },
-  { id: 'garbanzo',  name: 'Garbanzo',   desc: 'Hummus base con especias mediterráneas. Cremoso y sabroso.' },
-  { id: 'lentejas',  name: 'Lentejas',   desc: 'Lentejas rojas, cúrcuma y jengibre. Muy nutritivo.' },
-  { id: 'portobello',name: 'Portobello', desc: 'Champiñón portobello grillado con ajo y romero. Umami puro.' },
+  { id: 'remolacha', name: 'Tabule',  desc: 'Mijo , cebolla de verdeo , tomate deshidratado , harina de garvanzos , fabula de mandioca , aceite de girasol , jugo  y ralladura de limon y especias.' },
+  { id: 'quinoa',    name: 'Burrito Mexicano',     desc: 'Poroto negro, arroz blanco , cebolla , harina de garvanzos , fabula de mandioca , aceite de girasol , jugo  y ralladura de limon y especias.' },
+  { id: 'garbanzo',  name: 'Curry India',   desc: 'Lentejas, coliflor , espinaca, tomate deshidratado , harina de garbanzos , fabula de mandioca y especias.' },
+  { id: 'lentejas',  name: 'Fabel India',   desc: 'Garbanzos , fabula de mandioca , aceite de girsol , harina de garvanzos , de perejil , crando , comino y pimifentaor blanca' },
 ];
 
 // ── Helpers ───────────────────────────────────────────────

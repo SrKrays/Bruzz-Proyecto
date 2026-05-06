@@ -30,7 +30,7 @@ export const SUBCATEGORIAS = {
     { menuKey: 'pizza',       name: 'Pizza',        desc: 'Napolitana & italiana',    imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/fungo.jpg' },
     { menuKey: 'calzone',     name: 'Calzone',      desc: 'Relleno al horno',         imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/calzone%20fungo.jpg' },
     { menuKey: 'hamburgesas', name: 'Hamburgesas',  desc: 'Con combos disponibles',   imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/HSimple.jpg' },
-    { menuKey: 'lomitos',     name: 'Lomitos',      desc: 'En pan focaccia',          imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/Lomo.jpg' },
+    { menuKey: 'lomitos',     name: 'Lomitos',      desc: 'En pan focaccia',          imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/Bruzz/WhatsApp%20Image%202026-05-06%20at%2011.06.28.jpeg' },
     { menuKey: 'sandwich',    name: 'Sandwich',     desc: 'Artesanales & focaccia',   imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/ternera.jpg' },
     { menuKey: 'papas',       name: 'Papas',        desc: 'Simples o con toppings',   imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/papas%20cheddar.jpg' },  ],
   bebidas: [
@@ -102,7 +102,7 @@ export const MENU = {
     items: [
       { name: 'Simple',            price: '$21.600', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
       { name: 'Completo',          price: '$22.500', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
-      { name: 'Americano',         price: '$23.000', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas..', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Americano',         price: '$23.000', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas..', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/Bruzz/WhatsApp%20Image%202026-05-06%20at%2011.06.28.jpeg' },
       { name: 'Bife extra (100g)', price: '$6.500',  desc: 'Lomo 100%.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
     ],
   },
