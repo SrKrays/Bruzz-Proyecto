@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { MENU, POSTRES } from './menuData';
-
+import { MENU, POSTRES, CAFETERIA } from './menuData';
 const WHATSAPP_NUMBER = 543543512248;
 
 // ── Medallones de la Veggie ───────────────────────────────
@@ -360,7 +359,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
 //  🧾 CHECKOUT
 // ════════════════════════════════════════════════════════════
 
-const COSTO_ENVIO = { local: 2000, fuera: 3500 };
+const COSTO_ENVIO = { local: 2000, fuera: 3000 };
 
 function CheckoutScreen({ cart, onBack, onClear }) {
   const [name,      setName]      = useState('');
@@ -543,7 +542,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
         <div className="checkout-opts">
           <Opt active={pago === 'efectivo'} onClick={() => { setPago('efectivo'); setVuelto(''); }}>Efectivo</Opt>
           <Opt active={pago === 'tarjeta'}  onClick={() => setPago('tarjeta')}>Tarjeta</Opt>
-          <Opt active={pago === 'mp'}       onClick={() => setPago('mp')}>Mercado Pago</Opt>
+          <Opt active={pago === 'mp'}       onClick={() => setPago('mp')}>Transferencia</Opt>
         </div>
         {errors.pago && <span className="checkout-error">{errors.pago}</span>}
 
@@ -573,11 +572,12 @@ export default function Items({
 }) {
   const [expandedKey, setExpandedKey] = useState(null);
 
-  const isPostres  = menuKey === 'postres';
-  const data       = isPostres ? null     : MENU[menuKey];
-  const items      = isPostres ? POSTRES  : data?.items ?? [];
-  const title      = isPostres ? 'Postres': data?.title ?? '';
-  const backScreen = isPostres ? 'home'   : (data?.back ?? 'home');
+  const isPostres   = menuKey === 'postres';
+const isCafeteria = menuKey === 'cafeteria';
+const data        = (isPostres || isCafeteria) ? null      : MENU[menuKey];
+const items       = isCafeteria ? CAFETERIA : isPostres ? POSTRES   : data?.items ?? [];
+const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
+const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
 
   const handleConfirmAdd = useCallback(({ qty, note, medallon, ...item }) => {
     const key = item.name + '||' + (note || '') + '||' + (medallon || '');

@@ -51,6 +51,7 @@ export default function App() {
   const handleCategoria = useCallback((screenId) => {
     if (screenId === 'postres') { setMenuKey('postres'); setScreen('items'); return; }
     if (screenId === 'tragos')  { setMenuKey('tragos');  setScreen('items'); return; }
+    if (screenId === 'cafeteria') { setMenuKey('cafeteria'); setScreen('items'); return; }
     setScreen(screenId);
   }, []);
 
