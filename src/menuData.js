@@ -101,10 +101,10 @@ export const MENU = {
   lomitos: {
     title: 'Lomitos', back: 'comidas',
     items: [
-      { name: 'Lomito Simple',      price: '$21.600', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
-      { name: 'Lomito Completo',    price: '$22.500', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
-      { name: 'Lomito Americano',   price: '$23.000', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/Bruzz/WhatsApp%20Image%202026-05-06%20at%2011.06.28.jpeg' },
-      { name: 'Bife extra (100g)',  price: '$6.500',  desc: 'Lomo 100%.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Lomito Simple',      price: '$22.400', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Lomito Completo',    price: '$23.300', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
+      { name: 'Lomito Americano',   price: '$23.800', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://69f636d2a0be0e562863ff1f.imgix.net/Bruzz/WhatsApp%20Image%202026-05-06%20at%2011.06.28.jpeg' },
+      { name: 'Bife extra (100g)',  price: '$6.800',  desc: 'Lomo 100%.', imageUrl: 'https://69fa4c034ee83435ba38f221.imgix.net/Bruzz/Lomo%20Bruzz.jpg' },
     ],
   },
 
@@ -121,9 +121,9 @@ export const MENU = {
   papas: {
     title: 'Papas', back: 'comidas',
     items: [
-      { name: 'Patatines',         price: '$6.900',  desc: 'Papas fritas Clasicas.', imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800&q=80' },
-      { name: 'Papas Carbonara',   price: '$9.900',  desc: 'Papas fritas, huevo revuelto, parmesano y panceta.', imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800&q=80' },
-      { name: 'Papas con Cheddar', price: '$10.500', desc: 'Papas fritas con cheddar, bacon y cebolla de verdeo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/papas%20cheddar.jpg' },
+      { name: 'Patatines',         price: '$7.600',  desc: 'Papas fritas Clasicas.', imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800&q=80' },
+      { name: 'Papas Carbonara',   price: '$10.600',  desc: 'Papas fritas, huevo revuelto, parmesano y panceta.', imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800&q=80' },
+      { name: 'Papas con Cheddar', price: '$11.200', desc: 'Papas fritas con cheddar, bacon y cebolla de verdeo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/papas%20cheddar.jpg' },
     ],
   },
 
@@ -222,7 +222,7 @@ export const MENU = {
 export const POSTRES = [
   { sep: 'Postres' },
   { name: 'Tiramisú Bruzz',          price: '$6.500', desc: 'Vanilla, queso crema, cafe, cerveza negra, cacao. Receta de la Casa.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/tiramisu.jpg' },
-  { name: 'Flan Con Dulce de Leche', price: '$5.800', desc: 'Flan con Dulce de Leche.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/flan.jpg' },
+  { name: 'Budin de pan Con Dulce de Leche', price: '$5.800', desc: 'Budin de pan con Dulce de Leche.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/budin.jpg' },
 ];
 
 export const CAFETERIA = [
