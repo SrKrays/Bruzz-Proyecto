@@ -1,3 +1,14 @@
+// ══════════════════════════════════════════════════════════
+//  🔥 PROMO DEL DÍA — editá este objeto para cambiarla.
+//  Para ocultarla: export const PROMO_DEL_DIA = null;
+// ══════════════════════════════════════════════════════════
+export const PROMO_DEL_DIA = {
+  name: 'Promo Bladis',
+  price: '$49.000',
+  desc: '1 botella de Fernet Branca 750cc + 2 Cocas 1,25 lts.',
+  imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80',
+};
+
 export const CATEGORIAS = [
   {
     id: 'comidas',
@@ -170,7 +181,6 @@ export const MENU = {
     title: 'Vinos', back: 'bebidas',
     items: [
       { sep: 'Vinos' },
-      { name: 'Copa de Vino ',                       price: '$4.000',  desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
       { name: 'Santa Julia Chardonnay',                       price: '$8.500',  desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
       { name: 'Espumante Dada 7',                             price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
       { name: 'Luigi Bosca Malbec',                           price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
