@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback , useEffect } from 'react';
 import './App.css';
 import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
 import Subcategorias         from './Subcategorias';
 import Items, { CartChip, CartPanel }  from './Items';
-import CuentaDividida from './CuentaDividida';
 
 const SUBCATEGORIA_SCREENS = new Set(['comidas', 'bebidas']);
 
@@ -14,27 +13,43 @@ export default function App() {
   const [cart, setCart]            = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen]         = useState(false);
-  const [splitOpen, setSplitOpen]       = useState(false);
 
   useEffect(() => {
   console.log(
 `%c
-⠀⣿⣿⣿⣿⣿⣿⣿⣋⣭⣿⠶⠶⠿⠛⠛⠛⠛⠛⠛⠻⢶⣤⣀         
-⣿⣿⣿⣿⣿⣿⠟⠉⠁            ⠈⠹⢿⣄       
-⣿⣿⣿⣿⣇⡀                  ⠹⣷⣴⣶⡄   
-⣿⣿⣿⣿⠟⡃                ⢀⣀⢀⠘⡻⣿⣶⡆  
-⣿⣿⣿⣿⣿⡇ ⢰⣦⣀⣀⣴⡀⢠⣤⡀ ⣠⣄ ⣰⣶⣴⢸⣈  ⣿⡏⢑⠓ 
-⣿⣿⣿⣿⡿⠠⣴⡿⠏⠙⠋⠉⠛⠋⠉⠛⠛⠋⢻⠟⠛⠟⢿⣼⡿  ⠙⣿⡮⡇ 
-⣿⣿⣿⣿⡇⠘⣿⡄  ⢠⠠⠠⡠ ⠉⠡⠐⠂⠠⠄  ⢹⡗  ⠁⢻⡇⠃ 
-⣿⣿⣿⣿⠇ ⢸⡇⡀ ⠡⠶⢶⣬⡠ ⣴⣋⡿⡿⠶ ⣄⣸⣇   ⢸⣇⣀⣀
-⣿⣿⣿⣿  ⢸⡏⡙⢻⠳⠖⣠⡼  ⠨⣄⡀⠙⢒⣋⠽⣾⡇   ⢸⡿⠛⠛
-   ⣿  ⢺⡏⠑⣿⠷⢤⣉⣳⣖⣨⡭⢷⡖⢋⣽⡧⡾⢻⣧   ⢸⣷  
-   ⣿  ⢸⡇ ⣿⣿⣾⣶⣿⣶⣷⡶⠞⡟⠋⣹⠞⠁⢸⣿   ⣿⠁  
-   ⢻⣶⣇⣸⣇ ⠙⠧⠧⢧⣼⣤⢼⠤⠤⠟⣋⡡⠔⢀⣾⠇⣀⣀⣣⣟⣢⣴⣶
-   ⣠⣾⡿⠛⠻⣆⡐⠬⠄   ⠐⠓⠉⠁  ⣤⡾⠻⡶⢿⣿⢿⣍⡙⢿⢻
-⣀⣴⣟⣵⠋⣀⣀⣀⣈⢛⣶⣤⣤⣀⣀⣀⣀⣠⣤⡖⣛⢉⣀  ⢀⣻⣆⣈⡛⣷⣌
-
-% Mi Mami. Att Musculoso, 2026.`,
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⠶⠖⠚⣋⣉⡉⠉⠉⠉⠙⠓⠲⠶⠦⢤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣶⠞⠉⠁⣀⣠⡴⠶⠷⠶⠶⠶⠶⠶⠶⠤⣤⣈⣙⠒⠮⠉⠑⠲⢦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⣀⣤⣄⣒⡀⠀⣠⣾⡿⣆⡴⠖⠋⠉⠁⠀⠀⠀⠀⠀⢀⣀⣀⠠⢤⠒⠉⢿⠙⠓⠶⢦⣀⡀⠈⠉⠳⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢠⡾⣫⠁⠀⠉⣹⡿⠋⢩⠞⠉⠀⣀⣠⣤⠤⠒⠒⠋⠉⠉⠉⠁⠀⠀⠈⢧⢀⠈⢧⠀⠀⠀⠈⠙⢳⣦⡺⣽⣯⣳⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⣿⡇⢸⠀⢠⣼⠋⠀⣴⢿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⡴⠛⣿⣀⣤⠶⠚⠛⣻⡿⡇⢀⣀⣀⡀⠀⠛⢯⡿⠿⠙⢿⡷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢻⠀⠈⢀⣾⠇⠀⣼⣿⣿⣷⠠⡟⠛⠳⣤⠀⢀⣴⠟⡵⢂⣴⠟⠉⠀⠀⢀⣴⠿⠛⠛⠭⠀⢸⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠘⣷⣾⣿⡏⢰⢰⡿⠿⠿⢿⣧⠻⣜⠳⢾⣿⡟⠁⣤⣴⣾⣧⣄⣀⣀⣀⣿⣀⣀⠀⠀⠀⠘⢻⣿⣯⣽⣧⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢻⡿⢻⡇⠸⢸⡇⠘⡆⠘⢿⡀⠈⣳⣤⣤⣤⣴⣿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⣧⠈⣇⠀⠸⡇⠀⠁⠀⣾⣿⣿⣿⠿⠿⡟⠋⠙⣿⣿⣿⣿⣿⣿⣿⣄⣽⣿⣿⣿⣿⣿⣿⣧⡈⣿⣿⠟⠁⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠀⠀
+⠀⠀⠀⢻⡀⣸⡄⠀⢻⣷⣶⣶⣿⣿⡿⠋⠀⠀⢠⠀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⡟⢿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⢠⣾⣿⠇⠀⠀⠀⠀⠀⠀⠻⠃⡀⠀⡀
+⠀⠀⠀⠈⣿⣿⣿⣆⢀⠹⣿⡿⣿⡿⠀⠀⠀⢀⡈⠀⠀⠀⢈⡻⢿⣿⣿⣿⠿⠋⠀⠘⠻⣿⣿⣿⣿⣿⠛⠻⠛⠿⢿⢿⣿⡿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢩⠀
+⠀⠀⠀⠀⣿⠛⠉⠙⣿⣷⠌⠛⠿⣤⣀⠴⠃⠛⠀⠀⠀⣠⠞⠁⠀⢀⣿⣿⣒⣲⡖⢲⣖⢚⣻⣷⣄⠀⠀⠀⠉⠉⢉⣡⠟⠁⠀⠀⠀⠀⠀⠀⠀⣀⣴⣤⣀⠀⢸⠀
+⠀⠀⠀⠀⢿⠀⢇⠀⢸⡟⠳⣦⣀⡀⠉⠀⡀⠀⠀⢠⡞⠁⠀⠀⢀⡾⣏⠛⢿⣿⡟⠋⠉⠉⠁⠀⢹⡆⢰⢀⣀⡴⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣾⡿⠂⢸⠀
+⠀⠀⠀⠀⢸⠀⠘⠀⠈⠁⣰⡏⢩⠉⣶⠠⠟⠀⣠⡟⠀⠀⠀⠴⠋⠀⠉⠷⢤⣻⡿⢦⣤⣄⢀⣠⡾⠃⣼⣏⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⣿⠉⠃⢀⡏⠀
+⠀⠀⠀⠀⢸⣀⣠⣶⣶⣾⡿⠀⠃⠀⠋⠀⠀⢠⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠚⠓⠚⠛⠉⢀⡴⠃⠹⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡿⣾⠀⢸⠇⠀
+⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⡇⠀⠀⡀⢀⡇⠀⣾⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣲⠾⢶⡞⢻⡇⠀⠀⠻⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⢁⡁⠀⢸⠀⠀
+⠀⠀⠀⠀⢸⠟⠉⠉⢈⡿⠀⠀⠀⠇⠿⠀⢸⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠃⠀⠸⡇⠀⣷⢀⠀⠀⢷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠞⠙⡄⡸⠀⠀
+⠀⠀⠀⠀⣸⠀⡆⢠⣿⡇⠀⠀⠀⠀⠀⢘⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠇⠀⠀⠀⢹⡄⠈⣧⣆⠀⠈⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⢦⣀⣹⣇⣀⠀
+⠀⠀⠀⠀⣿⠀⠃⠸⢿⡇⠠⠀⡗⠀⡟⣼⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⠀⠀⠀⠈⢳⡄⠘⣿⣄⠀⠈⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⠈⣿⠇⠀⠀
+⠀⠀⠀⠀⣿⣀⣤⣶⣿⠀⠀⢰⠁⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠈⢳⣄⠈⢿⣄⠀⠹⡄⠀⠀⠀⠀⠀⠀⠀⠀⣾⣥⢦⡟⠀⠀⠀
+⠀⠀⠀⠀⣿⣿⣿⣿⣿⠀⠀⢨⠀⢠⢞⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠻⣦⠲⣽⢷⣄⢱⡀⠀⠀⠀⠀⠀⣠⠞⠛⣫⡟⠀⠀⠀⠀
+⠀⠀⠀⢠⣿⠛⠉⢈⣿⠀⡆⢸⠄⠘⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣇⠀⠀⣀⣠⣤⠤⠤⠒⠚⠻⢮⣟⠈⠛⠣⢤⣤⡤⠴⠛⠁⢀⣴⠋⠀⠀⠀⠀⠀
+⠀⠀⠀⢸⣿⢰⡄⢸⣿⡀⠀⢨⡄⠀⠸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠉⢓⠦⣤⣄⣈⣉⣡⡤⠞⠋⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣿⠈⢧⣼⣿⡇⠀⠈⣧⠀⣷⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡆⠠⡌⡇⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣹⣾⣿⣿⣿⣧⠸⠀⢻⠀⠘⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢧⡠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⠠⢷⣇⡀⠀⠀⠀⠀⢀⡤⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⢻⣿⠟⠋⢹⡆⠀⠀⣆⠘⣞⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⠶⠋⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠈⢳⡄⣄⠸⣷⣿⠀⠹⠀⢹⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢧⡀⠀⠀⢀⣀⣤⡤⠤⠖⠚⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠻⣞⠇⢸⣧⠀⠀⠠⡄⢿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣻⠞⠛⠿⠦⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣿⣿⣷⣳⡄⠙⠀⢹⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠾⠷⠶⠶⠤⢥⣀⣀⡉⢙⡳⢦⣀⠀⠀⠀⠀⠀⠀⢀⠀⣀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢿⣦⡀⡀⢦⡹⢇⡀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣠⠴⠞⠋⠁⠀⠀⠀⠀⠀⠀⠀⠉⠙⠳⠶⣄⣈⠛⢶⣄⡀⠀⣴⡿⠾⣿⡆⠀⠀
+⠀⠀⠀⠀⣀⣀⣠⠤⠶⠖⠒⠉⠉⠁⠉⠛⢿⣄⣁⠈⠉⠉⠓⠒⠶⠾⣟⣉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠳⣮⣈⠙⣶⠋⠀⢠⡾⠁⠀⠀
+⢀⣴⠊⠉⠉⠁⠀⡀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠈⠉⠙⠲⠶⢾⣭⣅⡀⠈⣉⠛⢶⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠳⣁⠀⣰⠟⠀⠀⠀⠀
+% Oh No Hermano`,
 'color: #00ffcc; font-family: monospace; font-size: 10px;',
   );
 }, []);
@@ -47,16 +62,17 @@ export default function App() {
   }, []);
 
   const handleCategoria = useCallback((screenId) => {
-    if (screenId === 'postres')   { setMenuKey('postres');   setScreen('items'); return; }
-    if (screenId === 'tragos')    { setMenuKey('tragos');    setScreen('items'); return; }
+    if (screenId === 'postres') { setMenuKey('postres'); setScreen('items'); return; }
+    if (screenId === 'tragos')  { setMenuKey('tragos');  setScreen('items'); return; }
     if (screenId === 'cafeteria') { setMenuKey('cafeteria'); setScreen('items'); return; }
     setScreen(screenId);
   }, []);
 
-  // ── Carrito: agregar ─────────────────────────────────
+  // ── Carrito: agregar (con qty y note opcionales) ─────
   const handleCartAdd = useCallback((item) => {
     const qty  = item.qty  ?? 1;
     const note = item.note ?? '';
+    // Clave única: nombre + nota (para misma pizza con distintas notas)
     const key  = item.name + '||' + note;
     setCart((prev) => {
       const exists = prev.find((c) => c._key === key);
@@ -83,12 +99,7 @@ export default function App() {
 
   const renderScreen = () => {
     if (screen === 'home') {
-      return (
-        <CategoriasPrincipales
-          onNavigate={handleCategoria}
-          onOpenSplit={() => setSplitOpen(true)}
-        />
-      );
+      return <CategoriasPrincipales onNavigate={handleCategoria} />;
     }
     if (SUBCATEGORIA_SCREENS.has(screen)) {
       return (
@@ -117,7 +128,7 @@ export default function App() {
         />
       );
     }
-    return <CategoriasPrincipales onNavigate={handleCategoria} onOpenSplit={() => setSplitOpen(true)} />;
+    return <CategoriasPrincipales onNavigate={handleCategoria} />;
   };
 
   return (
@@ -141,14 +152,10 @@ export default function App() {
           onCheckout={() => {
             setCartOpen(false);
             setShowCheckout(true);
-            if (screen !== 'items') { setScreen('items'); }
+            if (screen !== 'items') { setScreen('items');
+             }
           }}
-        />
-      )}
-      {splitOpen && (
-        <CuentaDividida
-          cart={cart}
-          onClose={() => setSplitOpen(false)}
+
         />
       )}
     </div>

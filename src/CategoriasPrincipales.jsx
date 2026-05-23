@@ -1,7 +1,4 @@
-import { useState } from 'react';
 import { CATEGORIAS } from './menuData';
-import CuentaDividida, { SplitBillIcon } from './CuentaDividida';
-import PromoDelDia from './PromoDelDia';
 
 function IgIcon() {
   return (
@@ -13,16 +10,11 @@ function IgIcon() {
   );
 }
 
-const IG_URL = 'https://www.instagram.com/bruzzok/';
+const IG_URL = 'https://www.instagram.com/bruzzok/'; 
 
 export default function CategoriasPrincipales({ onNavigate }) {
-  const [splitOpen, setSplitOpen] = useState(false);
-
   return (
     <div className="screen-body fade-up">
-
-      {/* ── Promo del día ── */}
-      <PromoDelDia />
 
       <p className="intro-label">¿Qué vas a pedir?</p>
 
@@ -43,18 +35,8 @@ export default function CategoriasPrincipales({ onNavigate }) {
         ))}
       </div>
 
-      {/* Barra inferior */}
+      {/* Barra inferior: Compartir + Instagram */}
       <div className="bottom-bar">
-
-        <button
-          className="split-bill-btn"
-          onClick={() => setSplitOpen(true)}
-          aria-label="Dividir cuenta"
-          title="¿Cada uno paga lo suyo?"
-        >
-          <SplitBillIcon />
-        </button>
-
         <button
           className="share-btn"
           onClick={() =>
@@ -77,10 +59,6 @@ export default function CategoriasPrincipales({ onNavigate }) {
           <IgIcon />
         </a>
       </div>
-
-      {splitOpen && (
-        <CuentaDividida onClose={() => setSplitOpen(false)} />
-      )}
 
     </div>
   );

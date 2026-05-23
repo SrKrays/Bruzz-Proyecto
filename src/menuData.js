@@ -1,14 +1,3 @@
-// ══════════════════════════════════════════════════════════
-//  🔥 PROMO DEL DÍA — editá este objeto para cambiarla.
-//  Para ocultarla: export const PROMO_DEL_DIA = null;
-// ══════════════════════════════════════════════════════════
-export const PROMO_DEL_DIA = {
-  name: 'Promo Bladis',
-  price: '$49.000',
-  desc: '1 botella de Fernet Branca 750cc + 2 Cocas 1,25 lts.',
-  imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80',
-};
-
 export const CATEGORIAS = [
   {
     id: 'comidas',
@@ -181,14 +170,15 @@ export const MENU = {
     title: 'Vinos', back: 'bebidas',
     items: [
       { sep: 'Vinos' },
-      { name: 'Santa Julia Chardonnay',                       price: '$8.500',  desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Espumante Dada 7',                             price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Luigi Bosca Malbec',                           price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Alma Mora Malbec',                             price: '$9.500',  desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Cordero con Piel de Lobo Cabernet Sauvignon',  price: '$13.500', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Cordero con Piel de Lobo Blanco Dulce',        price: '$12.900', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Fond de Cave Chardonnay',                      price: '$11.500', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
-      { name: 'Alma Mora Cabernet Sauvignon',                 price: '$9.500',  desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
+      { name: 'Copa de Vino ',                       price: '$4.000',  desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/Bruzz/vinos.jpg' },
+      { name: 'Santa Julia Chardonnay',                       price: '$8.500',  desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/vino.jpg' },
+      { name: 'Espumante Dada 7',                             price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/dada.jpg' },
+      { name: 'Luigi Bosca Malbec',                           price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/malbeer%20b.jpg' },
+      { name: 'Alma Mora Malbec',                             price: '$9.500',  desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/mora.jpg' },
+      { name: 'Cordero con Piel de Lobo Cabernet Sauvignon',  price: '$13.500', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/cordero.jpg' },
+      { name: 'Cordero con Piel de Lobo Blanco Dulce',        price: '$12.900', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/cordero.jpg' },
+      { name: 'Fond de Cave Chardonnay',                      price: '$11.500', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/cha.jpg' },
+      { name: 'Alma Mora Cabernet Sauvignon',                 price: '$9.500',  desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://69f969104ee83435ba386e9c.imgix.net/bruzz/mora.jpg' },
     ],
   },
 
