@@ -1036,6 +1036,53 @@ height: auto;
   vertical-align: middle;
 }
 
+/* ── BADGE SIN TACC ──────────────────────────────────────── */
+.badge-sintacc {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  margin-left: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ── SELECTOR SIN TACC (radio visual) ───────────────────── */
+.sintacc-wrap .medallon-label { color: #f87171; }
+.sintacc-icon-label { font-size: 14px; }
+
+.sintacc-opt--active {
+  border-color: #f87171 !important;
+  background: rgba(220, 38, 38, 0.10) !important;
+}
+.sintacc-opt--active .medallon-opt-name { color: #f87171 !important; }
+
+.sintacc-radio {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--fast), background var(--fast);
+}
+.sintacc-radio--on {
+  border-color: #f87171;
+  background: rgba(220, 38, 38, 0.15);
+}
+.sintacc-radio-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #f87171;
+}
+
 
 /* ════════════════════════════════════════════════════════════
    📝 PANTALLA CHECKOUT

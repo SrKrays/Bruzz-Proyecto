@@ -2,6 +2,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { MENU, POSTRES, CAFETERIA } from './menuData';
 const WHATSAPP_NUMBER = 543543512248;
 
+// ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
+const VARIEDADES_SINTACC = [
+  { id: 'napolitana',   name: 'Napolitana',    desc: 'Salsa de tomate fresca, mozzarella, rodajas de tomate fresco, aceite de ajo y orégano.' },
+  { id: 'cuatroquesos', name: 'Cuatro Quesos', desc: 'Salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.' },
+  { id: 'muzzajamon',   name: 'Muzza y Jamón', desc: 'Salsa de tomate fresca, abundante mozzarella, jamón cocido y orégano.' },
+];
+
 // ── Medallones de la Veggie ───────────────────────────────
 const MEDALLONES = [
   { id: 'remolacha', name: 'Tabule',  desc: 'Mijo , cebolla de verdeo , tomate deshidratado , harina de garvanzos , fabula de mandioca , aceite de girasol , jugo  y ralladura de limon y especias.' },
@@ -84,6 +91,9 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
                   </div>
                   {item.note && (
                     <p className="cart-panel-item-note">↳ {item.note}</p>
+                  )}
+                  {item.sintaccVariedad && (
+                    <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>
                   )}
                   {item.medallon && (
                     <p className="cart-panel-item-note">🌿 {item.medallon}</p>
@@ -202,15 +212,59 @@ function MedallonSelector({ qty, selected, onChange, error }) {
 
 
 // ════════════════════════════════════════════════════════════
+//  🌾 SELECTOR DE VARIEDAD SIN TACC
+// ════════════════════════════════════════════════════════════
+
+function SinTaccSelector({ selected, onChange, error }) {
+  return (
+    <div className="medallon-wrap sintacc-wrap">
+      <div className="medallon-header">
+        <span className="medallon-label">
+          <span className="sintacc-icon-label">🌾</span> Elegí tu variedad Sin T.A.C.C.
+        </span>
+      </div>
+      {error && <p className="medallon-error">⚠ {error}</p>}
+      <div className="medallon-list">
+        {VARIEDADES_SINTACC.map((v) => {
+          const isActive = selected === v.id;
+          return (
+            <div
+              key={v.id}
+              className={`medallon-opt${isActive ? ' medallon-opt--active sintacc-opt--active' : ''}`}
+              onClick={() => onChange(v.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="medallon-opt-text">
+                <span className="medallon-opt-name">{v.name}</span>
+                <span className="medallon-opt-desc">{v.desc}</span>
+              </div>
+              <div className="medallon-opt-controls">
+                <div className={`sintacc-radio${isActive ? ' sintacc-radio--on' : ''}`}>
+                  {isActive && <span className="sintacc-radio-dot" />}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+// ════════════════════════════════════════════════════════════
 //  📦 EXPANDABLE ITEM CARD
 // ════════════════════════════════════════════════════════════
 
 function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
-  const isVeggie    = item.name === 'Veggie';
-  const [qty, setQty]              = useState(1);
-  const [note, setNote]            = useState('');
-  const [medallones, setMedallones] = useState({});
+  const isVeggie   = item.name === 'Veggie';
+  const isSinTacc  = item.sinTacc === true;
+  const [qty, setQty]                     = useState(1);
+  const [note, setNote]                   = useState('');
+  const [medallones, setMedallones]       = useState({});
   const [medallonError, setMedallonError] = useState('');
+  const [sintaccVar, setSintaccVar]       = useState('');   // id de variedad elegida
+  const [sintaccError, setSintaccError]   = useState('');
   const MAX_NOTE = 150;
   const unitPrice = parsePrice(item.price);
   const bodyRef   = useRef(null);
@@ -222,6 +276,8 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       setNote('');
       setMedallones({});
       setMedallonError('');
+      setSintaccVar('');
+      setSintaccError('');
     }
   }, [isExpanded]);
 
@@ -233,7 +289,11 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
         return;
       }
     }
-    // Armar label: "2x Remolacha, 1x Quinoa"
+    if (isSinTacc && !sintaccVar) {
+      setSintaccError('Elegí una variedad para continuar');
+      return;
+    }
+    // Armar label medallones Veggie
     const medallonLabel = Object.entries(medallones)
       .filter(([, n]) => n > 0)
       .map(([id, n]) => {
@@ -241,7 +301,11 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
         return n > 1 ? `${n}x ${name}` : name;
       })
       .join(', ');
-    onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel });
+    // Label variedad Sin TACC
+    const sintaccLabel = isSinTacc
+      ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar
+      : '';
+    onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel });
     onToggle(null);
   };
 
@@ -261,6 +325,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
           <span className="exp-card-name">
             {item.name}
             {item.badge && <span className="badge">{item.badge}</span>}
+            {item.sinTacc && <span className="badge-sintacc">🌾 Sin T.A.C.C.</span>}
           </span>
           {item.desc && !isExpanded && (
             <p className="exp-card-desc-preview">{item.desc}</p>
@@ -304,6 +369,15 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
               selected={medallones}
               onChange={(sel) => { setMedallones(sel); setMedallonError(''); }}
               error={medallonError}
+            />
+          )}
+
+          {/* Selector variedad Sin TACC */}
+          {isSinTacc && (
+            <SinTaccSelector
+              selected={sintaccVar}
+              onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
+              error={sintaccError}
             />
           )}
 
@@ -404,6 +478,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
 
     const lines      = cart.map((i) => {
       let txt = `${i.qty}x ${i.name}: ${i.price}`;
+      if (i.sintaccVariedad) txt += `\n   🌾 Variedad Sin T.A.C.C.: ${i.sintaccVariedad}`;
       if (i.medallon) txt += `\n   🌿 Medallón: ${i.medallon}`;
       if (i.note)     txt += `\n   ↳ ${i.note}`;
       return txt;
@@ -455,6 +530,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
               <span className="checkout-row-qty">{i.qty}×</span>
               <span className="checkout-row-name">
                 {i.name}
+                {i.sintaccVariedad ? <em> · 🌾 {i.sintaccVariedad}</em> : null}
                 {i.medallon ? <em> · 🌿 {i.medallon}</em> : null}
                 {i.note     ? <em> · {i.note}</em>        : null}
               </span>
