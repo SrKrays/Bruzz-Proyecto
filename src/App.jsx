@@ -4,6 +4,8 @@ import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
 import Subcategorias         from './Subcategorias';
 import Items, { CartChip, CartPanel }  from './Items';
+import { Routes, Route } from 'react-router-dom';
+import AdminPanel from './AdminPanel';
 
 const SUBCATEGORIA_SCREENS = new Set(['comidas', 'bebidas']);
 
@@ -135,33 +137,36 @@ const handleCartAdd = useCallback((item) => {
     return <CategoriasPrincipales onNavigate={handleCategoria} />;
   };
 
-  return (
-    <div className="bruzz-app">
-      <div className="wave" />
-      <header className="header">
-        <div className="logo-ring">
-          <img src={logo} alt="Bruzz Pizza & Beer" />
+ return (
+    <Routes>
+      <Route path="/admin/*" element={<AdminPanel />} />
+      <Route path="/*" element={
+        <div className="bruzz-app">
+          <div className="wave" />
+          <header className="header">
+            <div className="logo-ring">
+              <img src={logo} alt="Bruzz Pizza & Beer" />
+            </div>
+            <p className="tagline">Carta Digital · 2026</p>
+            <CartChip cart={cart} onOpen={() => setCartOpen(true)} />
+          </header>
+          {renderScreen()}
+          {cartOpen && (
+            <CartPanel
+              cart={cart}
+              onClose={() => setCartOpen(false)}
+              onCartAdd={handleCartAdd}
+              onCartRemove={handleCartRemove}
+              onCartClear={handleCartClear}
+              onCheckout={() => {
+                setCartOpen(false);
+                setShowCheckout(true);
+                if (screen !== 'items') { setScreen('items'); }
+              }}
+            />
+          )}
         </div>
-        <p className="tagline">Carta Digital · 2026</p>
-        <CartChip cart={cart} onOpen={() => setCartOpen(true)} />
-      </header>
-      {renderScreen()}
-      {cartOpen && (
-        <CartPanel
-          cart={cart}
-          onClose={() => setCartOpen(false)}
-          onCartAdd={handleCartAdd}
-          onCartRemove={handleCartRemove}
-          onCartClear={handleCartClear}
-          onCheckout={() => {
-            setCartOpen(false);
-            setShowCheckout(true);
-            if (screen !== 'items') { setScreen('items');
-             }
-          }}
-
-        />
-      )}
-    </div>
+      } />
+    </Routes>
   );
 }
