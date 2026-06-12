@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
 
 const API = 'https://bruzz-api.onrender.com';
 
@@ -64,180 +63,6 @@ function LoginPage({ onLogin }) {
   );
 }
 
-// ── Dashboard ────────────────────────────────────────────────
-function Dashboard({ token, nombre, onLogout }) {
-  const [seccion, setSeccion]   = useState('items');
-  const [items, setItems]       = useState([]);
-  const [subcats, setSubcats]   = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [mensaje, setMensaje]   = useState('');
-  const [filtro, setFiltro]     = useState('');
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-
-  const cargarDatos = async () => {
-    setLoading(true);
-    try {
-      const [resItems, resSubs] = await Promise.all([
-        fetch(`${API}/api/items`, { headers }),
-        fetch(`${API}/api/menu`, { headers: { 'Content-Type': 'application/json' } })
-      ]);
-      const dataItems = await resItems.json();
-      const dataMenu  = await resSubs.json();
-      setItems(dataItems);
-      setSubcats(dataMenu.subcategorias);
-    } catch {
-      setMensaje('Error al cargar datos');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useState(() => { cargarDatos(); }, []);
-
-  const handlePrecio = async (item, nuevoPrecio) => {
-    try {
-      await fetch(`${API}/api/items/${item.id}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ ...item, precio: parseFloat(nuevoPrecio) })
-      });
-      setItems(prev => prev.map(i => i.id === item.id ? { ...i, precio: parseFloat(nuevoPrecio) } : i));
-      setMensaje('✅ Precio actualizado');
-      setTimeout(() => setMensaje(''), 3000);
-    } catch {
-      setMensaje('❌ Error al actualizar');
-    }
-  };
-
-  const handleToggle = async (id) => {
-    try {
-      const res  = await fetch(`${API}/api/items/${id}/toggle`, { method: 'PATCH', headers });
-      const data = await res.json();
-      setItems(prev => prev.map(i => i.id === id ? { ...i, activo: data.activo } : i));
-    } catch {
-      setMensaje('❌ Error al cambiar estado');
-    }
-  };
-
-  const handleEliminar = async (id) => {
-    if (!confirm('¿Seguro que querés eliminar este producto?')) return;
-    try {
-      await fetch(`${API}/api/items/${id}`, { method: 'DELETE', headers });
-      setItems(prev => prev.filter(i => i.id !== id));
-      setMensaje('✅ Producto eliminado');
-      setTimeout(() => setMensaje(''), 3000);
-    } catch {
-      setMensaje('❌ Error al eliminar');
-    }
-  };
-
-  const generarMenuData = () => {
-    const agrupado = {};
-    subcats.forEach(sub => {
-      agrupado[sub.menuKey] = items
-        .filter(i => i.subcategoriaId === sub.id)
-        .sort((a, b) => a.orden - b.orden)
-        .map(i => i.esSeparador
-          ? { sep: i.sepTexto }
-          : {
-              name: i.nombre,
-              price: `$${Math.round(i.precio).toLocaleString('es-AR')}`,
-              desc: i.descripcion,
-              imageUrl: i.imageUrl,
-              ...(i.badge && { badge: i.badge }),
-              ...(i.sinTacc && { sinTacc: true })
-            }
-        );
-    });
-
-    const contenido = `// menuData.js — Generado automáticamente ${new Date().toLocaleString('es-AR')}
-// ⚠️ No editar manualmente
-
-export const MENU = ${JSON.stringify(agrupado, null, 2)};
-`;
-    const blob = new Blob([contenido], { type: 'text/javascript' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'menuData.js';
-    a.click();
-    URL.revokeObjectURL(url);
-    setMensaje('✅ menuData.js descargado');
-    setTimeout(() => setMensaje(''), 3000);
-  };
-
-  const itemsFiltrados = items.filter(i =>
-    !i.esSeparador &&
-    i.nombre.toLowerCase().includes(filtro.toLowerCase())
-  );
-
-  return (
-    <div style={styles.dashWrap}>
-      {/* Sidebar */}
-      <div style={styles.sidebar}>
-        <h2 style={styles.sideTitle}>🍕 Bruzz</h2>
-        <p style={styles.sideNombre}>Hola, {nombre}</p>
-        <button style={seccion === 'items' ? styles.navActivo : styles.navBtn} onClick={() => setSeccion('items')}>
-          📋 Productos
-        </button>
-        <button style={seccion === 'agregar' ? styles.navActivo : styles.navBtn} onClick={() => setSeccion('agregar')}>
-          ➕ Agregar producto
-        </button>
-        <div style={{ flex: 1 }} />
-        <button style={styles.btnGenerar} onClick={generarMenuData}>
-          ⬇️ Descargar menuData.js
-        </button>
-        <button style={styles.btnLogout} onClick={onLogout}>
-          Cerrar sesión
-        </button>
-      </div>
-
-      {/* Contenido */}
-      <div style={styles.contenido}>
-        {mensaje && <div style={styles.toast}>{mensaje}</div>}
-
-        {seccion === 'items' && (
-          <>
-            <h2 style={styles.titulo}>Productos</h2>
-            <input
-              style={styles.buscador}
-              placeholder="🔍 Buscar producto..."
-              value={filtro}
-              onChange={e => setFiltro(e.target.value)}
-            />
-            {loading ? <p>Cargando...</p> : (
-              <div style={styles.tabla}>
-                {itemsFiltrados.map(item => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    subcats={subcats}
-                    onPrecio={handlePrecio}
-                    onToggle={handleToggle}
-                    onEliminar={handleEliminar}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {seccion === 'agregar' && (
-          <AgregarProducto
-            token={token}
-            subcats={subcats}
-            onGuardado={() => { cargarDatos(); setSeccion('items'); setMensaje('✅ Producto agregado'); setTimeout(() => setMensaje(''), 3000); }}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Fila de item ─────────────────────────────────────────────
 function ItemRow({ item, subcats, onPrecio, onToggle, onEliminar }) {
   const [editando, setEditando] = useState(false);
@@ -260,13 +85,12 @@ function ItemRow({ item, subcats, onPrecio, onToggle, onEliminar }) {
               onChange={e => setPrecio(e.target.value)}
             />
             <button style={styles.btnGuardar} onClick={() => { onPrecio(item, precio); setEditando(false); }}>✅</button>
-            <button style={styles.btnCancelar} onClick={() => setEditando(false)}>❌</button>
+            <button style={styles.btnCancelar} onClick={() => { setPrecio(item.precio); setEditando(false); }}>❌</button>
           </>
-        ) : (        <>
-<>
-  <span style={styles.itemPrecio}>${Math.round(item.precio).toLocaleString('es-AR')}</span>
-  <button style={styles.btnEditar} onClick={() => { setPrecio(item.precio); setEditando(true); }}>✏️ Editar precio</button>
-</>
+        ) : (
+          <>
+            <span style={styles.itemPrecio}>${Math.round(item.precio).toLocaleString('es-AR')}</span>
+            <button style={styles.btnEditar} onClick={() => { setPrecio(item.precio); setEditando(true); }}>✏️ Editar precio</button>
           </>
         )}
         <button style={item.activo ? styles.btnOcultar : styles.btnActivar} onClick={() => onToggle(item.id)}>
@@ -331,6 +155,167 @@ function AgregarProducto({ token, subcats, onGuardado }) {
   );
 }
 
+// ── Dashboard ────────────────────────────────────────────────
+function Dashboard({ token, nombre, onLogout }) {
+  const [seccion, setSeccion] = useState('items');
+  const [items, setItems]     = useState([]);
+  const [subcats, setSubcats] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [filtro, setFiltro]   = useState('');
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+
+  const cargarDatos = async () => {
+    setLoading(true);
+    try {
+      const [resItems, resMenu] = await Promise.all([
+        fetch(`${API}/api/items`, { headers }),
+        fetch(`${API}/api/menu`)
+      ]);
+      const dataItems = await resItems.json();
+      const dataMenu  = await resMenu.json();
+      setItems(dataItems);
+      setSubcats(dataMenu.subcategorias);
+    } catch {
+      setMensaje('Error al cargar datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useState(() => { cargarDatos(); }, []);
+
+  const handlePrecio = async (item, nuevoPrecio) => {
+    try {
+      await fetch(`${API}/api/items/${item.id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ ...item, precio: parseFloat(nuevoPrecio) })
+      });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, precio: parseFloat(nuevoPrecio) } : i));
+      setMensaje('✅ Precio actualizado');
+      setTimeout(() => setMensaje(''), 3000);
+    } catch {
+      setMensaje('❌ Error al actualizar');
+    }
+  };
+
+  const handleToggle = async (id) => {
+    try {
+      const res  = await fetch(`${API}/api/items/${id}/toggle`, { method: 'PATCH', headers });
+      const data = await res.json();
+      setItems(prev => prev.map(i => i.id === id ? { ...i, activo: data.activo } : i));
+    } catch {
+      setMensaje('❌ Error al cambiar estado');
+    }
+  };
+
+  const handleEliminar = async (id) => {
+    if (!confirm('¿Seguro que querés eliminar este producto?')) return;
+    try {
+      await fetch(`${API}/api/items/${id}`, { method: 'DELETE', headers });
+      setItems(prev => prev.filter(i => i.id !== id));
+      setMensaje('✅ Producto eliminado');
+      setTimeout(() => setMensaje(''), 3000);
+    } catch {
+      setMensaje('❌ Error al eliminar');
+    }
+  };
+
+  const publicarCambios = async () => {
+    setMensaje('⏳ Publicando cambios en la carta...');
+    try {
+      const res = await fetch(`${API}/api/deploy`, {
+        method: 'POST',
+        headers
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje('✅ Carta actualizada — los cambios se ven en 2-3 minutos');
+      } else {
+        setMensaje(`❌ Error: ${data.message}`);
+      }
+    } catch {
+      setMensaje('❌ Error de conexión');
+    }
+    setTimeout(() => setMensaje(''), 6000);
+  };
+
+  const itemsFiltrados = items.filter(i =>
+    !i.esSeparador &&
+    i.nombre.toLowerCase().includes(filtro.toLowerCase())
+  );
+
+  return (
+    <div style={styles.dashWrap}>
+      <div style={styles.sidebar}>
+        <h2 style={styles.sideTitle}>🍕 Bruzz</h2>
+        <p style={styles.sideNombre}>Hola, {nombre}</p>
+        <button style={seccion === 'items' ? styles.navActivo : styles.navBtn} onClick={() => setSeccion('items')}>
+          📋 Productos
+        </button>
+        <button style={seccion === 'agregar' ? styles.navActivo : styles.navBtn} onClick={() => setSeccion('agregar')}>
+          ➕ Agregar producto
+        </button>
+        <div style={{ flex: 1 }} />
+        <button style={styles.btnGenerar} onClick={publicarCambios}>
+          🚀 Publicar cambios
+        </button>
+        <button style={styles.btnLogout} onClick={onLogout}>
+          Cerrar sesión
+        </button>
+      </div>
+
+      <div style={styles.contenido}>
+        {mensaje && <div style={styles.toast}>{mensaje}</div>}
+
+        {seccion === 'items' && (
+          <>
+            <h2 style={styles.titulo}>Productos</h2>
+            <input
+              style={styles.buscador}
+              placeholder="🔍 Buscar producto..."
+              value={filtro}
+              onChange={e => setFiltro(e.target.value)}
+            />
+            {loading ? <p style={{ color: '#888' }}>Cargando...</p> : (
+              <div style={styles.tabla}>
+                {itemsFiltrados.map(item => (
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    subcats={subcats}
+                    onPrecio={handlePrecio}
+                    onToggle={handleToggle}
+                    onEliminar={handleEliminar}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {seccion === 'agregar' && (
+          <AgregarProducto
+            token={token}
+            subcats={subcats}
+            onGuardado={() => {
+              cargarDatos();
+              setSeccion('items');
+              setMensaje('✅ Producto agregado');
+              setTimeout(() => setMensaje(''), 3000);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Estilos ──────────────────────────────────────────────────
 const styles = {
   loginWrap:   { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' },
@@ -357,7 +342,7 @@ const styles = {
   itemInfo:    { display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 },
   itemNombre:  { fontWeight: 'bold', color: '#fff' },
   itemSub:     { fontSize: '0.8rem', color: '#888' },
-  itemAcciones:{ display: 'flex', alignItems: 'center', gap: '0.5rem' },
+  itemAcciones:{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' },
   itemPrecio:  { color: '#e8b84b', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
   inputPrecio: { width: '100px', padding: '0.4rem', borderRadius: '6px', border: '1px solid #444', background: '#111', color: '#fff' },
   btnEditar:   { padding: '0.4rem 0.8rem', borderRadius: '6px', background: '#1a2a3a', color: '#4a9eff', border: 'none', cursor: 'pointer', fontSize: '0.85rem' },
@@ -371,13 +356,18 @@ const styles = {
   checkLabel:  { color: '#ccc', display: 'flex', alignItems: 'center', gap: '0.5rem' },
 };
 
-// ── AdminPanel principal ─────────────────────────────────────
+// ── Export principal ─────────────────────────────────────────
 export default function AdminPanel() {
   const [token, setToken]   = useState(() => localStorage.getItem('bruzz_token') || '');
   const [nombre, setNombre] = useState(() => localStorage.getItem('bruzz_nombre') || '');
 
   const handleLogin  = (t, n) => { setToken(t); setNombre(n); };
-  const handleLogout = () => { localStorage.removeItem('bruzz_token'); localStorage.removeItem('bruzz_nombre'); setToken(''); setNombre(''); };
+  const handleLogout = () => {
+    localStorage.removeItem('bruzz_token');
+    localStorage.removeItem('bruzz_nombre');
+    setToken('');
+    setNombre('');
+  };
 
   if (!token) return <LoginPage onLogin={handleLogin} />;
   return <Dashboard token={token} nombre={nombre} onLogout={handleLogout} />;
