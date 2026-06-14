@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 23:04
+// menuData.js — Generado el 14/06/2026 23:05
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -165,7 +165,6 @@ export const MENU = {
   tragos: {
     title: 'Tragos', back: 'home',
     items: [
-      { name: 'El Pelao Trago', price: '$1', desc: '1', imageUrl: 'https://bruzz.com.ar/img/1781478264-descarga-1.jpg', badge: 'Lito', sinTacc: true },
       { sep: 'Clásicos' },
       { name: 'Vaso Fernet c/ Coca', price: '$7.000', desc: 'Fernet Branca con Coca-Cola.', imageUrl: 'https://bruzz.com.ar/img/ferne.png' },
       { name: 'Carpano Orange', price: '$7.000', desc: 'Carpano con jugo de naranja.', imageUrl: 'https://bruzz.com.ar/img/carpani.png' },
