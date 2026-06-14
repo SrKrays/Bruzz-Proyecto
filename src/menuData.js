@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 08:44
+// menuData.js — Generado el 14/06/2026 08:45
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -30,7 +30,6 @@ export const MENU = {
   pizza: {
     title: 'Pizzas', back: 'comidas',
     items: [
-      { name: 'Pizza de Sairo', price: '$15.000', desc: 'Pizza para sairo', imageUrl: 'https://bruzz.com.ar/img/1781426651-tiramisu.jpg', badge: 'trolo :D' },
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
       { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/Celiacopizza.jpg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
