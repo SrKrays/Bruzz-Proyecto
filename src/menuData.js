@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 07:13
+// menuData.js — Generado el 14/06/2026 07:15
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -30,9 +30,11 @@ export const MENU = {
   pizza: {
     title: 'Pizzas', back: 'comidas',
     items: [
+      { name: 'Pizza para el Ruffua', price: '$13', desc: 'snfgija bgeuhaw gbuyehadvyfuheabyugfbAS9UHSA', imageUrl: 'A', badge: 'fIRMA RUFFANA' },
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
+      { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/Celiacopizza.jpg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
-      { name: 'Mini Pizza Bambino', price: '$14.500', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
+      { name: 'Mini Pizza Bambino', price: '$14.501', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
       { name: 'Pepe', price: '$23.300', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
       { name: 'Prosciutto Cotto', price: '$22.000', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
