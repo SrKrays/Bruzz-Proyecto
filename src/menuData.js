@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 08:45
+// menuData.js — Generado el 14/06/2026 08:53
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
