@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 23:02
+// menuData.js — Generado el 14/06/2026 23:03
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -81,7 +81,6 @@ export const MENU = {
   lomitos: {
     title: 'Lomitos', back: 'comidas',
     items: [
-      { name: 'Testeo', price: '$15.000', desc: 'Testeo de web', imageUrl: 'https://bruzz.com.ar/img/1781478097-descarga-1.jpg', badge: 'MAteo' },
       { name: 'Lomito Simple', price: '$22.400', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
       { name: 'Lomito Completo', price: '$23.300', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
       { name: 'Lomito Americano', price: '$23.800', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
