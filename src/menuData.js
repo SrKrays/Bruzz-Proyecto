@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 22:47
+// menuData.js — Generado el 14/06/2026 22:49
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -30,6 +30,7 @@ export const MENU = {
   pizza: {
     title: 'Pizzas', back: 'comidas',
     items: [
+      { name: 'Pizza de Tomas', price: '$15', desc: 'Testeo', imageUrl: '', badge: 'A' },
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
       { name: 'Pizza Sin T.A.C.C.', price: '$23.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/Celiacopizza.jpg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
