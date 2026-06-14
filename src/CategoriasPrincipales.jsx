@@ -1,4 +1,7 @@
+import { motion } from 'framer-motion';
 import { CATEGORIAS } from './menuData';
+import TiltCard from './TiltCard';
+import RevealText from './RevealText';
 
 function IgIcon() {
   return (
@@ -10,19 +13,40 @@ function IgIcon() {
   );
 }
 
-const IG_URL = 'https://www.instagram.com/bruzzok/'; 
+const IG_URL = 'https://www.instagram.com/bruzzok/';
+
+// ── Entrada escalonada de las cards de categorías ──────────
+const gridVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.09, delayChildren: 0.08 },
+  },
+};
+
+const cardVariants = {
+  hidden:  { opacity: 0, y: 26, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export default function CategoriasPrincipales({ onNavigate }) {
   return (
-    <div className="screen-body fade-up">
+    <div className="screen-body">
 
-      <p className="intro-label">¿Qué vas a pedir?</p>
+      <p className="intro-label">
+        <RevealText as="span">¿Qué vas a pedir?</RevealText>
+      </p>
 
-      <div className="card-grid">
+      <motion.div
+        className="card-grid"
+        variants={gridVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {CATEGORIAS.map((cat) => (
-          <button
+          <TiltCard
             key={cat.id}
             className="nav-card"
+            variants={cardVariants}
             onClick={() => onNavigate(cat.id)}
           >
             {cat.imageUrl && (
@@ -31,9 +55,9 @@ export default function CategoriasPrincipales({ onNavigate }) {
             <div className="card-overlay" />
             <span className="card-name">{cat.name}</span>
             <span className="card-desc">{cat.desc}</span>
-          </button>
+          </TiltCard>
         ))}
-      </div>
+      </motion.div>
 
       {/* Barra inferior: Compartir + Instagram */}
       <div className="bottom-bar">
