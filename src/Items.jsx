@@ -1,5 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MENU, POSTRES, CAFETERIA } from './menuData';
+import { emitFlyToCart } from './flyToCart';
+import RevealText from './RevealText';
 const WHATSAPP_NUMBER = 543543512248;
 
 // ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
@@ -31,6 +34,26 @@ function formatDate() {
   const d   = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)} - ${pad(d.getHours())}:${pad(d.getMinutes())}hs`;
+}
+
+// ── Precio con efecto "roll" al cambiar de valor ─────────
+function AnimatedPrice({ value }) {
+  return (
+    <span className="price-roll">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={value}
+          className="price-roll-inner"
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -14, opacity: 0 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {formatARS(value)}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
 }
 
 
@@ -267,7 +290,15 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
   const [sintaccError, setSintaccError]   = useState('');
   const MAX_NOTE = 150;
   const unitPrice = parsePrice(item.price);
-  const bodyRef   = useRef(null);
+
+  // ── Glow que sigue el cursor en cada fila ──
+  const handleRowMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mx = ((e.clientX - rect.left) / rect.width) * 100;
+    const my = ((e.clientY - rect.top) / rect.height) * 100;
+    e.currentTarget.style.setProperty('--mx', `${mx}%`);
+    e.currentTarget.style.setProperty('--my', `${my}%`);
+  };
 
   // reset cuando se cierra
   useEffect(() => {
@@ -281,7 +312,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
     }
   }, [isExpanded]);
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
     if (isVeggie) {
       const totalSelected = Object.values(medallones).reduce((s, n) => s + n, 0);
       if (totalSelected < qty) {
@@ -306,16 +337,29 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar
       : '';
     onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel });
+    // ── Animación "vuelo" hacia el carrito ──
+    if (e?.currentTarget) {
+      emitFlyToCart({ rect: e.currentTarget.getBoundingClientRect(), imageUrl: item.imageUrl });
+    }
     onToggle(null);
   };
 
   return (
-    <div
+    <motion.div
       className={`exp-card${isExpanded ? ' exp-card--open' : ''}`}
-      style={{ animationDelay: '0ms' }}
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={handleRowMouseMove}
     >
+      <span className="exp-card-glow" aria-hidden="true" />
       {/* ── Cabecera siempre visible ── */}
-      <div className="exp-card-head" onClick={() => onToggle(isExpanded ? null : item.name)}>
+      <motion.div
+        className="exp-card-head"
+        onClick={() => onToggle(isExpanded ? null : item.name)}
+        whileTap={{ scale: 0.99 }}
+      >
         {item.imageUrl && (
           <div className="exp-card-thumb">
             <img src={item.imageUrl} alt={item.name} />
@@ -337,25 +381,34 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
             ›
           </span>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Cuerpo expandible ── */}
-      <div
-        className="exp-card-body"
-        ref={bodyRef}
-        style={{
-          maxHeight: isExpanded ? '900px' : '0px',
-          opacity:   isExpanded ? 1 : 0,
-        }}
-      >
-        <div className="exp-card-body-inner">
-          {/* Imagen grande */}
-          {item.imageUrl && (
-            <div className="exp-card-img-wrap">
-              <img src={item.imageUrl} alt={item.name} className="exp-card-img" />
-              <div className="exp-card-img-grad" />
-            </div>
-          )}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            className="exp-card-body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="exp-card-body-inner">
+              {/* Imagen grande con zoom cinematográfico */}
+              {item.imageUrl && (
+                <div className="exp-card-img-wrap">
+                  <motion.img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="exp-card-img"
+                    initial={{ scale: 1.18, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                  <div className="exp-card-img-grad" />
+                </div>
+              )}
 
           {/* Descripción */}
           {item.desc && (
@@ -418,13 +471,15 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
               <span className="exp-qty-val">{qty}</span>
               <button className="exp-qty-btn" onClick={() => setQty((q) => q + 1)}>+</button>
             </div>
-            <button className="exp-add-btn" onClick={handleAdd}>
-              Agregar · {formatARS(unitPrice * qty)}
-            </button>
+            <motion.button className="exp-add-btn" whileTap={{ scale: 0.96 }} onClick={handleAdd}>
+              Agregar · <AnimatedPrice value={unitPrice * qty} />
+            </motion.button>
           </div>
-        </div>
-      </div>
-    </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -665,12 +720,14 @@ const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'hom
   }
 
   return (
-    <div className="screen-body fade-up" style={{ paddingBottom: 32 }}>
+    <div className="screen-body" style={{ paddingBottom: 32 }}>
 
       {/* ── Back row ── */}
       <div className="back-row">
         <button className="back-btn" onClick={() => onNavigate(backScreen)}>← Volver</button>
-        <span className="screen-title">{title}</span>
+        <span className="screen-title">
+          <RevealText as="span">{title}</RevealText>
+        </span>
       </div>
 
       {/* ── Lista de items ── */}
