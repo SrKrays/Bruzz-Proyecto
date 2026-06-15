@@ -1534,3 +1534,158 @@ height: auto;
 .cart-bump {
   animation: cartBump 0.42s cubic-bezier(.34, 1.56, .64, 1);
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   🆕 ANIMACIONES v2 — agregadas sobre el CSS existente
+════════════════════════════════════════════════════════════ */
+
+/* ── MEDIA 7: Header que encoge al hacer scroll ───────────── */
+.header {
+  transition:
+    padding var(--mid),
+    background var(--mid),
+    backdrop-filter var(--mid),
+    box-shadow var(--mid);
+}
+
+.header--shrunk {
+  padding-top: 8px !important;
+  padding-bottom: 4px !important;
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header--shrunk .logo-ring img {
+  width: 52px;
+  height: 52px;
+  transition: width var(--mid), height var(--mid);
+}
+
+.header--shrunk .tagline {
+  font-size: 9px;
+  opacity: 0.6;
+  transition: font-size var(--mid), opacity var(--mid);
+}
+
+/* ── ALTA 1: Shimmer dorado en los precios ────────────────── */
+@keyframes shimmerGold {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.shimmer-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+  background: linear-gradient(
+    90deg,
+    var(--gold)    0%,
+    #fffbe6       40%,
+    var(--gold)   55%,
+    var(--gold-dim) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerGold 1.6s ease forwards;
+  animation-play-state: paused;
+}
+
+/* Se dispara cuando el item entra al viewport (via whileInView) */
+.exp-card.is-visible .shimmer-price {
+  animation-play-state: running;
+}
+
+/* Alternativa: siempre corre una vez, sutil */
+.shimmer-price {
+  animation-play-state: running;
+}
+
+/* ── ALTA 2: Hover líquido en nav-cards (refuerzo) ────────── */
+.nav-card:hover .card-overlay,
+.nav-card:focus-visible .card-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.1) 100%);
+  transition: background var(--expand);
+}
+
+/* ── ALTA 6: Badge pulsante ───────────────────────────────── */
+@keyframes pulseRing {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(1.5); opacity: 0;   }
+  100% { transform: scale(1.5); opacity: 0;   }
+}
+
+.badge--pulse {
+  position: relative;
+}
+
+.badge--pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 1.5px solid var(--gold);
+  animation: pulseRing 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+/* ── FX 11: Imagen con parallax en card expandida ─────────── */
+.exp-card-img--parallax {
+  transition: transform 0.1s linear;
+  transform-origin: center center;
+  /* scale base está en el JS con translateY */
+}
+
+/* ── FX 10: Morph de card a pantalla (placeholder base) ────── */
+/* La animación real es en el JS con Framer Motion layoutId */
+.nav-card {
+  transform-style: preserve-3d;
+}
+
+/* ── ALTA 5: Transición con dirección — los variants están en JS */
+/* Solo forzamos que el screen-transition no recorte el blur */
+.screen-transition {
+  will-change: transform, opacity, filter;
+}
+
+/* ── MEDIA 8: CartPanel spring — la animación está en el JSX */
+/* Elimina la animación CSS previa para que no compita */
+.cart-panel {
+  animation: none !important;
+}
+
+.cart-panel-backdrop {
+  animation: none !important;
+}
+
+/* ── FX 12: Botón de confirmar con efecto celebración ──────── */
+.checkout-send-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.checkout-send-btn::after {
+  content: '🎉';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  font-size: 18px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.checkout-send-btn:hover::after {
+  transform: translateY(-50%) scale(1);
+}
+
+/* ── Instalación canvas-confetti: aviso visual ──────────────── */
+/* npm install canvas-confetti  —  ya incluido en confettiCheckout.js */
+

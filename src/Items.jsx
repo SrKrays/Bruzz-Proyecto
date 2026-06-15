@@ -1,8 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MENU, POSTRES, CAFETERIA } from './menuData';
 import { emitFlyToCart } from './flyToCart';
 import RevealText from './RevealText';
+import { launchConfetti } from './confettiCheckout';
+
 const WHATSAPP_NUMBER = 543543512248;
 
 // ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
@@ -14,29 +16,35 @@ const VARIEDADES_SINTACC = [
 
 // ── Medallones de la Veggie ───────────────────────────────
 const MEDALLONES = [
-  { id: 'remolacha', name: 'Tabule',  desc: 'Mijo , cebolla de verdeo , tomate deshidratado , harina de garvanzos , fabula de mandioca , aceite de girasol , jugo  y ralladura de limon y especias.' },
-  { id: 'quinoa',    name: 'Burrito Mexicano',     desc: 'Poroto negro, arroz blanco , cebolla , harina de garvanzos , fabula de mandioca , aceite de girasol , jugo  y ralladura de limon y especias.' },
-  { id: 'garbanzo',  name: 'Curry India',   desc: 'Lentejas, coliflor , espinaca, tomate deshidratado , harina de garbanzos , fabula de mandioca y especias.' },
-  { id: 'lentejas',  name: 'Fabel India',   desc: 'Garbanzos , fabula de mandioca , aceite de girsol , harina de garvanzos , de perejil , crando , comino y pimifentaor blanca' },
+  { id: 'remolacha', name: 'Tabule',          desc: 'Mijo, cebolla de verdeo, tomate deshidratado, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
+  { id: 'quinoa',    name: 'Burrito Mexicano', desc: 'Poroto negro, arroz blanco, cebolla, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
+  { id: 'garbanzo',  name: 'Curry India',      desc: 'Lentejas, coliflor, espinaca, tomate deshidratado, harina de garbanzos, fábula de mandioca y especias.' },
+  { id: 'lentejas',  name: 'Fabel India',      desc: 'Garbanzos, fábula de mandioca, aceite de girasol, harina de garbanzos, perejil, comino y pimienta blanca.' },
 ];
 
 // ── Helpers ───────────────────────────────────────────────
 function parsePrice(priceStr) {
   return parseFloat((priceStr || '0').replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
 }
-
 function formatARS(n) {
   return '$' + Math.round(n).toLocaleString('es-AR');
 }
-
-
 function formatDate() {
-  const d   = new Date();
+  const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)} - ${pad(d.getHours())}:${pad(d.getMinutes())}hs`;
 }
 
-// ── Precio con efecto "roll" al cambiar de valor ─────────
+// ── ALTA 1: Precio con shimmer dorado al entrar ───────────
+function ShimmerPrice({ value }) {
+  return (
+    <span className="shimmer-price">
+      {value}
+    </span>
+  );
+}
+
+// ── Precio animado con "roll" al cambiar qty ──────────────
 function AnimatedPrice({ value }) {
   return (
     <span className="price-roll">
@@ -56,9 +64,8 @@ function AnimatedPrice({ value }) {
   );
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  🛒 CART FAB — siempre visible en lateral
+//  🛒 CART FAB — con ALTA 3: spring bounce en el número
 // ════════════════════════════════════════════════════════════
 
 export function CartChip({ cart, onOpen }) {
@@ -72,14 +79,23 @@ export function CartChip({ cart, onOpen }) {
       aria-label="Ver mi pedido"
     >
       <span className="cart-fab-header-icon">🛒</span>
-      <span className={`cart-fab-header-badge${isEmpty ? ' zero' : ''}`}>{totalItems}</span>
+      {/* key cambia con totalItems → re-dispara la animación spring */}
+      <motion.span
+        key={totalItems}
+        className={`cart-fab-header-badge${isEmpty ? ' zero' : ''}`}
+        initial={{ scale: isEmpty ? 1 : 1.6, y: isEmpty ? 0 : -3 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+      >
+        {totalItems}
+      </motion.span>
     </button>
   );
 }
 
 
 // ════════════════════════════════════════════════════════════
-//  🛒 PANEL LATERAL DEL CARRITO
+//  🛒 PANEL LATERAL — MEDIA 8: spring lateral al entrar
 // ════════════════════════════════════════════════════════════
 
 export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear, onCheckout }) {
@@ -87,10 +103,26 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
   const totalPrice = cart.reduce((s, i) => s + parsePrice(i.price) * i.qty, 0);
   const isEmpty    = totalItems === 0;
 
+  // En mobile el panel viene de abajo; en desktop de la derecha
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
+
   return (
     <>
-      <div className="cart-panel-backdrop" onClick={onClose} />
-      <div className="cart-panel">
+      <motion.div
+        className="cart-panel-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22 }}
+        onClick={onClose}
+      />
+      <motion.div
+        className="cart-panel"
+        initial={isMobile ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
+        animate={isMobile ? { y: 0, opacity: 1 } : { x: 0, opacity: 1 }}
+        exit={isMobile ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+      >
         <div className="cart-panel-header">
           <span className="cart-panel-title">Mi pedido</span>
           <button className="cart-panel-close" onClick={onClose}>✕</button>
@@ -112,34 +144,14 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
                       {formatARS(parsePrice(item.price) * item.qty)}
                     </span>
                   </div>
-                  {item.note && (
-                    <p className="cart-panel-item-note">↳ {item.note}</p>
-                  )}
-                  {item.sintaccVariedad && (
-                    <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>
-                  )}
-                  {item.medallon && (
-                    <p className="cart-panel-item-note">🌿 {item.medallon}</p>
-                  )}
+                  {item.note && <p className="cart-panel-item-note">↳ {item.note}</p>}
+                  {item.sintaccVariedad && <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>}
+                  {item.medallon && <p className="cart-panel-item-note">🌿 {item.medallon}</p>}
                   <div className="cart-panel-item-controls">
-                    <button
-                      className="cart-panel-ctrl"
-                      onClick={() => onCartRemove(item._key)}
-                      aria-label="Quitar uno"
-                    >−</button>
+                    <button className="cart-panel-ctrl" onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
                     <span className="cart-panel-item-qty">{item.qty}</span>
-                    <button
-                      className="cart-panel-ctrl"
-                      onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '' })}
-                      aria-label="Sumar uno"
-                    >+</button>
-                    <button
-                      className="cart-panel-del"
-                      onClick={() => {
-                        for (let i = 0; i < item.qty; i++) onCartRemove(item._key);
-                      }}
-                      aria-label="Eliminar"
-                    >🗑</button>
+                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '' })} aria-label="Sumar uno">+</button>
+                    <button className="cart-panel-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑</button>
                   </div>
                 </li>
               ))}
@@ -150,80 +162,47 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
               <span className="cart-panel-total-price">{formatARS(totalPrice)}</span>
             </div>
 
-            <button className="cart-panel-order-btn" onClick={onCheckout}>
-              📲 Confirmar pedido
-            </button>
-
-            <button className="cart-panel-clear" onClick={onCartClear}>
-              Vaciar carrito
-            </button>
+            <button className="cart-panel-order-btn" onClick={onCheckout}>📲 Confirmar pedido</button>
+            <button className="cart-panel-clear" onClick={onCartClear}>Vaciar carrito</button>
           </>
         )}
-      </div>
+      </motion.div>
     </>
   );
 }
 
 
 // ════════════════════════════════════════════════════════════
-//  🥗 SELECTOR DE MEDALLÓN (solo para Veggie)
+//  🥗 SELECTOR DE MEDALLÓN
 // ════════════════════════════════════════════════════════════
 
 function MedallonSelector({ qty, selected, onChange, error }) {
-  // selected = { [id]: count } — permite múltiples del mismo
   const totalSelected = Object.values(selected).reduce((s, n) => s + n, 0);
-
-  const add = (id) => {
-    if (totalSelected >= qty) return;
-    onChange({ ...selected, [id]: (selected[id] || 0) + 1 });
-  };
-
-  const remove = (id) => {
-    if (!selected[id]) return;
-    const next = { ...selected, [id]: selected[id] - 1 };
-    if (next[id] === 0) delete next[id];
-    onChange(next);
-  };
+  const add    = (id) => { if (totalSelected >= qty) return; onChange({ ...selected, [id]: (selected[id] || 0) + 1 }); };
+  const remove = (id) => { if (!selected[id]) return; const next = { ...selected, [id]: selected[id] - 1 }; if (next[id] === 0) delete next[id]; onChange(next); };
 
   return (
     <div className="medallon-wrap">
       <div className="medallon-header">
-        <span className="medallon-label">
-          <span>🌿</span> Elegí tu medallón
-        </span>
-        <span className="medallon-counter">
-          {totalSelected}/{qty} seleccionado{qty !== 1 ? 's' : ''}
-        </span>
+        <span className="medallon-label"><span>🌿</span> Elegí tu medallón</span>
+        <span className="medallon-counter">{totalSelected}/{qty} seleccionado{qty !== 1 ? 's' : ''}</span>
       </div>
       {error && <p className="medallon-error">⚠ {error}</p>}
       <div className="medallon-list">
         {MEDALLONES.map((m) => {
-          const count    = selected[m.id] || 0;
+          const count = selected[m.id] || 0;
           const isActive = count > 0;
-          const canAdd   = totalSelected < qty;
+          const canAdd = totalSelected < qty;
           return (
-            <div
-              key={m.id}
-              className={`medallon-opt${isActive ? ' medallon-opt--active' : ''}${!canAdd && !isActive ? ' medallon-opt--disabled' : ''}`}
-            >
+            <div key={m.id} className={`medallon-opt${isActive ? ' medallon-opt--active' : ''}${!canAdd && !isActive ? ' medallon-opt--disabled' : ''}`}>
               <div className="medallon-opt-text" onClick={() => canAdd && add(m.id)}>
                 <span className="medallon-opt-name">{m.name}</span>
                 <span className="medallon-opt-desc">{m.desc}</span>
               </div>
               <div className="medallon-opt-controls">
-                {isActive && (
-                  <button type="button" className="medallon-ctrl" onClick={() => remove(m.id)} aria-label="Quitar">−</button>
-                )}
-                {isActive && (
-                  <span className="medallon-ctrl-count">{count}</span>
-                )}
-                <button
-                  type="button"
-                  className={`medallon-ctrl medallon-ctrl--add${!canAdd ? ' medallon-ctrl--off' : ''}`}
-                  onClick={() => add(m.id)}
-                  disabled={!canAdd}
-                  aria-label="Agregar"
-                >+</button>
+                {isActive && <button type="button" className="medallon-ctrl" onClick={() => remove(m.id)} aria-label="Quitar">−</button>}
+                {isActive && <span className="medallon-ctrl-count">{count}</span>}
+                <button type="button" className={`medallon-ctrl medallon-ctrl--add${!canAdd ? ' medallon-ctrl--off' : ''}`} onClick={() => add(m.id)} disabled={!canAdd} aria-label="Agregar">+</button>
               </div>
             </div>
           );
@@ -235,28 +214,21 @@ function MedallonSelector({ qty, selected, onChange, error }) {
 
 
 // ════════════════════════════════════════════════════════════
-//  🌾 SELECTOR DE VARIEDAD SIN TACC
+//  🌾 SELECTOR SIN TACC
 // ════════════════════════════════════════════════════════════
 
 function SinTaccSelector({ selected, onChange, error }) {
   return (
     <div className="medallon-wrap sintacc-wrap">
       <div className="medallon-header">
-        <span className="medallon-label">
-          <span className="sintacc-icon-label">🌾</span> Elegí tu variedad Sin T.A.C.C.
-        </span>
+        <span className="medallon-label"><span className="sintacc-icon-label">🌾</span> Elegí tu variedad Sin T.A.C.C.</span>
       </div>
       {error && <p className="medallon-error">⚠ {error}</p>}
       <div className="medallon-list">
         {VARIEDADES_SINTACC.map((v) => {
           const isActive = selected === v.id;
           return (
-            <div
-              key={v.id}
-              className={`medallon-opt${isActive ? ' medallon-opt--active sintacc-opt--active' : ''}`}
-              onClick={() => onChange(v.id)}
-              style={{ cursor: 'pointer' }}
-            >
+            <div key={v.id} className={`medallon-opt${isActive ? ' medallon-opt--active sintacc-opt--active' : ''}`} onClick={() => onChange(v.id)} style={{ cursor: 'pointer' }}>
               <div className="medallon-opt-text">
                 <span className="medallon-opt-name">{v.name}</span>
                 <span className="medallon-opt-desc">{v.desc}</span>
@@ -277,89 +249,98 @@ function SinTaccSelector({ selected, onChange, error }) {
 
 // ════════════════════════════════════════════════════════════
 //  📦 EXPANDABLE ITEM CARD
+//  ✅ ALTA 1: shimmer en precio
+//  ✅ ALTA 4: entrada con blur
+//  ✅ ALTA 6: badge pulsante
+//  ✅ FX 11: parallax en imagen expandida
 // ════════════════════════════════════════════════════════════
 
 function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
-  const isVeggie   = item.name === 'Veggie';
-  const isSinTacc  = item.sinTacc === true;
+  const isVeggie  = item.name === 'Veggie';
+  const isSinTacc = item.sinTacc === true;
   const [qty, setQty]                     = useState(1);
   const [note, setNote]                   = useState('');
   const [medallones, setMedallones]       = useState({});
   const [medallonError, setMedallonError] = useState('');
-  const [sintaccVar, setSintaccVar]       = useState('');   // id de variedad elegida
+  const [sintaccVar, setSintaccVar]       = useState('');
   const [sintaccError, setSintaccError]   = useState('');
-  const MAX_NOTE = 150;
+
+  // FX 11: parallax en imagen del body
+  const imgRef  = useRef(null);
+  const wrapRef = useRef(null);
+
+  const MAX_NOTE  = 150;
   const unitPrice = parsePrice(item.price);
 
-  // ── Glow que sigue el cursor en cada fila ──
+  // ── FX 11: scroll parallax en la imagen grande ────────────
+  useEffect(() => {
+    if (!isExpanded || !imgRef.current || !wrapRef.current) return;
+    const wrap = wrapRef.current;
+    const img  = imgRef.current;
+
+    const onScroll = () => {
+      const rect   = wrap.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const ratio  = (window.innerHeight / 2 - center) / window.innerHeight;
+      img.style.transform = `scale(1.12) translateY(${ratio * 18}px)`;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // posición inicial
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isExpanded]);
+
+  // Glow cursor
   const handleRowMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const mx = ((e.clientX - rect.left) / rect.width) * 100;
-    const my = ((e.clientY - rect.top) / rect.height) * 100;
-    e.currentTarget.style.setProperty('--mx', `${mx}%`);
-    e.currentTarget.style.setProperty('--my', `${my}%`);
+    e.currentTarget.style.setProperty('--mx', `${((e.clientX - rect.left) / rect.width) * 100}%`);
+    e.currentTarget.style.setProperty('--my', `${((e.clientY - rect.top) / rect.height) * 100}%`);
   };
 
-  // reset cuando se cierra
   useEffect(() => {
     if (!isExpanded) {
-      setQty(1);
-      setNote('');
-      setMedallones({});
-      setMedallonError('');
-      setSintaccVar('');
-      setSintaccError('');
+      setQty(1); setNote(''); setMedallones({});
+      setMedallonError(''); setSintaccVar(''); setSintaccError('');
     }
   }, [isExpanded]);
 
   const handleAdd = (e) => {
     if (isVeggie) {
       const totalSelected = Object.values(medallones).reduce((s, n) => s + n, 0);
-      if (totalSelected < qty) {
-        setMedallonError(`Seleccioná ${qty} medallón${qty > 1 ? 'es' : ''} para continuar`);
-        return;
-      }
+      if (totalSelected < qty) { setMedallonError(`Seleccioná ${qty} medallón${qty > 1 ? 'es' : ''} para continuar`); return; }
     }
-    if (isSinTacc && !sintaccVar) {
-      setSintaccError('Elegí una variedad para continuar');
-      return;
-    }
-    // Armar label medallones Veggie
+    if (isSinTacc && !sintaccVar) { setSintaccError('Elegí una variedad para continuar'); return; }
+
     const medallonLabel = Object.entries(medallones)
       .filter(([, n]) => n > 0)
-      .map(([id, n]) => {
-        const name = MEDALLONES.find((m) => m.id === id)?.name ?? id;
-        return n > 1 ? `${n}x ${name}` : name;
-      })
+      .map(([id, n]) => { const name = MEDALLONES.find((m) => m.id === id)?.name ?? id; return n > 1 ? `${n}x ${name}` : name; })
       .join(', ');
-    // Label variedad Sin TACC
-    const sintaccLabel = isSinTacc
-      ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar
-      : '';
+    const sintaccLabel = isSinTacc ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar : '';
+
     onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel });
-    // ── Animación "vuelo" hacia el carrito ──
+
     if (e?.currentTarget) {
       emitFlyToCart({ rect: e.currentTarget.getBoundingClientRect(), imageUrl: item.imageUrl });
     }
     onToggle(null);
   };
 
+  const hasBadge = !!item.badge;
+
   return (
+    // ALTA 4: entrada con blur
     <motion.div
       className={`exp-card${isExpanded ? ' exp-card--open' : ''}`}
-      initial={{ opacity: 0, y: 26 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: 26, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
       onMouseMove={handleRowMouseMove}
     >
       <span className="exp-card-glow" aria-hidden="true" />
-      {/* ── Cabecera siempre visible ── */}
-      <motion.div
-        className="exp-card-head"
-        onClick={() => onToggle(isExpanded ? null : item.name)}
-        whileTap={{ scale: 0.99 }}
-      >
+
+      {/* Cabecera */}
+      <motion.div className="exp-card-head" onClick={() => onToggle(isExpanded ? null : item.name)} whileTap={{ scale: 0.99 }}>
         {item.imageUrl && (
           <div className="exp-card-thumb">
             <img src={item.imageUrl} alt={item.name} />
@@ -368,22 +349,20 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
         <div className="exp-card-head-info">
           <span className="exp-card-name">
             {item.name}
-            {item.badge && <span className="badge">{item.badge}</span>}
+            {/* ALTA 6: badge pulsante */}
+            {item.badge && <span className={`badge${hasBadge ? ' badge--pulse' : ''}`}>{item.badge}</span>}
             {item.sinTacc && <span className="badge-sintacc">🌾 Sin T.A.C.C.</span>}
           </span>
-          {item.desc && !isExpanded && (
-            <p className="exp-card-desc-preview">{item.desc}</p>
-          )}
+          {item.desc && !isExpanded && <p className="exp-card-desc-preview">{item.desc}</p>}
         </div>
         <div className="exp-card-head-right">
-          <span className="exp-card-price">{item.price}</span>
-          <span className={`exp-card-chevron${isExpanded ? ' exp-card-chevron--open' : ''}`}>
-            ›
-          </span>
+          {/* ALTA 1: precio con shimmer */}
+          <ShimmerPrice value={item.price} />
+          <span className={`exp-card-chevron${isExpanded ? ' exp-card-chevron--open' : ''}`}>›</span>
         </div>
       </motion.div>
 
-      {/* ── Cuerpo expandible ── */}
+      {/* Cuerpo expandible */}
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
@@ -395,86 +374,74 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
             style={{ overflow: 'hidden' }}
           >
             <div className="exp-card-body-inner">
-              {/* Imagen grande con zoom cinematográfico */}
+              {/* FX 11: imagen con parallax */}
               {item.imageUrl && (
-                <div className="exp-card-img-wrap">
-                  <motion.img
+                <div className="exp-card-img-wrap" ref={wrapRef}>
+                  <img
+                    ref={imgRef}
                     src={item.imageUrl}
                     alt={item.name}
-                    className="exp-card-img"
-                    initial={{ scale: 1.18, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                    className="exp-card-img exp-card-img--parallax"
                   />
                   <div className="exp-card-img-grad" />
                 </div>
               )}
 
-          {/* Descripción */}
-          {item.desc && (
-            <p className="exp-card-full-desc">{item.desc}</p>
-          )}
+              {item.desc && <p className="exp-card-full-desc">{item.desc}</p>}
 
-          {/* Selector medallón (solo Veggie) */}
-          {isVeggie && (
-            <MedallonSelector
-              qty={qty}
-              selected={medallones}
-              onChange={(sel) => { setMedallones(sel); setMedallonError(''); }}
-              error={medallonError}
-            />
-          )}
+              {isVeggie && (
+                <MedallonSelector
+                  qty={qty} selected={medallones}
+                  onChange={(sel) => { setMedallones(sel); setMedallonError(''); }}
+                  error={medallonError}
+                />
+              )}
+              {isSinTacc && (
+                <SinTaccSelector
+                  selected={sintaccVar}
+                  onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
+                  error={sintaccError}
+                />
+              )}
 
-          {/* Selector variedad Sin TACC */}
-          {isSinTacc && (
-            <SinTaccSelector
-              selected={sintaccVar}
-              onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
-              error={sintaccError}
-            />
-          )}
+              <div className="exp-obs-label">
+                <span>Observaciones</span>
+                <span className="exp-obs-count">{note.length} / {MAX_NOTE}</span>
+              </div>
+              <textarea
+                className="exp-textarea"
+                placeholder="Alguna aclaración para tu pedido…"
+                maxLength={MAX_NOTE}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+              />
 
-          {/* Observaciones */}
-          <div className="exp-obs-label">
-            <span>Observaciones</span>
-            <span className="exp-obs-count">{note.length} / {MAX_NOTE}</span>
-          </div>
-          <textarea
-            className="exp-textarea"
-            placeholder="Alguna aclaración para tu pedido…"
-            maxLength={MAX_NOTE}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-          />
-
-          {/* Footer qty + botón */}
-          <div className="exp-footer">
-            <div className="exp-qty-row">
-              <button className="exp-qty-btn" onClick={() => {
-                const newQty = Math.max(1, qty - 1);
-                setQty(newQty);
-                if (isVeggie) {
-                  // recortar medallones hasta newQty total
-                  setMedallones((prev) => {
-                    let rem = newQty;
-                    const next = {};
-                    for (const [id, n] of Object.entries(prev)) {
-                      if (rem <= 0) break;
-                      next[id] = Math.min(n, rem);
-                      rem -= next[id];
+              <div className="exp-footer">
+                <div className="exp-qty-row">
+                  <button className="exp-qty-btn" onClick={() => {
+                    const newQty = Math.max(1, qty - 1);
+                    setQty(newQty);
+                    if (isVeggie) {
+                      setMedallones((prev) => {
+                        let rem = newQty;
+                        const next = {};
+                        for (const [id, n] of Object.entries(prev)) {
+                          if (rem <= 0) break;
+                          next[id] = Math.min(n, rem);
+                          rem -= next[id];
+                        }
+                        return next;
+                      });
                     }
-                    return next;
-                  });
-                }
-              }}>−</button>
-              <span className="exp-qty-val">{qty}</span>
-              <button className="exp-qty-btn" onClick={() => setQty((q) => q + 1)}>+</button>
-            </div>
-            <motion.button className="exp-add-btn" whileTap={{ scale: 0.96 }} onClick={handleAdd}>
-              Agregar · <AnimatedPrice value={unitPrice * qty} />
-            </motion.button>
-          </div>
+                  }}>−</button>
+                  <span className="exp-qty-val">{qty}</span>
+                  <button className="exp-qty-btn" onClick={() => setQty((q) => q + 1)}>+</button>
+                </div>
+                <motion.button className="exp-add-btn" whileTap={{ scale: 0.96 }} onClick={handleAdd}>
+                  Agregar · <AnimatedPrice value={unitPrice * qty} />
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -485,7 +452,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
 
 
 // ════════════════════════════════════════════════════════════
-//  🧾 CHECKOUT
+//  🧾 CHECKOUT — FX 12: confetti al confirmar
 // ════════════════════════════════════════════════════════════
 
 const COSTO_ENVIO = { local: 2000, fuera: 3000 };
@@ -506,36 +473,39 @@ function CheckoutScreen({ cart, onBack, onClear }) {
 
   const validate = () => {
     const e = {};
-    if (!name.trim())                              e.name      = 'Ingresá tu nombre';
-    if (!phone.trim())                             e.phone     = 'Ingresá tu teléfono';
-    if (!entrega)                                  e.entrega   = 'Seleccioná una opción';
-    if (!pago)                                     e.pago      = 'Seleccioná una opción';
-    if (entrega === 'envio' && !direccion.trim())  e.direccion = 'Ingresá tu dirección';
-    if (entrega === 'envio' && !zona)              e.zona      = 'Seleccioná la zona';
+    if (!name.trim())                             e.name      = 'Ingresá tu nombre';
+    if (!phone.trim())                            e.phone     = 'Ingresá tu teléfono';
+    if (!entrega)                                 e.entrega   = 'Seleccioná una opción';
+    if (!pago)                                    e.pago      = 'Seleccioná una opción';
+    if (entrega === 'envio' && !direccion.trim()) e.direccion = 'Ingresá tu dirección';
+    if (entrega === 'envio' && !zona)             e.zona      = 'Seleccioná la zona';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleSend = () => {
     if (!validate()) return;
-    const fecha         = formatDate();
-    const mapsUrl       = entrega === 'envio' && direccion.trim()
+
+    // FX 12: ¡Confetti!
+    launchConfetti();
+
+    const fecha     = formatDate();
+    const mapsUrl   = entrega === 'envio' && direccion.trim()
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion.trim())}`
       : null;
-
     const entregaLabel = entrega === 'retiro'
       ? 'Retira personalmente'
       : `Envío — ${direccion.trim()}${mapsUrl ? `\n   📍 ${mapsUrl}` : ''}`;
-    const zonaLabel    = zona === 'local' ? 'Dentro del Talar' : zona === 'fuera' ? 'Fuera del Talar' : '';
-    const pagoLabel    = pago === 'efectivo'
+    const zonaLabel  = zona === 'local' ? 'Dentro del Talar' : zona === 'fuera' ? 'Fuera del Talar' : '';
+    const pagoLabel  = pago === 'efectivo'
       ? `Efectivo${vuelto.trim() ? ` (abona con ${vuelto.trim()})` : ''}`
       : pago === 'tarjeta' ? 'Tarjeta débito/crédito' : 'Mercado Pago';
 
     const lines      = cart.map((i) => {
       let txt = `${i.qty}x ${i.name}: ${i.price}`;
       if (i.sintaccVariedad) txt += `\n   🌾 Variedad Sin T.A.C.C.: ${i.sintaccVariedad}`;
-      if (i.medallon) txt += `\n   🌿 Medallón: ${i.medallon}`;
-      if (i.note)     txt += `\n   ↳ ${i.note}`;
+      if (i.medallon)        txt += `\n   🌿 Medallón: ${i.medallon}`;
+      if (i.note)            txt += `\n   ↳ ${i.note}`;
       return txt;
     });
     const totalLines = entrega === 'envio'
@@ -560,7 +530,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
       'Espero tu respuesta para confirmar 🙌',
     ].join('\n');
 
-    window.open(`https://wa.me/${543543512248}?text=${encodeURIComponent(body)}`, '_blank');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank');
     onClear();
     onBack();
   };
@@ -612,7 +582,6 @@ function CheckoutScreen({ cart, onBack, onClear }) {
           <input className={`checkout-input${errors.name ? ' has-error' : ''}`} placeholder="¿Cómo te llamás?" value={name} onChange={(e) => setName(e.target.value)} />
           {errors.name && <span className="checkout-error">{errors.name}</span>}
         </label>
-
         <label className="checkout-label">
           Teléfono <span className="req">*</span>
           <input className={`checkout-input${errors.phone ? ' has-error' : ''}`} placeholder="Medio de contacto" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
@@ -635,23 +604,15 @@ function CheckoutScreen({ cart, onBack, onClear }) {
               <input className={`checkout-input${errors.direccion ? ' has-error' : ''}`} placeholder="Ej: Av. Rivadavia 1234" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
               {errors.direccion && <span className="checkout-error">{errors.direccion}</span>}
             </label>
-
-            {/* Botón verificar ubicación en Maps */}
             <button
               type="button"
               className={`verify-location-btn${!direccion.trim() ? ' verify-location-btn--off' : ''}`}
               disabled={!direccion.trim()}
-              onClick={() => {
-                const query = encodeURIComponent(direccion.trim());
-                // geo: funciona en Android; maps: en iOS; fallback web para PC
-                const url = `https://www.google.com/maps/search/?api=1&query=${query}`;
-                window.open(url, '_blank', 'noopener,noreferrer');
-              }}
+              onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion.trim())}`, '_blank', 'noopener,noreferrer')}
             >
               <span className="verify-location-icon">📍</span>
               Verificar ubicación en Maps
             </button>
-
             <div className="checkout-zona-label">Zona de envío <span className="req">*</span></div>
             <div className="checkout-zona-opts">
               <Opt active={zona === 'local'} onClick={() => setZona('local')}>
@@ -704,11 +665,11 @@ export default function Items({
   const [expandedKey, setExpandedKey] = useState(null);
 
   const isPostres   = menuKey === 'postres';
-const isCafeteria = menuKey === 'cafeteria';
-const data        = (isPostres || isCafeteria) ? null      : MENU[menuKey];
-const items       = isCafeteria ? CAFETERIA : isPostres ? POSTRES   : data?.items ?? [];
-const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
-const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
+  const isCafeteria = menuKey === 'cafeteria';
+  const data        = (isPostres || isCafeteria) ? null      : MENU[menuKey];
+  const items       = isCafeteria ? CAFETERIA : isPostres ? POSTRES   : data?.items ?? [];
+  const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
+  const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
 
   const handleConfirmAdd = useCallback(({ qty, note, medallon, ...item }) => {
     const key = item.name + '||' + (note || '') + '||' + (medallon || '');
@@ -721,8 +682,6 @@ const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'hom
 
   return (
     <div className="screen-body" style={{ paddingBottom: 32 }}>
-
-      {/* ── Back row ── */}
       <div className="back-row">
         <button className="back-btn" onClick={() => onNavigate(backScreen)}>← Volver</button>
         <span className="screen-title">
@@ -730,7 +689,6 @@ const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'hom
         </span>
       </div>
 
-      {/* ── Lista de items ── */}
       <div className="items-list">
         {items.map((item, i) => {
           if (item.sep) {
@@ -748,7 +706,6 @@ const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'hom
         })}
       </div>
 
-      {/* ── Panel carrito ── */}
       {cartOpen && (
         <CartPanel
           cart={cart}
@@ -760,7 +717,6 @@ const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'hom
         />
       )}
 
-      {/* ── FAB carrito fijo — solo visible cuando hay card expandido ── */}
       {expandedKey !== null && (
         <button
           className={`cart-fab-fixed${cart.reduce((s,i)=>s+i.qty,0) === 0 ? ' cart-fab-fixed--empty' : ' cart-fab-fixed--active'}`}
