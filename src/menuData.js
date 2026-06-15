@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // menuData.js — Generado el 15/06/2026 03:39
+=======
+// menuData.js — Generado el 14/06/2026 09:23
+>>>>>>> 4ca5b12 (animaciones testing)
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
