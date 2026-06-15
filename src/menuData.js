@@ -1,4 +1,4 @@
-// menuData.js — Generado el 15/06/2026 03:38
+// menuData.js — Generado el 15/06/2026 03:39
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -33,6 +33,7 @@ export const MENU = {
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
       { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1781494602-leomessi20092010-pic-fcb-arsenal62.jpg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
+      { name: 'Mini Pizza Bambino', price: '$14.500', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
       { name: 'Pepe', price: '$23.300', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
       { name: 'Prosciutto Cotto', price: '$22.000', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
@@ -164,7 +165,6 @@ export const MENU = {
   tragos: {
     title: 'Tragos', back: 'home',
     items: [
-      { name: 'Pelao', price: '$1', desc: '1', imageUrl: 'https://bruzz.com.ar/img/1781494693-images.webp', badge: 'Casa' },
       { sep: 'Clásicos' },
       { name: 'Vaso Fernet c/ Coca', price: '$7.000', desc: 'Fernet Branca con Coca-Cola.', imageUrl: 'https://bruzz.com.ar/img/ferne.png' },
       { name: 'Carpano Orange', price: '$7.000', desc: 'Carpano con jugo de naranja.', imageUrl: 'https://bruzz.com.ar/img/carpani.png' },
