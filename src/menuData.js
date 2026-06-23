@@ -1,4 +1,4 @@
-// menuData.js — Generado el 23/06/2026 21:59
+// menuData.js — Generado el 23/06/2026 22:21
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -222,4 +222,15 @@ export const CAFETERIA = [
   { name: 'Ristretto', price: '$2.500', desc: 'Shot de café concentrado.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Licuados', price: '$5.000', desc: 'Consultá las opciones disponibles.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Limonada', price: '$6.900', desc: 'Limonada fresca.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
+];
+
+export const PROMOS = [
+  {
+    id: 1,
+    titulo: 'Happy',
+    desc: 'testeo',
+    precio: '15',
+    tag: 'A',
+    activa: true,
+  },
 ];
