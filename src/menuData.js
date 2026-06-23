@@ -1,4 +1,4 @@
-// menuData.js — Generado el 14/06/2026 09:23
+// menuData.js — Generado el 23/06/2026 21:50
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -7,6 +7,7 @@ export const CATEGORIAS = [
   { id: 'tragos',    name: 'Tragos',    desc: 'Los Mejores Cócteles',        imageUrl: 'https://bruzz.com.ar/img/gin.png' },
   { id: 'postres',   name: 'Postres',   desc: 'Dulce final perfecto',        imageUrl: 'https://bruzz.com.ar/img/postres.jpg' },
   { id: 'cafeteria', name: 'Cafetería', desc: 'Café, infusiones y más',      imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
+  { id: 'promos',    name: 'Promos',    desc: '¡Ofertas de hoy!',            imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
 ];
 
 export const SUBCATEGORIAS = {
@@ -31,7 +32,7 @@ export const MENU = {
     title: 'Pizzas', back: 'comidas',
     items: [
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
-      { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/Celiacopizza.jpg', sinTacc: true },
+      { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1781494602-leomessi20092010-pic-fcb-arsenal62.jpg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
       { name: 'Mini Pizza Bambino', price: '$14.500', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
