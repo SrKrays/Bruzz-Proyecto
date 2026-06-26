@@ -1,4 +1,4 @@
-// menuData.js — Generado el 25/06/2026 23:47
+// menuData.js — Generado el 26/06/2026 00:18
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -32,7 +32,6 @@ export const MENU = {
     title: 'Pizzas', back: 'comidas',
     items: [
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
-      { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1782431141-whatsapp-image-2026-06-25-at-84443-pm.jpeg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
       { name: 'Mini Pizza Bambino', price: '$14.500', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
