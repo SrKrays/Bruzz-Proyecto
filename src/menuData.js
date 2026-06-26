@@ -1,4 +1,4 @@
-// menuData.js — Generado el 26/06/2026 00:19
+// menuData.js — Generado el 26/06/2026 04:24
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -7,7 +7,6 @@ export const CATEGORIAS = [
   { id: 'tragos',    name: 'Tragos',    desc: 'Los Mejores Cócteles',        imageUrl: 'https://bruzz.com.ar/img/gin.png' },
   { id: 'postres',   name: 'Postres',   desc: 'Dulce final perfecto',        imageUrl: 'https://bruzz.com.ar/img/postres.jpg' },
   { id: 'cafeteria', name: 'Cafetería', desc: 'Café, infusiones y más',      imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
-  { id: 'promos',    name: 'Promos',    desc: '¡Ofertas de hoy!',            imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
 ];
 
 export const SUBCATEGORIAS = {
@@ -32,6 +31,7 @@ export const MENU = {
     title: 'Pizzas', back: 'comidas',
     items: [
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
+      { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1782431141-whatsapp-image-2026-06-25-at-84443-pm.jpeg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
       { name: 'Mini Pizza Bambino', price: '$14.500', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
@@ -220,15 +220,4 @@ export const CAFETERIA = [
   { name: 'Ristretto', price: '$2.500', desc: 'Shot de café concentrado.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Licuados', price: '$5.000', desc: 'Consultá las opciones disponibles.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Limonada', price: '$6.900', desc: 'Limonada fresca.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
-];
-
-export const PROMOS = [
-  {
-    id: 1,
-    titulo: 'Happy',
-    desc: 'testeo',
-    precio: '15',
-    tag: 'A',
-    activa: true,
-  },
 ];
