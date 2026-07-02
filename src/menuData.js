@@ -1,4 +1,4 @@
-// menuData.js — Generado el 02/07/2026 22:05
+// menuData.js — Generado el 02/07/2026 23:23
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -137,11 +137,9 @@ export const MENU = {
       { name: 'Heineken 330 CC', price: '$4.200', desc: '', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
       { name: 'Heineken 0.0 330 CC', price: '$3.600', desc: 'Sin Alcohol.', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
       { name: 'Imperial 330 CC', price: '$3.600', desc: '', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg' },
-      { name: 'Blue Moon 355 CC', price: '$6.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/blue.jpg' },
       { sep: 'Para Disfrutar con amigos' },
       { name: 'Balde Heineken x6', price: '$21.000', desc: 'Paga 5 y te llevas 6.', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg', badge: 'Balde' },
       { name: 'Balde Imperial Golden x6', price: '$18.000', desc: 'Paga 5 y te llevas 6.', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg', badge: 'Balde' },
-      { name: 'Balde Blue Moon x6', price: '$30.000', desc: 'Paga 5 y te llevas 6.', imageUrl: 'https://bruzz.com.ar/img/blue.jpg', badge: 'Balde' },
     ],
   },
 
