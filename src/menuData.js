@@ -1,4 +1,4 @@
-// menuData.js — Generado el 02/07/2026 23:24
+// menuData.js — Generado el 03/07/2026 00:21
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -198,7 +198,7 @@ export const MENU = {
 export const POSTRES = [
   { sep: 'Postres' },
   { name: 'Tiramisú Bruzz', price: '$7.500', desc: 'Vanilla, queso crema, cafe, cerveza negra, cacao. Receta de la Casa.', imageUrl: 'https://bruzz.com.ar/img/tiramisu.jpg' },
-  { name: 'Flan Con Dulce de Leche', price: '$5.800', desc: 'Flan con Dulce de Leche.', imageUrl: 'https://bruzz.com.ar/img/flan.jpg' },
+  { name: 'Flan Con Dulce de Leche', price: '$6.500', desc: 'Flan con Dulce de Leche.', imageUrl: 'https://bruzz.com.ar/img/flan.jpg' },
 ];
 
 export const CAFETERIA = [
