@@ -1,4 +1,4 @@
-// menuData.js — Generado el 05/07/2026 01:28
+// menuData.js — Generado el 05/07/2026 01:31
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -110,6 +110,7 @@ export const MENU = {
   sinAlcohol: {
     title: 'Sin Alcohol', back: 'bebidas',
     items: [
+      { name: 'Coca 1.25', price: '$8.100', desc: 'sin alcohol', imageUrl: 'https://bruzz.com.ar/img/1783215054-logotipo-de-coca-cola-en-la-pantalla-de-.webp' },
       { name: 'Agua mineral CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua con gas CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua Saborisada CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/aquarius.png' },
@@ -117,7 +118,6 @@ export const MENU = {
       { name: 'Coca cola Zero 500 CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/cocazero.png' },
       { name: 'Fanta CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/fanta.jpg' },
       { name: 'Sprite CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/sprite.jpg' },
-      { name: 'Coca Cola 1.5L', price: '$8.100', desc: '', imageUrl: 'https://bruzz.com.ar/img/coca.jpg' },
       { name: 'Limonada Litro', price: '$7.500', desc: 'Limón exprimido, hielo, azúcar.', imageUrl: 'https://bruzz.com.ar/img/limonada.jpg' },
     ],
   },
