@@ -1,4 +1,4 @@
-// menuData.js — Generado el 03/07/2026 00:21
+// menuData.js — Generado el 05/07/2026 01:28
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -35,6 +35,7 @@ export const MENU = {
       { sep: 'Mini Pizzas BamBino' },
       { name: 'Mini Pizza Bambino', price: '$16.000', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
+      { name: 'Pepe', price: '$23.800', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
       { name: 'Prosciutto Cotto', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Fungo', price: '$24.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.', imageUrl: 'https://bruzz.com.ar/img/fungo.png' },
       { name: 'Rúcula', price: '$24.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.', imageUrl: 'https://bruzz.com.ar/img/rucula.jpg' },
