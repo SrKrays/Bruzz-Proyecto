@@ -12,6 +12,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplashScreen from './SplashScreen';
 import EmberParticles from './EmberParticles';
 import FlyToCartLayer from './FlyToCartLayer';
+import Promos from './Promos';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -142,6 +143,9 @@ export default function App() {
   const renderScreen = () => {
     if (screen === 'home') {
       return <CategoriasPrincipales onNavigate={handleCategoria} />;
+    }
+    if (screen === 'promos') {
+      return <Promos onNavigate={navigate} onShowItems={showItems} />;
     }
     if (SUBCATEGORIA_SCREENS.has(screen)) {
       return (

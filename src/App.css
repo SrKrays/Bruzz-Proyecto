@@ -223,7 +223,7 @@ button {
 .card-grid.wide {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;          
+  gap: 8px;
 height: auto;
   max-width: 100%;
   max-height: none;
@@ -1309,7 +1309,7 @@ height: auto;
   .card-desc { font-size: 11px; }
 
   .card-grid.wide { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .card-grid.wide .nav-card { aspect-ratio: 10900 / 9850; }   
+  .card-grid.wide .nav-card { aspect-ratio: 10900 / 9850; }
   .nav-card.full-width { aspect-ratio: 10900 / 9850; }
 
   /* Texto en subcats mobile más legible */
@@ -1330,7 +1330,7 @@ height: auto;
   .cart-fab-header-icon { font-size: 18px; }
   .cart-fab-header-badge { font-size: 11px; }
   .cart-panel { width: 100%; border-left: none; border-top: 1px solid rgba(245,200,66,0.2); border-radius: 20px 20px 0 0; top: auto; bottom: 0; max-height: 85vh; }
-  
+
   @keyframes slideInRight {
     from { transform: translateY(100%); opacity: 0; }
     to   { transform: translateY(0);    opacity: 1; }
@@ -1363,13 +1363,23 @@ height: auto;
   .card-grid.wide .nav-card { aspect-ratio: 16 / 14; }    /* +40% más alto que 16/10 */
   .card-grid.wide .card-name { font-size: 26px; }
   .card-grid.wide .card-desc { font-size: 15px; }
+
+  /* ── Promos — Pintas y Semana en tablet: 3 columnas quedaban
+     demasiado altas/angostas con el alto pensado para desktop. ── */
+  .promo-grid--semanal .promo-card {
+    min-height: 260px;
+    padding: 12px 10px;
+  }
+  .promo-grid--semanal .promo-card-titulo { font-size: 14px; }
+  .promo-grid--semanal .promo-card-desc { font-size: 11px; }
+  .promo-flip { min-height: 170px; }
 }
 
 /* ════════════════════════════════════════════════════════════
    ✨ ANIMACIONES "WOW" — identidad visual extra
 ════════════════════════════════════════════════════════════ */
 
-/* ── Partículas ambiente (brasas doradas) ───────────────── */
+/* ── Partículas ambiente (brasas doradas + íconos) ────────── */
 .ember-layer {
   position: fixed;
   inset: 0;
@@ -1387,6 +1397,15 @@ height: auto;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   will-change: transform, opacity;
+}
+
+/* Variante ícono (🍕 / 🍺) — sin el fondo radial de la brasa,
+   línea de texto normal para que el emoji se vea bien. */
+.ember--icono {
+  background: none;
+  border-radius: 0;
+  line-height: 1;
+  filter: saturate(0.85) brightness(0.95);
 }
 
 @keyframes emberFloat {
@@ -1689,3 +1708,510 @@ height: auto;
 /* ── Instalación canvas-confetti: aviso visual ──────────────── */
 /* npm install canvas-confetti  —  ya incluido en confettiCheckout.js */
 
+
+/* ════════════════════════════════════════════════════════════
+   🎉 PROMOS — bloque countdown + grilla unificada (v5.0)
+   Un solo tipo de card (vertical, borde dorado arriba) para
+   todas las promos, tanto las principales como las semanales.
+════════════════════════════════════════════════════════════ */
+
+.promo-countdown-label {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.promo-countdown-digits {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.promo-countdown-unit {
+  background: var(--black);
+  border: 1px solid rgba(245,200,66,0.3);
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.promo-countdown-num {
+  font-family: 'Playfair Display', serif;
+  color: var(--gold);
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.promo-countdown-unit-label {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.promo-countdown-desc {
+  color: var(--cream);
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+/* ── Grilla unificada de promos ────────────────────────────── */
+.promo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-bottom: 18px;
+}
+
+/* Variante semanal — 3 columnas en vez de 2 */
+.promo-grid--semanal {
+  grid-template-columns: 1fr 1fr 1fr;
+  padding-bottom: 24px;
+}
+
+/* ── Card unificada — vertical, borde dorado arriba ────────── */
+.promo-card {
+  position: relative;
+  background: var(--dark);
+  border: 1px solid rgba(245,200,66,0.16);
+  border-top: 3px solid var(--gold);
+  border-radius: 12px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 410px;
+  text-align: left;
+  overflow: hidden;
+  transition: border-color var(--fast), transform var(--fast), box-shadow var(--fast), filter var(--fast);
+}
+
+.promo-card:hover {
+  border-color: rgba(245,200,66,0.4);
+  transform: translateY(-2px);
+}
+
+/* Bloques de color sólido — coloreados automáticamente por posición */
+.promo-card--verde {
+  background: var(--green);
+  border-color: rgba(255,255,255,0.1);
+}
+.promo-card--verde .promo-card-titulo,
+.promo-card--verde .promo-card-dia { color: #fff; }
+.promo-card--verde .promo-card-desc { color: rgba(255,255,255,0.7); }
+
+.promo-card--crema {
+  background: var(--cream);
+  border-color: rgba(0,0,0,0.1);
+}
+.promo-card--crema .promo-card-titulo { color: var(--black); }
+.promo-card--crema .promo-card-dia    { color: var(--green); }
+.promo-card--crema .promo-card-desc   { color: #555; }
+
+.promo-card--dorado {
+  background: var(--gold-dim);
+  border-color: rgba(0,0,0,0.15);
+}
+.promo-card--dorado .promo-card-titulo,
+.promo-card--dorado .promo-card-dia { color: var(--black); }
+.promo-card--dorado .promo-card-desc { color: #3a2e0a; }
+
+.promo-card--marron {
+  background: #4a2a1a;
+  border-color: rgba(255,255,255,0.1);
+}
+.promo-card--marron .promo-card-titulo,
+.promo-card--marron .promo-card-dia { color: #fff; }
+.promo-card--marron .promo-card-desc { color: rgba(255,255,255,0.7); }
+
+/* Card con imagen de fondo — pisa el color sólido si la promo tiene imageUrl */
+.promo-card--imagen {
+  background: var(--black);
+  justify-content: flex-end;
+}
+
+.promo-card-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.promo-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.05) 100%);
+  z-index: 1;
+}
+
+/* Envuelve el texto para que siempre quede arriba de la imagen/overlay */
+.promo-card-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.promo-card--imagen .promo-card-titulo { color: #fff; }
+.promo-card--imagen .promo-card-desc   { color: rgba(255,255,255,0.78); }
+.promo-card--imagen .promo-card-dia    { color: var(--gold); }
+
+/* Cards con link directo a la carta (ej: Combos de hamburguesa) */
+.promo-card--clickeable {
+  cursor: pointer;
+}
+.promo-card--clickeable:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+  filter: brightness(1.05);
+}
+.promo-card--clickeable:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.promo-card-dia {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 700;
+}
+
+.promo-card-titulo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--cream);
+}
+
+.promo-card-desc {
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.promo-card-precio {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: 17px;
+  margin-top: 8px;
+  color: var(--gold);
+}
+
+.promo-card-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: #e05252;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Etiqueta de sección ("Promos de la semana") — legacy, ver
+   .promo-section-label más abajo para el tratamiento nuevo ── */
+.promo-semanal-label {
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 6px 0 10px;
+  overflow: hidden;
+}
+
+.promo-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 16px;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .promo-countdown-num { font-size: 21px; }
+  .promo-countdown-unit { min-width: 44px; padding: 7px 10px; }
+
+  .promo-card-titulo { font-size: 15px; }
+  .promo-card-desc { font-size: 11px; }
+
+  .promo-grid--semanal { grid-template-columns: 1fr; gap: 8px; }
+  .promo-grid--semanal .promo-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    min-height: unset;
+    padding: 12px 14px;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   🎉 PROMOS v5.1 — bloque principal más chico + carrusel Dely
+════════════════════════════════════════════════════════════ */
+
+/* ── Bloque principal (Reservas, Combos, Bladis, Bambino) ──
+   ~30% más chico que el resto. Solo afecta este grid puntual —
+   Pintas y Semanales quedan con el tamaño original. ──────── */
+.promo-grid--principal .promo-card {
+  min-height: 285px;
+  padding: 11px 10px;
+}
+
+.promo-grid--principal .promo-card-titulo {
+  font-size: 13px;
+}
+
+.promo-grid--principal .promo-card-desc {
+  font-size: 10px;
+}
+
+.promo-grid--principal .promo-card-precio {
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.promo-grid--principal .promo-card-tag {
+  font-size: 9px;
+  padding: 2px 8px;
+}
+
+@media (max-width: 480px) {
+  .promo-grid--principal .promo-card {
+    min-height: unset;
+  }
+}
+
+/* ── Carrusel de Promos Dely — una sola card que rota ──────── */
+.promo-dely-carousel {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.promo-dely-carousel .promo-card--dely {
+  min-height: 200px;
+  cursor: grab;
+}
+
+.promo-dely-carousel .promo-card--dely:active {
+  cursor: grabbing;
+}
+
+.promo-dely-cta {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+.promo-dely-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.promo-dely-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(245,200,66,0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--fast), transform var(--fast);
+}
+
+.promo-dely-dot:hover {
+  background: rgba(245,200,66,0.5);
+}
+
+.promo-dely-dot--active {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   🎉 PROMOS v5.2 — reorden de secciones + detalle visual
+════════════════════════════════════════════════════════════ */
+
+/* ── Label de sección con ícono + línea divisoria dorada ──
+   Reemplaza los labels sueltos por un tratamiento consistente
+   en todas las secciones (Pintas, Dely, Semana, Principal). ── */
+.promo-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 6px 0 10px;
+}
+
+.promo-section-icon {
+  font-size: 15px;
+  line-height: 1;
+  filter: grayscale(0.15);
+}
+
+.promo-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(245,200,66,0.4), transparent);
+  margin-left: 4px;
+}
+
+/* ── Bloque de countdown de Happy Hour, con resplandor sutil ── */
+.promo-countdown {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--green) 0%, #11331f 100%);
+  border: 1px solid rgba(245,200,66,0.25);
+  border-radius: 14px;
+  padding: 18px 16px;
+  margin-bottom: 18px;
+  text-align: center;
+  transition: filter 0.4s ease;
+}
+
+.promo-countdown::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(245,200,66,0.16), transparent 70%);
+  pointer-events: none;
+}
+
+/* Estado "no activo" (antes de las 20 o después de las 22) —
+   se ve apagado/estático para transmitir que no está corriendo. */
+.promo-countdown--static {
+  filter: saturate(0.55) brightness(0.9);
+}
+
+.promo-countdown-horario {
+  color: var(--gold-dim);
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* ── Cards que se dan vuelta — Promos de la semana ──────────
+   Frente: imagen de fondo + día + gancho corto. Atrás: color
+   sólido con descripción + condición de pago. Flip 3D con CSS
+   puro, sin dependencias extra. ─────────────────────────────── */
+.promo-flip {
+  position: relative;
+  min-height: 190px;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.promo-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(.22, 1, .36, 1);
+  transform-style: preserve-3d;
+}
+
+.promo-flip-inner--flipped {
+  transform: rotateY(180deg);
+}
+
+.promo-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  min-height: unset;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* El frente lleva imagen — el texto va abajo, como el resto de
+   las cards con foto de fondo (justify-content: flex-end). */
+.promo-flip-face--front.promo-card--imagen {
+  justify-content: flex-end;
+}
+
+.promo-flip-face--back {
+  transform: rotateY(180deg);
+}
+
+.promo-flip-titulo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: 24px;
+  color: #fff;
+  margin-top: 4px;
+}
+
+.promo-card--verde .promo-flip-titulo   { color: #fff; }
+.promo-card--crema .promo-flip-titulo   { color: var(--green); }
+.promo-card--dorado .promo-flip-titulo  { color: var(--black); }
+.promo-card--marron .promo-flip-titulo  { color: var(--gold); }
+
+.promo-flip-hint {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 6px;
+}
+
+.promo-card--dorado .promo-flip-hint { color: rgba(0,0,0,0.55); }
+
+.promo-flip-condicion {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+  color: var(--gold-dim);
+  opacity: 0.85;
+}
+
+.promo-card--verde .promo-flip-condicion { color: #fff; border-color: rgba(255,255,255,0.4); }
+
+@media (max-width: 480px) {
+  .promo-flip { min-height: 150px; }
+  .promo-flip-titulo { font-size: 19px; }
+}
