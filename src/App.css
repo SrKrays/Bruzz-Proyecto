@@ -2506,29 +2506,77 @@ height: auto;
 
 .promo-sheet-dely-opciones-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
 }
 
+/* Fila por sabor: nombre + stepper (− cant +). Permite repetir el
+   mismo sabor varias veces (3 margarita, o 2 prosciutto + 1 dolce)
+   en vez de forzar sabores distintos. */
 .promo-sheet-dely-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 12px;
-  color: var(--cream);
-  transition: background var(--fast), border-color var(--fast), color var(--fast);
-}
-
-.promo-sheet-dely-opcion:hover {
-  border-color: rgba(245,200,66,0.4);
+  border-radius: 10px;
+  padding: 8px 8px 8px 14px;
+  transition: background var(--fast), border-color var(--fast);
 }
 
 .promo-sheet-dely-opcion--activa {
-  background: rgba(245,200,66,0.18);
-  border-color: var(--gold);
+  background: rgba(245,200,66,0.1);
+  border-color: rgba(245,200,66,0.4);
+}
+
+.promo-sheet-dely-opcion-nombre {
+  font-size: 13px;
+  color: var(--cream);
+}
+
+.promo-sheet-dely-opcion--activa .promo-sheet-dely-opcion-nombre {
   color: var(--gold);
   font-weight: 700;
+}
+
+.promo-sheet-dely-opcion-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.promo-sheet-dely-opcion-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.35);
+  color: var(--gold);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--fast), opacity var(--fast);
+}
+
+.promo-sheet-dely-opcion-btn:hover:not(:disabled) {
+  background: rgba(245,200,66,0.22);
+}
+
+.promo-sheet-dely-opcion-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.promo-sheet-dely-opcion-cant {
+  min-width: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cream);
 }
 
 .promo-sheet-dely-action {

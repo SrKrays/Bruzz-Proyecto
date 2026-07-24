@@ -585,23 +585,37 @@ function PromoDetailSheet({ promo, tipo, onClose, actionLabel, actionVariant = '
   }`;
 
   // ── Selector de sabores (solo para promos con `opciones`, ej.
-  //    "3 Pizzas a Elección"). Vive acá porque es puramente de UI:
-  //    se resetea solo cada vez que se abre una ficha nueva. ──────
+  //    "3 Pizzas a Elección"). Es un contador por sabor — así se
+  //    puede repetir el mismo (3 margarita, o 2 prosciutto + 1
+  //    dolce) en vez de forzar sabores distintos. Vive acá porque
+  //    es puramente de UI: se resetea solo cada vez que se abre
+  //    una ficha nueva. ─────────────────────────────────────────
   const tieneOpciones = Boolean(promo.opciones?.length);
   const maxSelect = promo.maxSelect || promo.opciones?.length || 0;
-  const [seleccion, setSeleccion] = useState([]);
+  const [seleccion, setSeleccion] = useState({}); // { 'Margherita': 2, 'Dolce': 1 }
 
-  const toggleOpcion = (op) => {
+  const totalSeleccionado = Object.values(seleccion).reduce((a, b) => a + b, 0);
+
+  const sumarOpcion = (op) => {
     setSeleccion((prev) => {
-      if (prev.includes(op)) return prev.filter((o) => o !== op);
-      if (prev.length >= maxSelect) return prev;
-      return [...prev, op];
+      const total = Object.values(prev).reduce((a, b) => a + b, 0);
+      if (total >= maxSelect) return prev;
+      return { ...prev, [op]: (prev[op] || 0) + 1 };
     });
   };
 
-  const opcionesCompletas = !tieneOpciones || seleccion.length === maxSelect;
+  const restarOpcion = (op) => {
+    setSeleccion((prev) => {
+      if (!prev[op]) return prev;
+      const next = { ...prev, [op]: prev[op] - 1 };
+      if (next[op] <= 0) delete next[op];
+      return next;
+    });
+  };
+
+  const opcionesCompletas = !tieneOpciones || totalSeleccionado === maxSelect;
   const labelBoton = tieneOpciones && !opcionesCompletas
-    ? `Elegí ${maxSelect} sabores (${seleccion.length}/${maxSelect})`
+    ? `Elegí ${maxSelect} sabores (${totalSeleccionado}/${maxSelect})`
     : actionLabel;
 
   return createPortal(
@@ -735,20 +749,36 @@ function PromoDetailSheet({ promo, tipo, onClose, actionLabel, actionVariant = '
                 <div className="promo-sheet-dely-opciones">
                   <div className="promo-sheet-dely-opciones-head">
                     <span className="promo-sheet-dely-opciones-label">Elegí tus sabores</span>
-                    <span className="promo-sheet-dely-opciones-count">{seleccion.length}/{maxSelect}</span>
+                    <span className="promo-sheet-dely-opciones-count">{totalSeleccionado}/{maxSelect}</span>
                   </div>
                   <div className="promo-sheet-dely-opciones-list">
                     {promo.opciones.map((op) => {
-                      const activa = seleccion.includes(op);
+                      const cant = seleccion[op] || 0;
                       return (
-                        <button
-                          key={op}
-                          type="button"
-                          className={`promo-sheet-dely-opcion${activa ? ' promo-sheet-dely-opcion--activa' : ''}`}
-                          onClick={() => toggleOpcion(op)}
-                        >
-                          {op}
-                        </button>
+                        <div key={op} className={`promo-sheet-dely-opcion${cant > 0 ? ' promo-sheet-dely-opcion--activa' : ''}`}>
+                          <span className="promo-sheet-dely-opcion-nombre">{op}</span>
+                          <div className="promo-sheet-dely-opcion-stepper">
+                            <button
+                              type="button"
+                              className="promo-sheet-dely-opcion-btn"
+                              onClick={() => restarOpcion(op)}
+                              disabled={cant === 0}
+                              aria-label={`Sacar una de ${op}`}
+                            >
+                              −
+                            </button>
+                            <span className="promo-sheet-dely-opcion-cant">{cant}</span>
+                            <button
+                              type="button"
+                              className="promo-sheet-dely-opcion-btn"
+                              onClick={() => sumarOpcion(op)}
+                              disabled={totalSeleccionado >= maxSelect}
+                              aria-label={`Sumar una de ${op}`}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
@@ -758,7 +788,12 @@ function PromoDetailSheet({ promo, tipo, onClose, actionLabel, actionVariant = '
               {actionLabel && (
                 <button
                   className={`${botonClass} promo-sheet-dely-action`}
-                  onClick={() => onAction(tieneOpciones ? seleccion : undefined)}
+                  onClick={() => {
+                    const detalleSabores = Object.entries(seleccion)
+                      .filter(([, cant]) => cant > 0)
+                      .map(([op, cant]) => `${cant}x ${op}`);
+                    onAction(tieneOpciones ? detalleSabores : undefined);
+                  }}
                   disabled={actionDisabled || !opcionesCompletas}
                 >
                   {labelBoton}
@@ -842,15 +877,21 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
 
   const handleAction = (opcionesElegidas) => {
     if (!detalle) return;
-    if (detalle.tipo === 'dely' || detalle.tipo === 'pinta') {
-      // Si viene de un selector (ej. sabores de pizza), sumamos lo
-      // elegido a la nota del pedido — si no, queda solo la desc.
+    // Pintas es solo consumo local — el botón de su ficha ya no
+    // agrega nada al carrito, solo cierra (ver actionLabel: "Volver").
+    if (detalle.tipo === 'pinta') {
+      cerrarDetalle();
+      return;
+    }
+    if (detalle.tipo === 'dely') {
+      // Si viene del selector de sabores (ej. pizza), sumamos el
+      // detalle elegido a la nota del pedido — si no, queda solo la desc.
       const notaSabores = Array.isArray(opcionesElegidas) && opcionesElegidas.length > 0
         ? ` — Sabores: ${opcionesElegidas.join(', ')}`
         : '';
       onCartAdd({
         name: detalle.promo.titulo,
-        price: detalle.promo.precio || (detalle.tipo === 'pinta' ? 'Pinta' : 'Promo'),
+        price: detalle.promo.precio || 'Promo',
         qty: 1,
         note: (detalle.promo.desc || '') + notaSabores,
       });
@@ -868,13 +909,14 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
 
   const actionLabel =
     detalle?.tipo === 'dely'    ? (agregando ? '✓ Agregado' : '🛒 Agregar al carrito') :
-    detalle?.tipo === 'pinta'   ? (agregando ? '✓ Agregado' : '🍺 Agregar al carrito') :
+    detalle?.tipo === 'pinta'   ? '← Volver' :
     detalle?.tipo === 'semanal' ? '🙋 Llamar mozo' :
     null;
 
-  // ── Dely y Pintas usan el botón sólido de "Agregar al carrito";
-  //    Mozo pasa a ser una etiqueta/tag clickeable (como la de
-  //    "Efectivo o transferencia" pero interactiva). ──────────────
+  // ── Dely usa el botón sólido de "Agregar al carrito"; Pintas
+  //    usa el mismo estilo sólido pero para "Volver" (más fácil de
+  //    ver y tocar para personas mayores que el ✕ chiquito); Mozo
+  //    sigue siendo una etiqueta/tag clickeable. ──────────────────
   const actionVariant = detalle?.tipo === 'semanal' ? 'tag' : 'button';
 
   return (
