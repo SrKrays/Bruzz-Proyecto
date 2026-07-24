@@ -193,28 +193,6 @@ function formatFechaHora() {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)} - ${pad(d.getHours())}:${pad(d.getMinutes())}hs`;
 }
 
-// ── Arma y manda el pedido de "Llamar mozo" por WhatsApp para
-//    una promo de consumo local. Mismo mecanismo que el carrito
-//    (wa.me con texto pre-armado). ─────────────────────────────
-function pedirMozoPorWhatsapp(promo) {
-  const body = [
-    '¡Hola! Estoy en el local y quiero esta promo 🙋',
-    '',
-    `Promo: ${promo.dia ? `${promo.dia} — ` : ''}${promo.titulo}`,
-    promo.desc ? `Detalle: ${promo.desc}` : null,
-    promo.condicion ? `Condición: ${promo.condicion}` : null,
-    '',
-    `Hora: ${formatFechaHora()}`,
-    '',
-    '¿Me mandan un mozo a la mesa?',
-  ].filter((line) => line !== null).join('\n');
-
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank');
-}
-
-// ── Arma y manda una consulta de reserva por WhatsApp — se dispara
-//    directo al hacer click en la card de "Reservá tu evento",
-//    mismo mecanismo (wa.me con texto pre-armado). ──────────────
 function pedirReservaPorWhatsapp(promo) {
   const body = [
     '¡Hola! Quiero consultar por una reserva para un evento 🎉',
@@ -227,7 +205,7 @@ function pedirReservaPorWhatsapp(promo) {
     '¿Me pasan disponibilidad?',
   ].filter((line) => line !== null).join('\n');
 
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank');
+  window.open(`https://wa.me/${3543512248}?text=${encodeURIComponent(body)}`, '_blank');
 }
 
 // ── Calcula en qué fase está el Happy Hour real (HH_INICIO–HH_FIN) ──
