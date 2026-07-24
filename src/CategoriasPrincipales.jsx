@@ -15,17 +15,11 @@ function IgIcon() {
 
 const IG_URL = 'https://www.instagram.com/bruzzok/';
 
-// ── Card fija de Promos ────────────────────────────────────
-// ⚠️ A propósito NO vive en menuData.js: ese archivo lo regenera
-// el backend en cada "Publicar cambios" y todavía no sabe nada de
-// Promos. La agregamos acá, a mano, para que sobreviva a cualquier
-// publish futuro. Cuando el backend soporte "promos" como categoría
-// real, esto se puede mover a CATEGORIAS sin tocar nada más.
 const PROMOS_CARD = {
   id: 'promos',
   name: 'Promos',
   desc: 'Ofertas, combos y Happy Hour',
-  imageUrl: 'https://bruzz.com.ar/img/happyhour.png',
+  imageUrl: 'https://bruzz.com.ar/img/promos3.jpg',
 };
 
 // ── Entrada escalonada de las cards de categorías ──────────

@@ -1,73 +1,48 @@
 // ============================================================
-//  EmberParticles.jsx — Partículas ambiente flotando hacia
-//  arriba (brasas doradas + algunos íconos de pizza/cerveza
-//  para reforzar la identidad de Bruzz). Capa decorativa fija
-//  de fondo, no interactiva, muy bajo costo de performance.
+//  EmberParticles.jsx — 16 brasas doradas flotando hacia arriba
+//  en loop. Capa decorativa fija de fondo, no interactiva, muy
+//  bajo costo de performance.
+//
+//  ⚠️ Se probó mezclar íconos de pizza/cerveza acá (v5.3) y se
+//  sacó a pedido — vuelve a ser solo brasas, sin íconos.
 // ============================================================
 
 import { useMemo } from 'react';
 
 const EMBER_COUNT = 16;
 
-// Proporción de tipos: la mayoría siguen siendo brasas doradas,
-// unos pocos son íconos de pizza/cerveza para dar más identidad
-// sin saturar (6 brasas por cada pizza y cada cerveza).
-const TIPOS = ['brasa', 'brasa', 'brasa', 'brasa', 'brasa', 'brasa', 'pizza', 'cerveza'];
-
 export default function EmberParticles() {
   const embers = useMemo(
     () =>
-      Array.from({ length: EMBER_COUNT }, (_, i) => {
-        const tipo = TIPOS[Math.floor(Math.random() * TIPOS.length)];
-        const esIcono = tipo !== 'brasa';
-        return {
-          id: i,
-          tipo,
-          left: Math.random() * 100,
-          size: esIcono ? 14 + Math.random() * 8 : 2 + Math.random() * 4,
-          duration: 16 + Math.random() * 18,
-          delay: -(Math.random() * 30),
-          drift: (Math.random() - 0.5) * 90,
-          opacity: esIcono ? 0.16 + Math.random() * 0.18 : 0.25 + Math.random() * 0.35,
-        };
-      }),
+      Array.from({ length: EMBER_COUNT }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        size: 2 + Math.random() * 4,
+        duration: 16 + Math.random() * 18,
+        delay: -(Math.random() * 30),
+        drift: (Math.random() - 0.5) * 90,
+        opacity: 0.25 + Math.random() * 0.35,
+      })),
     []
   );
 
   return (
     <div className="ember-layer" aria-hidden="true">
-      {embers.map((e) =>
-        e.tipo === 'brasa' ? (
-          <span
-            key={e.id}
-            className="ember"
-            style={{
-              left: `${e.left}%`,
-              width: `${e.size}px`,
-              height: `${e.size}px`,
-              animationDuration: `${e.duration}s`,
-              animationDelay: `${e.delay}s`,
-              opacity: e.opacity,
-              '--drift': `${e.drift}px`,
-            }}
-          />
-        ) : (
-          <span
-            key={e.id}
-            className="ember ember--icono"
-            style={{
-              left: `${e.left}%`,
-              fontSize: `${e.size}px`,
-              animationDuration: `${e.duration}s`,
-              animationDelay: `${e.delay}s`,
-              opacity: e.opacity,
-              '--drift': `${e.drift}px`,
-            }}
-          >
-            {e.tipo === 'pizza' ? '🍕' : '🍺'}
-          </span>
-        )
-      )}
+      {embers.map((e) => (
+        <span
+          key={e.id}
+          className="ember"
+          style={{
+            left: `${e.left}%`,
+            width: `${e.size}px`,
+            height: `${e.size}px`,
+            animationDuration: `${e.duration}s`,
+            animationDelay: `${e.delay}s`,
+            opacity: e.opacity,
+            '--drift': `${e.drift}px`,
+          }}
+        />
+      ))}
     </div>
   );
 }

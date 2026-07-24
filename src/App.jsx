@@ -145,7 +145,13 @@ export default function App() {
       return <CategoriasPrincipales onNavigate={handleCategoria} />;
     }
     if (screen === 'promos') {
-      return <Promos onNavigate={navigate} onShowItems={showItems} />;
+      return (
+        <Promos
+          onNavigate={navigate}
+          onShowItems={showItems}
+          onCartAdd={handleCartAdd}
+        />
+      );
     }
     if (SUBCATEGORIA_SCREENS.has(screen)) {
       return (
