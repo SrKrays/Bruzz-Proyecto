@@ -45,7 +45,7 @@ const ADMIN_CSS = `
   .adm-login-box {
     position: relative; z-index: 2;
     background: var(--dark2); border: 1px solid var(--gold-border);
-    border-radius: 20px; padding: 2.5rem 2rem; width: 380px;
+    border-radius: 20px; padding: 2.5rem 2rem; width: 380px; max-width: 92vw;
     text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.6);
     animation: admFadeUp var(--mid) both;
   }
@@ -172,6 +172,8 @@ const ADMIN_CSS = `
   .adm-item-row:hover { border-color: var(--gold-border); }
   .adm-item-row.inactivo { opacity: 0.45; }
 
+  .adm-item-row-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+
   .adm-item-info { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 0; }
   .adm-item-nombre { font-weight: 600; color: var(--cream); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .adm-item-sub { font-size: 0.75rem; color: var(--muted); }
@@ -261,13 +263,50 @@ const ADMIN_CSS = `
   .adm-btn-img-upload:disabled { opacity: 0.5; cursor: not-allowed; }
   .adm-img-status { font-size: 0.78rem; color: var(--muted); align-self: center; }
 
-  /* ── Responsive mobile ──────────────────────────────── */
-  @media (max-width: 768px) {
-    .adm-sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; padding: 1rem; }
+  /* ── Responsive tablet (900px) — la sidebar se achica un poco
+     pero sigue siendo la columna fija de siempre; a este ancho
+     todavía entra cómoda. ────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .adm-sidebar { width: 200px; padding: 1.25rem 0.85rem; }
+    .adm-content { margin-left: 200px; }
+    .adm-content-header { padding: 1.25rem 1.5rem 1rem; }
+    .adm-content-body { padding: 1.25rem 1.5rem; }
+    .adm-item-row { flex-wrap: wrap; }
+    .adm-item-acciones { flex-wrap: wrap; justify-content: flex-end; }
+  }
+
+  /* ── Responsive celular (600px) — recién acá la sidebar deja de
+     ser fija y pasa a ser una barra arriba; las filas de producto
+     pasan info y acciones a columna para no apretar todo. ──────── */
+  @media (max-width: 600px) {
+    .adm-sidebar {
+      width: 100%; height: auto; position: relative;
+      flex-direction: row; flex-wrap: wrap; align-items: center;
+      padding: 0.85rem;
+    }
+    .adm-sidebar-header { margin-bottom: 0; margin-right: auto; }
+    .adm-sidebar-user { display: none; }
     .adm-sidebar-spacer { display: none; }
+    .adm-nav-btn { flex: 1 1 auto; justify-content: center; padding: 0.55rem 0.6rem; font-size: 0.82rem; }
+    .adm-btn-publish, .adm-btn-logout { flex: 1 1 auto; justify-content: center; }
     .adm-content { margin-left: 0; }
+    .adm-content-header { padding: 1.1rem 1rem 0.9rem; }
     .adm-content-body { padding: 1rem; }
-    .adm-item-acciones { flex-direction: column; align-items: flex-end; }
+
+    .adm-login-box { padding: 2rem 1.25rem; }
+
+    /* Fila de producto: info arriba, botones abajo, en columna */
+    .adm-item-row-top { flex-direction: column; align-items: stretch; gap: 0.65rem; }
+    .adm-item-info { order: 1; }
+    .adm-item-acciones {
+      order: 2; flex-direction: row; flex-wrap: wrap;
+      justify-content: flex-start; align-items: center;
+    }
+    .adm-item-precio { text-align: left; min-width: 0; }
+    .adm-input-precio { width: 90px; }
+    .adm-btn-sm { font-size: 0.78rem; padding: 0.45rem 0.65rem; }
+
+    .adm-toast { left: 1rem; right: 1rem; top: 1rem; }
   }
 `;
 
@@ -454,7 +493,7 @@ function ItemRow({ item, subcats, onPrecio, onToggle, onEliminar, onImagenActual
   return (
     <div className={`adm-item-row${item.activo ? '' : ' inactivo'}`} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
       {/* ── Fila principal ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+      <div className="adm-item-row-top">
         <div className="adm-item-info">
           <span className="adm-item-nombre">{item.nombre}</span>
           <span className="adm-item-sub">{sub?.nombre || ''}</span>

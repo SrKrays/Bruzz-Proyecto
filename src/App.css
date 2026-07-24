@@ -1364,22 +1364,21 @@ height: auto;
   .card-grid.wide .card-name { font-size: 26px; }
   .card-grid.wide .card-desc { font-size: 15px; }
 
-  /* ── Promos — Pintas y Semana en tablet: 3 columnas quedaban
-     demasiado altas/angostas con el alto pensado para desktop. ── */
+  /* ── Promos de la semana en tablet: 3 columnas quedaban
+     demasiado altas con el alto pensado para desktop. ── */
   .promo-grid--semanal .promo-card {
     min-height: 260px;
     padding: 12px 10px;
   }
   .promo-grid--semanal .promo-card-titulo { font-size: 14px; }
   .promo-grid--semanal .promo-card-desc { font-size: 11px; }
-  .promo-flip { min-height: 170px; }
 }
 
 /* ════════════════════════════════════════════════════════════
    ✨ ANIMACIONES "WOW" — identidad visual extra
 ════════════════════════════════════════════════════════════ */
 
-/* ── Partículas ambiente (brasas doradas + íconos) ────────── */
+/* ── Partículas ambiente (brasas doradas) ─────────────────── */
 .ember-layer {
   position: fixed;
   inset: 0;
@@ -1397,15 +1396,6 @@ height: auto;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   will-change: transform, opacity;
-}
-
-/* Variante ícono (🍕 / 🍺) — sin el fondo radial de la brasa,
-   línea de texto normal para que el emoji se vea bien. */
-.ember--icono {
-  background: none;
-  border-radius: 0;
-  line-height: 1;
-  filter: saturate(0.85) brightness(0.95);
 }
 
 @keyframes emberFloat {
@@ -1711,8 +1701,6 @@ height: auto;
 
 /* ════════════════════════════════════════════════════════════
    🎉 PROMOS — bloque countdown + grilla unificada (v5.0)
-   Un solo tipo de card (vertical, borde dorado arriba) para
-   todas las promos, tanto las principales como las semanales.
 ════════════════════════════════════════════════════════════ */
 
 .promo-countdown-label {
@@ -1765,7 +1753,7 @@ height: auto;
   margin-top: 12px;
 }
 
-/* ── Grilla unificada de promos ────────────────────────────── */
+/* ── Grilla unificada de promos (Promos de la semana) ──────── */
 .promo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1870,7 +1858,7 @@ height: auto;
 .promo-card--imagen .promo-card-desc   { color: rgba(255,255,255,0.78); }
 .promo-card--imagen .promo-card-dia    { color: var(--gold); }
 
-/* Cards con link directo a la carta (ej: Combos de hamburguesa) */
+/* Cards clickeables (abren la ficha de detalle) */
 .promo-card--clickeable {
   cursor: pointer;
 }
@@ -1929,6 +1917,12 @@ height: auto;
   text-transform: uppercase;
 }
 
+/* Card única a todo el ancho — Reservá tu evento */
+.promo-card--full {
+  min-height: 190px;
+  margin-bottom: 20px;
+}
+
 /* ── Etiqueta de sección ("Promos de la semana") — legacy, ver
    .promo-section-label más abajo para el tratamiento nuevo ── */
 .promo-semanal-label {
@@ -1955,6 +1949,8 @@ height: auto;
   .promo-card-titulo { font-size: 15px; }
   .promo-card-desc { font-size: 11px; }
 
+  .promo-card--marquee { width: 190px; min-height: 220px; }
+
   .promo-grid--semanal { grid-template-columns: 1fr; gap: 8px; }
   .promo-grid--semanal .promo-card {
     flex-direction: row;
@@ -1964,105 +1960,16 @@ height: auto;
     min-height: unset;
     padding: 12px 14px;
   }
+
+  .promo-card--full { min-height: 150px; }
 }
 
 
 /* ════════════════════════════════════════════════════════════
-   🎉 PROMOS v5.1 — bloque principal más chico + carrusel Dely
+   🎉 PROMOS v6.0 — carrusel genérico + ficha de detalle
 ════════════════════════════════════════════════════════════ */
 
-/* ── Bloque principal (Reservas, Combos, Bladis, Bambino) ──
-   ~30% más chico que el resto. Solo afecta este grid puntual —
-   Pintas y Semanales quedan con el tamaño original. ──────── */
-.promo-grid--principal .promo-card {
-  min-height: 285px;
-  padding: 11px 10px;
-}
-
-.promo-grid--principal .promo-card-titulo {
-  font-size: 13px;
-}
-
-.promo-grid--principal .promo-card-desc {
-  font-size: 10px;
-}
-
-.promo-grid--principal .promo-card-precio {
-  font-size: 13px;
-  margin-top: 5px;
-}
-
-.promo-grid--principal .promo-card-tag {
-  font-size: 9px;
-  padding: 2px 8px;
-}
-
-@media (max-width: 480px) {
-  .promo-grid--principal .promo-card {
-    min-height: unset;
-  }
-}
-
-/* ── Carrusel de Promos Dely — una sola card que rota ──────── */
-.promo-dely-carousel {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.promo-dely-carousel .promo-card--dely {
-  min-height: 200px;
-  cursor: grab;
-}
-
-.promo-dely-carousel .promo-card--dely:active {
-  cursor: grabbing;
-}
-
-.promo-dely-cta {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  color: var(--gold);
-  opacity: 0.9;
-}
-
-.promo-dely-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.promo-dely-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(245,200,66,0.25);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: background var(--fast), transform var(--fast);
-}
-
-.promo-dely-dot:hover {
-  background: rgba(245,200,66,0.5);
-}
-
-.promo-dely-dot--active {
-  background: var(--gold);
-  transform: scale(1.3);
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   🎉 PROMOS v5.2 — reorden de secciones + detalle visual
-════════════════════════════════════════════════════════════ */
-
-/* ── Label de sección con ícono + línea divisoria dorada ──
-   Reemplaza los labels sueltos por un tratamiento consistente
-   en todas las secciones (Pintas, Dely, Semana, Principal). ── */
+/* ── Label de sección con ícono + línea divisoria dorada ──── */
 .promo-section-label {
   display: flex;
   align-items: center;
@@ -2113,8 +2020,8 @@ height: auto;
   pointer-events: none;
 }
 
-/* Estado "no activo" (antes de las 20 o después de las 22) —
-   se ve apagado/estático para transmitir que no está corriendo. */
+/* Estado "no activo" (fuera del horario de Happy Hour) — se ve
+   apagado/estático para transmitir que no está corriendo. */
 .promo-countdown--static {
   filter: saturate(0.55) brightness(0.9);
 }
@@ -2127,91 +2034,578 @@ height: auto;
   font-weight: 600;
 }
 
-/* ── Cards que se dan vuelta — Promos de la semana ──────────
-   Frente: imagen de fondo + día + gancho corto. Atrás: color
-   sólido con descripción + condición de pago. Flip 3D con CSS
-   puro, sin dependencias extra. ─────────────────────────────── */
-.promo-flip {
-  position: relative;
-  min-height: 190px;
-  perspective: 1200px;
+/* ── Marquee de Pintas — tira automática infinita ──────────── */
+.promo-marquee {
+  overflow: hidden;
+  margin-bottom: 24px;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+}
+
+.promo-marquee-track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation-name: promoMarqueeScroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: calc(var(--marquee-count, 6) * 4.5s);
+}
+
+.promo-marquee:hover .promo-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes promoMarqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.promo-card--marquee {
+  flex: 0 0 auto;
+  width: 240px;
+  min-height: 260px;
   cursor: pointer;
 }
 
-.promo-flip-inner {
+/* ── Carrusel genérico — Promos Dely ───────────────────────── */
+.promo-carousel {
   position: relative;
+  margin-bottom: 24px;
+}
+
+.promo-carousel .promo-card--carousel {
+  min-height: 200px;
+  cursor: grab;
+}
+
+.promo-carousel .promo-card--carousel:active {
+  cursor: grabbing;
+}
+
+.promo-carousel-cta {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+.promo-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.promo-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(245,200,66,0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--fast), transform var(--fast);
+}
+
+.promo-carousel-dot:hover {
+  background: rgba(245,200,66,0.5);
+}
+
+.promo-carousel-dot--active {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
+/* ── Ficha de detalle — modal flotante centrado (Pintas / Dely /
+   Semanal). Montada por portal directo en document.body, así que
+   este backdrop cubre SIEMPRE el viewport real y no depende del
+   scroll de la página ni de dónde esté montada en el árbol. ──── */
+.promo-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 300;
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.promo-sheet {
+  position: relative;
+  z-index: 310;
+  width: min(400px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #161616;
+  border: 1px solid rgba(245,200,66,0.2);
+  border-radius: 18px;
+  padding: 20px 22px 26px;
+}
+
+.promo-sheet-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 16px;
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--fast), background var(--fast);
+}
+.promo-sheet-close:hover {
+  color: var(--cream);
+  background: rgba(255,255,255,0.06);
+}
+
+.promo-sheet-img-wrap {
+  width: 100%;
+  height: 170px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.promo-sheet-img {
   width: 100%;
   height: 100%;
-  transition: transform 0.6s cubic-bezier(.22, 1, .36, 1);
-  transform-style: preserve-3d;
+  object-fit: cover;
+  display: block;
 }
 
-.promo-flip-inner--flipped {
-  transform: rotateY(180deg);
-}
-
-.promo-flip-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  min-height: unset;
+.promo-sheet-body {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
   gap: 6px;
 }
 
-/* El frente lleva imagen — el texto va abajo, como el resto de
-   las cards con foto de fondo (justify-content: flex-end). */
-.promo-flip-face--front.promo-card--imagen {
-  justify-content: flex-end;
-}
-
-.promo-flip-face--back {
-  transform: rotateY(180deg);
-}
-
-.promo-flip-titulo {
+.promo-sheet-title {
   font-family: 'Playfair Display', serif;
-  font-weight: 800;
   font-size: 24px;
-  color: #fff;
-  margin-top: 4px;
+  font-weight: 800;
+  color: var(--gold);
+  margin-top: 2px;
 }
 
-.promo-card--verde .promo-flip-titulo   { color: #fff; }
-.promo-card--crema .promo-flip-titulo   { color: var(--green); }
-.promo-card--dorado .promo-flip-titulo  { color: var(--black); }
-.promo-card--marron .promo-flip-titulo  { color: var(--gold); }
-
-.promo-flip-hint {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: rgba(255,255,255,0.7);
-  margin-top: 6px;
+.promo-sheet-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.5;
+  margin-top: 2px;
 }
 
-.promo-card--dorado .promo-flip-hint { color: rgba(0,0,0,0.55); }
-
-.promo-flip-condicion {
+.promo-sheet-condicion {
   display: inline-block;
-  margin-top: 8px;
-  font-size: 10px;
+  margin-top: 6px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 20px;
-  border: 1px solid currentColor;
+  border: 1px solid rgba(245,200,66,0.4);
   color: var(--gold-dim);
-  opacity: 0.85;
+  width: fit-content;
 }
 
-.promo-card--verde .promo-flip-condicion { color: #fff; border-color: rgba(255,255,255,0.4); }
+.promo-sheet-action {
+  margin-top: 16px;
+  width: 100%;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: 24px;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: filter var(--fast), transform var(--fast), opacity var(--fast);
+}
+.promo-sheet-action:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.promo-sheet-action:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* Variante "solo texto" — Pintas y Llamar mozo. Sin fondo de
+   botón, queda como un link/acción simple debajo de la descripción. */
+.promo-sheet-action--text {
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  padding: 2px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(245,200,66,0.5);
+  align-self: flex-start;
+}
+.promo-sheet-action--text:hover:not(:disabled) {
+  color: #fffbe6;
+  text-decoration-color: var(--gold);
+  transform: none;
+  filter: none;
+}
+
+/* Variante "etiqueta" — Llamar mozo. Mismo lenguaje visual que el
+   pill de "Efectivo o transferencia" pero clickeable. */
+.promo-sheet-action--tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: auto;
+  align-self: flex-start;
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.45);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+.promo-sheet-action--tag:hover:not(:disabled) {
+  background: rgba(245,200,66,0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: none;
+  filter: none;
+}
 
 @media (max-width: 480px) {
-  .promo-flip { min-height: 150px; }
-  .promo-flip-titulo { font-size: 19px; }
+  .promo-sheet-title { font-size: 20px; }
+  .promo-sheet-img-wrap { height: 140px; }
+}
+
+/* ── Ficha técnica de Pintas — imagen a un lado + ficha con
+   estilo/alc/color/IBU e ingredientes, mismo formato para las 6. ── */
+.promo-sheet--pinta {
+  width: min(640px, 94vw);
+  max-height: 85vh;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.promo-sheet-pinta-img-wrap {
+  flex: 0 0 42%;
+  position: relative;
+  background: #000;
+}
+
+.promo-sheet-pinta-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.promo-sheet-pinta-info {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 26px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.promo-sheet-pinta-divider {
+  height: 1px;
+  background: rgba(245,200,66,0.18);
+  margin: 16px 0;
+}
+
+.promo-sheet-attrs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.promo-sheet-attr {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.promo-sheet-attr-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,200,66,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.promo-sheet-attr-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 700;
+}
+
+.promo-sheet-attr-value {
+  display: block;
+  font-size: 14px;
+  color: var(--cream);
+  margin-top: 2px;
+}
+
+.promo-sheet-pinta-ingredientes {
+  margin-bottom: 20px;
+}
+
+.promo-sheet-pinta-ing-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.promo-sheet-pinta-ing-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.promo-sheet-pinta-ing-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--cream);
+}
+
+.promo-sheet-pinta-action {
+  margin-top: auto;
+}
+
+@media (max-width: 560px) {
+  .promo-sheet--pinta {
+    flex-direction: column;
+    max-height: 88vh;
+  }
+  .promo-sheet-pinta-img-wrap {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 190px;
+  }
+  .promo-sheet-pinta-info {
+    padding: 20px 18px 22px;
+  }
+}
+
+/* ── Ficha de Promos Dely — mismo formato "imagen + info" que
+   Pintas pero diferenciada: stats en recuadros pareados (en vez
+   de lista con ícono circular) y un callout verde en vez de tags
+   de ingredientes. Misma función, otra piel. ── */
+.promo-sheet--dely {
+  width: min(640px, 94vw);
+  max-height: 85vh;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.promo-sheet-dely-img-wrap {
+  flex: 0 0 42%;
+  position: relative;
+  background: #000;
+}
+
+.promo-sheet-dely-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.promo-sheet-dely-info {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 26px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.promo-sheet-dely-tag {
+  display: inline-block;
+  background: #e05252;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+/* Ficha técnica (Incluye/Bebidas/Exclusivo App/Válido) — reusa
+   las clases genéricas .promo-sheet-attr* compartidas con Pintas. */
+
+.promo-sheet-dely-opciones {
+  margin: 2px 0 20px;
+}
+
+.promo-sheet-dely-opciones-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.promo-sheet-dely-opciones-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 700;
+}
+
+.promo-sheet-dely-opciones-count {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.promo-sheet-dely-opciones-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.promo-sheet-dely-opcion {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  color: var(--cream);
+  transition: background var(--fast), border-color var(--fast), color var(--fast);
+}
+
+.promo-sheet-dely-opcion:hover {
+  border-color: rgba(245,200,66,0.4);
+}
+
+.promo-sheet-dely-opcion--activa {
+  background: rgba(245,200,66,0.18);
+  border-color: var(--gold);
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.promo-sheet-dely-action {
+  margin-top: auto;
+}
+
+@media (max-width: 560px) {
+  .promo-sheet--dely {
+    flex-direction: column;
+    max-height: 88vh;
+  }
+  .promo-sheet-dely-img-wrap {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 190px;
+  }
+  .promo-sheet-dely-info {
+    padding: 20px 18px 22px;
+  }
+}
+
+/* ── Ficha de Promos de la semana — mismo formato de dos columnas
+   que Pintas/Dely (imagen + info), contenido intacto: Día y
+   Condición pasan de pill suelto a filas con ícono. ── */
+.promo-sheet--semanal {
+  width: min(640px, 94vw);
+  max-height: 85vh;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.promo-sheet-semanal-img-wrap {
+  flex: 0 0 42%;
+  position: relative;
+  background: #000;
+}
+
+.promo-sheet-semanal-info {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 26px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.promo-sheet-semanal-action {
+  margin-top: auto;
+}
+
+@media (max-width: 560px) {
+  .promo-sheet--semanal {
+    flex-direction: column;
+    max-height: 88vh;
+  }
+  .promo-sheet-semanal-img-wrap {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 190px;
+  }
+  .promo-sheet-semanal-info {
+    padding: 20px 18px 22px;
+  }
+}
+
+/* ── Imagen con recorte inteligente (cards, carrusel, marquee y
+   fichas de detalle). Una sola <img> con object-fit: cover — el
+   object-position lo calcula la librería `smartcrop` por JS (ver
+   PromoImgFit en Promos.jsx) y se aplica inline, así que acá solo
+   dejamos el tamaño/posición base. ── */
+.promo-img-fit-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
