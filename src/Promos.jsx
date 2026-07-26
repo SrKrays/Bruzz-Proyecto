@@ -132,7 +132,7 @@ const PROMOS_DELY = [
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Todos los días' },
+      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
     ],
   },
   {
@@ -142,7 +142,7 @@ const PROMOS_DELY = [
     atributos: [
       { icon: '🍕', label: 'Incluye', value: '3 pizzas a elección' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Todos los días' },
+      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
     ],
     opciones: ['Prosciutto Cotto', 'Quattro Formaggi', 'Margherita', 'Napolitana', 'Dolce'],
     maxSelect: 3,
@@ -154,7 +154,7 @@ const PROMOS_DELY = [
     atributos: [
       { icon: '🍔', label: 'Incluye', value: '2 hamburguesas completas + Papas fritas' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Todos los días' },
+      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
     ],
   },
 ];
