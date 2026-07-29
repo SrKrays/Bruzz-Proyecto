@@ -127,7 +127,7 @@ const PINTAS_EJEMPLO = [
 const PROMOS_DELY = [
   {
     id: 2, titulo: '2 Sandwiches de Ternera', desc: 'Completos. Con papas!', tag: 'DELY',
-    precio: '$25.000',
+    precio: '$37.000',
     imageUrl: 'https://bruzz.com.ar/img/ternera-promo.jpg',
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
@@ -149,7 +149,7 @@ const PROMOS_DELY = [
   },
   {
     id: 4, titulo: '2 Burgers Completas', desc: 'Completas. Con papas!', tag: 'DELY',
-    precio: '$25.000',
+    precio: '$24.500',
     imageUrl: 'https://bruzz.com.ar/img/burger-promo.jpg',
     atributos: [
       { icon: '🍔', label: 'Incluye', value: '2 hamburguesas completas + Papas fritas' },
