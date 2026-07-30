@@ -128,7 +128,7 @@ const PROMOS_DELY = [
   {
     id: 2, titulo: '2 Sandwiches de Ternera', desc: 'Completos. Con papas!', tag: 'DELY',
     precio: '$37.000',
-    imageUrl: 'https://bruzz.com.ar/img/ternera-promo.jpg',
+    imageUrl: 'https://bruzz.com.ar/img/terners-promo2.png',
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
