@@ -170,7 +170,7 @@ const PROMOS_SEMANALES = [
   },
   { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', tag:'No dispo por esta semana!', condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
   { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',  tag:'No dispo por esta semana!',   condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-  { id: 'w4', dia: 'Todos Los dias',    titulo: 'Semana de la Pizza', desc: '30% en la Pizza que mas te guste!', etiquieta:'Tiempo Limitado!' , condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/semanaP.jpeg' },
+  { id: 'w4', dia: 'Todos Los dias',    titulo: 'Semana de la Pizza', desc: '30% en la Pizza que mas te guste!', tag:'Tiempo Limitado!' , condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/semanaP.jpeg' },
 
 ];
 
