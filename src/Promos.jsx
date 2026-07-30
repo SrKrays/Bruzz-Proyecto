@@ -131,8 +131,8 @@ const PROMOS_DELY = [
     imageUrl: 'https://bruzz.com.ar/img/ternera-promo2.png',
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
   },
   {
@@ -141,8 +141,8 @@ const PROMOS_DELY = [
     imageUrl: 'https://bruzz.com.ar/img/pizza-promo.jpg',
     atributos: [
       { icon: '🍕', label: 'Incluye', value: '3 pizzas a elección' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
     opciones: ['Prosciutto Cotto', 'Quattro Formaggi', 'Margherita', 'Napolitana', 'Dolce'],
     maxSelect: 3,
@@ -153,8 +153,8 @@ const PROMOS_DELY = [
     imageUrl: 'https://bruzz.com.ar/img/Pburger.png',
     atributos: [
       { icon: '🍔', label: 'Incluye', value: '2 hamburguesas completas + Papas fritas' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
   },
 ];
@@ -164,13 +164,13 @@ const PROMOS_DELY = [
 const PROMOS_SEMANALES = [
   {
     id: 'w1', dia: 'Martes', tag: '3x2 en Pintas y 50% en la segunda Pizza',
-    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', tag:'No dispo por esta semana!',  condicion: 'Efectivo o transferencia',
+    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', tag:'No dispo por esta semana!',  condicion: 'Efectivo o transferencia  (Solo consumo local)',
     imageUrl: 'https://bruzz.com.ar/img/pintas.jpg',
     imgPosition: '50% 25%', // ⚠️ smartcrop la recortaba muy cerrada — encuadre manual, ajustá el % si hace falta
   },
-  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', tag:'No dispo por esta semana!', condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
-  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',  tag:'No dispo por esta semana!',   condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-  { id: 'w4', dia: 'Todos Los dias',    titulo: 'Semana de la Pizza', desc: '30% en la Pizza que mas te guste!', tag:'Tiempo Limitado!' , condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/semanaP.jpeg' },
+  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', tag:'No dispo por esta semana!', condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
+  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',  tag:'No dispo por esta semana!',   condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+  { id: 'w4', dia: 'Todos Los dias',    titulo: 'Semana de la Pizza', desc: '30% en la Pizza que mas te guste!', tag:'Tiempo Limitado!' , condicion: 'Efectivo o transferencia (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/semanaP.jpeg' },
 
 ];
 
