@@ -946,7 +946,7 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
       />
 
       {/* ── Promos Dely (carrusel, click abre ficha + agregar al carrito) ── */}
-      <PromoSectionLabel icon="🛵">Promos Dely</PromoSectionLabel>
+      <PromoSectionLabel icon="🛵">Promos Dely o Take away </PromoSectionLabel>
       <PromoCarousel
         promos={PROMOS_DELY}
         onCardClick={(promo) => setDetalle({ promo, tipo: 'dely' })}
