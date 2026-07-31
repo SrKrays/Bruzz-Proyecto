@@ -150,14 +150,14 @@ export const MENU = {
     items: [
       { sep: 'Vinos' },
       { name: 'Copa de Vino', price: '$4.000', desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://bruzz.com.ar/img/vino.jpg' },
-      { name: 'Santa Julia Chardonnay', price: '$8.500', desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://bruzz.com.ar/img/santa.jpeg' },
       { name: 'Espumante Dada 7', price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://bruzz.com.ar/img/dada.jpg' },
       { name: 'Luigi Bosca Malbec', price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://bruzz.com.ar/img/bosca.jpg' },
       { name: 'Alma Mora Malbec', price: '$9.500', desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
       { name: 'Cordero con Piel de Lobo Cabernet Sauvignon', price: '$13.500', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Cordero con Piel de Lobo Blanco Dulce', price: '$12.900', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Fond de Cave Chardonnay', price: '$11.500', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://bruzz.com.ar/img/fond.png' },
-      { name: 'Alma Mora Cabernet Sauvignon', price: '$9.500', desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
+
+    
     ],
   },
 
