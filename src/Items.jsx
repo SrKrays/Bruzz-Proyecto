@@ -455,7 +455,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
 //  🧾 CHECKOUT — FX 12: confetti al confirmar
 // ════════════════════════════════════════════════════════════
 
-const COSTO_ENVIO = { local: 2000, fuera: 3000 };
+const COSTO_ENVIO = { local: 2500, fuera: 3500 };
 
 function CheckoutScreen({ cart, onBack, onClear }) {
   const [name,      setName]      = useState('');
