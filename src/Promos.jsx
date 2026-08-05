@@ -170,7 +170,6 @@ const PROMOS_SEMANALES = [
   },
   { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa',  condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
   { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',   condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
- 
 ];
 
 // ── Entrada escalonada del mosaico ────────────────────────
