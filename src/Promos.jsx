@@ -164,14 +164,13 @@ const PROMOS_DELY = [
 const PROMOS_SEMANALES = [
   {
     id: 'w1', dia: 'Martes', tag: '3x2 en Pintas y 50% en la segunda Pizza',
-    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', tag:'No dispo por esta semana!',  condicion: 'Efectivo o transferencia  (Solo consumo local)',
+    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', condicion: 'Efectivo o transferencia  (Solo consumo local)',
     imageUrl: 'https://bruzz.com.ar/img/pintas.jpg',
     imgPosition: '50% 25%', // ⚠️ smartcrop la recortaba muy cerrada — encuadre manual, ajustá el % si hace falta
   },
-  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', tag:'No dispo por esta semana!', condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
-  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',  tag:'No dispo por esta semana!',   condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-  { id: 'w4', dia: 'Todos Los dias',    titulo: 'Semana de la Pizza', desc: '30% en la Pizza que mas te guste!', tag:'Tiempo Limitado!' , condicion: 'Efectivo o transferencia (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/semanaP.jpeg' },
-
+  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa',  condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
+  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',   condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+ 
 ];
 
 // ── Entrada escalonada del mosaico ────────────────────────
