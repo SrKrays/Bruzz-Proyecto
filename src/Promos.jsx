@@ -163,7 +163,7 @@ const PROMOS_DELY = [
 //    mozo" (ya no se dan vuelta in-place). ────────────────────
 const PROMOS_SEMANALES = [
   {
-    id: 'w1', dia: 'Martes', tag: '3x2 en Pintas y 50% en la segunda Pizza',
+    id: 'w1', dia: 'Martes',
     desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', condicion: 'Efectivo o transferencia  (Solo consumo local)',
     imageUrl: 'https://bruzz.com.ar/img/pintas.jpg',
     imgPosition: '50% 25%', // ⚠️ smartcrop la recortaba muy cerrada — encuadre manual, ajustá el % si hace falta
