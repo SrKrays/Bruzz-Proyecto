@@ -5,7 +5,7 @@
 //  - Pintas: ahora es un carrusel con TODAS las pintas. Click
 //    no navega a ningún lado — abre una ficha de detalle.
 //  - Promos Dely: click abre la misma ficha de detalle, con
-//    botón "Agregar al carrito" (carrito real de la app).
+//    botón "Agregar al carrito" (carrito real de la app)
 //  - Promos de la semana: ya no se dan vuelta (se sacó el flip).
 //    Click abre la misma ficha de detalle, con botón
 //    "Llamar mozo" (WhatsApp).
