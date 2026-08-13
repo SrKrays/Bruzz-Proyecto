@@ -161,15 +161,28 @@ const PROMOS_DELY = [
 
 // ── Promos semanales — click abre ficha con botón "Llamar
 //    mozo" (ya no se dan vuelta in-place). ────────────────────
+// ⚠️ EVENTO PUNTUAL — "Circuito Gastronómico: Siete Días de Pizzas"
+// (27 jul – 2 ago). Mientras dure, las promos de consumo local de
+// siempre quedan pausadas (`disponible: false`, se ve atenuada la
+// card y no abre la ficha) y esta es la única activa. Pasada la
+// semana: borrar `w0` y sacar `disponible: false` de w1/w2/w3.
 const PROMOS_SEMANALES = [
+  {
+    id: 'w0', dia: 'Circuito Gastronómico', titulo: '30% OFF en Pizzas',
+    desc: 'Toda la semana (27 jul al 2 ago), pagando en efectivo o transferencia',
+    condicion: 'Efectivo o transferencia',
+    imageUrl: 'https://bruzz.com.ar/img/pizza-promo.jpg',
+    destacado: true,
+  },
   {
     id: 'w1', dia: 'Martes', titulo: '3x2 en Pintas y 50% en la segunda Pizza',
     desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', condicion: 'Efectivo o transferencia',
     imageUrl: 'https://bruzz.com.ar/img/pintas.jpg',
     imgPosition: '50% 25%', // ⚠️ smartcrop la recortaba muy cerrada — encuadre manual, ajustá el % si hace falta
+    disponible: false,
   },
-  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
-  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',     condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', disponible: false },
+  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',     condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg', disponible: false },
 ];
 
 // ── Entrada escalonada del mosaico ────────────────────────
@@ -389,15 +402,22 @@ function PromoImgFit({ src, alt, aspect = 1.6, position: manualPosition }) {
 //     navegar con `linkTo` (por si algún día se vuelve a usar).
 // ════════════════════════════════════════════════════════════
 function PromoCard({ promo, colorClass, onShowItems, onClick, className = '', aspect = 0.85 }) {
-  const handleClick = onClick
-    ? () => onClick(promo)
-    : (promo.linkTo ? () => onShowItems?.(promo.linkTo) : undefined);
+  // `disponible: false` — promo pausada temporalmente (ej. durante
+  // un evento puntual). Se ve atenuada, con etiqueta, y no abre
+  // la ficha de detalle aunque el padre le pase un onClick.
+  const disponible = promo.disponible !== false;
+
+  const handleClick = !disponible
+    ? undefined
+    : onClick
+      ? () => onClick(promo)
+      : (promo.linkTo ? () => onShowItems?.(promo.linkTo) : undefined);
   const esClickeable = Boolean(handleClick);
   const tieneImagen  = Boolean(promo.imageUrl);
 
   return (
     <motion.div
-      className={`promo-card${tieneImagen ? ' promo-card--imagen' : ` promo-card--${colorClass}`}${esClickeable ? ' promo-card--clickeable' : ''}${className ? ` ${className}` : ''}`}
+      className={`promo-card${tieneImagen ? ' promo-card--imagen' : ` promo-card--${colorClass}`}${esClickeable ? ' promo-card--clickeable' : ''}${!disponible ? ' promo-card--no-disponible' : ''}${className ? ` ${className}` : ''}`}
       variants={cardVariants}
       onClick={handleClick}
       role={esClickeable ? 'button' : undefined}
@@ -409,6 +429,7 @@ function PromoCard({ promo, colorClass, onShowItems, onClick, className = '', as
           <div className="promo-card-overlay" />
         </>
       )}
+      {!disponible && <span className="promo-card-nodisponible">No disponible esta semana</span>}
       {promo.tag && <span className="promo-card-tag">{promo.tag}</span>}
       <div className="promo-card-content">
         {promo.dia && <span className="promo-card-dia">{promo.dia}</span>}
@@ -964,7 +985,8 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
             promo={promo}
             colorClass={PALETA[i % PALETA.length]}
             onClick={(p) => setDetalle({ promo: p, tipo: 'semanal' })}
-            aspect={0.85}
+            aspect={promo.destacado ? 2.4 : 0.85}
+            className={promo.destacado ? 'promo-card--semana-destacada' : ''}
           />
         ))}
       </motion.div>
