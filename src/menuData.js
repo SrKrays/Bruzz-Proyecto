@@ -1,4 +1,4 @@
-// menuData.js — Generado el 10/07/2026 21:17
+// menuData.js — Generado el 29/08/2026 21:42
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -7,6 +7,7 @@ export const CATEGORIAS = [
   { id: 'tragos',    name: 'Tragos',    desc: 'Los Mejores Cócteles',        imageUrl: 'https://bruzz.com.ar/img/gin.png' },
   { id: 'postres',   name: 'Postres',   desc: 'Dulce final perfecto',        imageUrl: 'https://bruzz.com.ar/img/postres.jpg' },
   { id: 'cafeteria', name: 'Cafetería', desc: 'Café, infusiones y más',      imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
+  { id: 'promos',    name: 'Promos',    desc: '¡Ofertas de hoy!',            imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
 ];
 
 export const SUBCATEGORIAS = {
@@ -30,6 +31,7 @@ export const MENU = {
   pizza: {
     title: 'Pizzas', back: 'comidas',
     items: [
+      { name: 'La pizza que araña ', price: '$15', desc: 'Testeo de el programador', imageUrl: 'https://bruzz.com.ar/img/1788039738-imagen-2026-08-29-184201334.png', badge: 'Testeo' },
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
       { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1782431141-whatsapp-image-2026-06-25-at-84443-pm.jpeg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
@@ -67,16 +69,12 @@ export const MENU = {
       { name: 'Hamburgesa Bambino', price: '$16.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png' },
       { name: 'Simple', price: '$12.500', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { name: 'Completa', price: '$14.400', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
-      { name: 'Di Lusso', price: '$14.400', desc: 'Pan de papa, carne de res, cheddar, lactonesa de la casa, ketchup, cebolla, bacon y papas fritas', imageUrl: 'https://bruzz.com.ar/img/di.jpeg' },
-
       { name: 'Hamb Bruzz', price: '$14.900', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: '✦ Firma' },
       { name: 'Veggie', price: '$13.100', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { name: 'Medallón extra', price: '$2.000', desc: 'Extra Carne para una Gran Hamburguesa.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
       { name: 'Combo Simple', price: '$15.300', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
       { name: 'Combo Completa', price: '$17.100', desc: 'Hamburguesa completa mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
-      { name: 'Combo Di Lusso', price: '$17.100', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/di.jpeg' , badge: 'Combo'  },
-
       { name: 'Combo Bruzz', price: '$17.500', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: 'Combo' },
       { name: 'Combo Veggie', price: '$15.900', desc: 'Hamburguesa vegana mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
     ],
@@ -154,14 +152,14 @@ export const MENU = {
     items: [
       { sep: 'Vinos' },
       { name: 'Copa de Vino', price: '$4.000', desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://bruzz.com.ar/img/vino.jpg' },
+      { name: 'Santa Julia Chardonnay', price: '$8.500', desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://bruzz.com.ar/img/santa.jpeg' },
       { name: 'Espumante Dada 7', price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://bruzz.com.ar/img/dada.jpg' },
       { name: 'Luigi Bosca Malbec', price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://bruzz.com.ar/img/bosca.jpg' },
       { name: 'Alma Mora Malbec', price: '$9.500', desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
       { name: 'Cordero con Piel de Lobo Cabernet Sauvignon', price: '$13.500', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Cordero con Piel de Lobo Blanco Dulce', price: '$12.900', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Fond de Cave Chardonnay', price: '$11.500', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://bruzz.com.ar/img/fond.png' },
-
-    
+      { name: 'Alma Mora Cabernet Sauvignon', price: '$9.500', desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
     ],
   },
 
@@ -224,4 +222,15 @@ export const CAFETERIA = [
   { name: 'Ristretto', price: '$2.500', desc: 'Shot de café concentrado.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Licuados', price: '$5.000', desc: 'Consultá las opciones disponibles.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Limonada', price: '$6.900', desc: 'Limonada fresca.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
+];
+
+export const PROMOS = [
+  {
+    id: 1,
+    titulo: 'Happy',
+    desc: 'testeo',
+    precio: '15',
+    tag: 'A',
+    activa: true,
+  },
 ];
