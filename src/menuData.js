@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/08/2026 23:08
+// menuData.js — Generado el 30/08/2026 23:10
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -128,12 +128,12 @@ export const MENU = {
     title: 'Cervezas', back: 'bebidas',
     items: [
       { sep: 'Pintas Tiradas' },
-      { name: 'Blonde Ale', price: '$4.700', desc: 'KRAL alc. 4,5%. Ligera, moderado aroma dulce maltoso, bajo amargor y leve cítrico.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
-      { name: 'IPA', price: '$6.000', desc: 'KRAL. ALC. 5,3% De cuerpo medio, con marcados aromas y sabores cítricos florales.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
+      { name: 'Blonde Ale', price: '$4.900', desc: 'KRAL alc. 4,5%. Ligera, moderado aroma dulce maltoso, bajo amargor y leve cítrico.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
+      { name: 'IPA', price: '$6.500', desc: 'KRAL. ALC. 5,3% De cuerpo medio, con marcados aromas y sabores cítricos florales.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
       { name: 'Irish Red', price: '$5.200', desc: 'UN TAL RENE. alc 5%. Roja, con notas dulces, frutal.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
       { name: 'Negra Stout', price: '$6.200', desc: 'Un tal RENE. Negra, notas a cafe. alc. 4.8% de amargor bajo.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
-      { name: 'Honey Blueberry', price: '$5.600', desc: 'UN TAL RENE. 6% Alc. Rubia, endulzada con miel y notas de blueberry.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
-      { name: 'American Lagger', price: '$4.800', desc: 'BUFON DEL REY. 4,2% alc. Rubia, ligera y refrescante. De amargor bajo. (Medalla de ORO 2023)', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
+      { name: 'Honey Blueberry', price: '$6.400', desc: 'UN TAL RENE. 6% Alc. Rubia, endulzada con miel y notas de blueberry.', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
+      { name: 'American Lagger', price: '$5.000', desc: 'BUFON DEL REY. 4,2% alc. Rubia, ligera y refrescante. De amargor bajo. (Medalla de ORO 2023)', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
       { sep: 'Cervezas en Botella' },
       { name: 'Imperial Litro', price: '$9.500', desc: 'Golden o Extra Lagger.', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg' },
       { name: 'Heineken Litro', price: '$10.500', desc: '', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
