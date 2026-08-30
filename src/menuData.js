@@ -157,7 +157,6 @@ export const MENU = {
       { name: 'Cordero con Piel de Lobo Cabernet Sauvignon', price: '$12.900', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Cordero con Piel de Lobo Blanco Dulce', price: '$13.500', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Fond de Cave Chardonnay', price: '$17.900', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://bruzz.com.ar/img/fond.png' },
-      { name: 'Alma Mora Cabernet Sauvignon', price: '$9.500', desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
     ],
   },
 
