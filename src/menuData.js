@@ -1,4 +1,4 @@
-// menuData.js — Generado el 29/08/2026 21:43
+// menuData.js — Generado el 30/08/2026 23:04
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -34,17 +34,17 @@ export const MENU = {
       { sep: 'Sin T.A.C.C. — Masa artesanal libre de gluten' },
       { name: 'Pizza Sin T.A.C.C.', price: '$22.000', desc: 'Masa artesanal sin TACC. Elegí la variedad que querés: Napolitana, Cuatro Quesos o Muzza y Jamón.', imageUrl: 'https://bruzz.com.ar/img/1782431141-whatsapp-image-2026-06-25-at-84443-pm.jpeg', sinTacc: true },
       { sep: 'Mini Pizzas BamBino' },
-      { name: 'Mini Pizza Bambino', price: '$16.000', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
+      { name: 'Mini Pizza Bambino', price: '$17.000', desc: 'Mini pizza de muzzarella + bebida + helado + juguete.', imageUrl: 'https://bruzz.com.ar/img/bambino.png', badge: 'Para los peques' },
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
-      { name: 'Pepe', price: '$23.800', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
-      { name: 'Prosciutto Cotto', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
-      { name: 'Fungo', price: '$24.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.', imageUrl: 'https://bruzz.com.ar/img/fungo.png' },
-      { name: 'Rúcula', price: '$24.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.', imageUrl: 'https://bruzz.com.ar/img/rucula.jpg' },
+      { name: 'Pepe', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
+      { name: 'Prosciutto Cotto', price: '$22.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
+      { name: 'Fungo', price: '$26.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.', imageUrl: 'https://bruzz.com.ar/img/fungo.png' },
+      { name: 'Rúcula', price: '$25.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.', imageUrl: 'https://bruzz.com.ar/img/rucula.jpg' },
       { name: 'Quattro Formaggi', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Margherita', price: '$18.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, albahaca fresca, aceite de oliva.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
-      { name: 'Pizza Bruzz', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cebolla caramelizada con roquefort, morrón, lomo ahumado, orégano.', imageUrl: 'https://bruzz.com.ar/img/image.png', badge: '✦ Firma' },
+      { name: 'Pizza Bruzz', price: '$24.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cebolla caramelizada con roquefort, morrón, lomo ahumado, orégano.', imageUrl: 'https://bruzz.com.ar/img/image.png', badge: '✦ Firma' },
       { name: 'Napolitana', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, muzzarella, rodajas de tomate fresco, aceite de ajo y orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
-      { name: 'Dolce Pera', price: '$23.500', desc: 'Pizza estilo napolitano, base de aceite de oliva extra virgen, muzzarella, roquefort, pera, nueces, miel, cebolla de verdeo.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
+      { name: 'Dolce Pera', price: '$24.900', desc: 'Pizza estilo napolitano, base de aceite de oliva extra virgen, muzzarella, roquefort, pera, nueces, miel, cebolla de verdeo.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Dolce', price: '$22.400', desc: 'Pizza estilo napolitano, base de aceite de oliva extra virgen, muzzarella, roquefort, sardo, nueces, miel.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Panceta Affumicata', price: '$23.800', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, panceta ahumada, romero, humo, queso parmesano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Acciuga', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cherrys confitados en oliva, filete de anchoa, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
@@ -57,15 +57,15 @@ export const MENU = {
     title: 'Calzone', back: 'comidas',
     items: [
       { name: 'Calzone Margherita', price: '$18.900', desc: 'Salsa de tomate fresca, mozzarella, albahaca fresca, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
-      { name: 'Calzone Prosciutto Cotto', price: '$22.500', desc: 'Salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, orégano, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
-      { name: 'Calzone Fungo', price: '$24.900', desc: 'Salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
+      { name: 'Calzone Prosciutto Cotto', price: '$22.900', desc: 'Salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, orégano, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
+      { name: 'Calzone Fungo', price: '$26.200', desc: 'Salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
     ],
   },
 
   hamburgesas: {
     title: 'Hamburgesas', back: 'comidas',
     items: [
-      { name: 'Hamburgesa Bambino', price: '$16.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png' },
+      { name: 'Hamburgesa Bambino', price: '$17.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png' },
       { name: 'Simple', price: '$12.500', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { name: 'Completa', price: '$14.400', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { name: 'Hamb Bruzz', price: '$14.900', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: '✦ Firma' },
