@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/08/2026 23:14
+// menuData.js — Generado el 30/08/2026 23:16
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -155,8 +155,8 @@ export const MENU = {
       { name: 'Espumante Dada 7', price: '$23.000', desc: 'Espumante Dada 7.', imageUrl: 'https://bruzz.com.ar/img/dada.jpg' },
       { name: 'Luigi Bosca Malbec', price: '$27.900', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://bruzz.com.ar/img/bosca.jpg' },
       { name: 'Alma Mora Malbec', price: '$13.500', desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
-      { name: 'Cordero con Piel de Lobo Cabernet Sauvignon', price: '$13.500', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
-      { name: 'Cordero con Piel de Lobo Blanco Dulce', price: '$12.900', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
+      { name: 'Cordero con Piel de Lobo Cabernet Sauvignon', price: '$12.900', desc: 'Vino tinto Cabernet Sauvignon, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
+      { name: 'Cordero con Piel de Lobo Blanco Dulce', price: '$13.500', desc: 'Vino blanco dulce, Cordero con Piel de Lobo.', imageUrl: 'https://bruzz.com.ar/img/cordero.jpg' },
       { name: 'Fond de Cave Chardonnay', price: '$17.900', desc: 'Vino blanco Chardonnay, Fond de Cave.', imageUrl: 'https://bruzz.com.ar/img/fond.png' },
       { name: 'Alma Mora Cabernet Sauvignon', price: '$9.500', desc: 'Vino tinto Cabernet Sauvignon, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
     ],
