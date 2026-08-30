@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/08/2026 23:20
+// menuData.js — Generado el 30/08/2026 23:22
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -151,7 +151,6 @@ export const MENU = {
     items: [
       { sep: 'Vinos' },
       { name: 'Copa de Vino', price: '$4.900', desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://bruzz.com.ar/img/vino.jpg' },
-      { name: 'Santa Julia Chardonnay', price: '$8.500', desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://bruzz.com.ar/img/santa.jpeg' },
       { name: 'Espumante Dada 7', price: '$23.000', desc: 'Espumante Dada 7.', imageUrl: 'https://bruzz.com.ar/img/dada.jpg' },
       { name: 'Luigi Bosca Malbec', price: '$27.900', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://bruzz.com.ar/img/bosca.jpg' },
       { name: 'Alma Mora Malbec', price: '$13.500', desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },
