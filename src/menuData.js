@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/08/2026 23:06
+// menuData.js — Generado el 30/08/2026 23:07
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -85,7 +85,7 @@ export const MENU = {
       { name: 'Lomito Simple', price: '$22.900', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
       { name: 'Lomito Completo', price: '$23.800', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
       { name: 'Lomito Americano', price: '$24.300', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
-      { name: 'Bife extra (100g)', price: '$7.000', desc: 'Lomo 100%.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
+      { name: 'Bife extra (100g)', price: '$8.000', desc: 'Lomo 100%.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
     ],
   },
 
@@ -93,9 +93,9 @@ export const MENU = {
     title: 'Sandwich', back: 'comidas',
     items: [
       { name: 'Tostato', price: '$9.800', desc: 'Pan artesanal, lactonesa de la casa, jamón cocido, queso dambo y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-      { name: 'Macerata', price: '$12.400', desc: 'Pan artesanal, lactonesa de la casa, queso dambo, jamón crudo, tomates frescos, rúcula, y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-      { name: 'Vegetariano', price: '$15.500', desc: 'Pan de focaccia, salsa Bruzz, lechuga, tomate fresco, zucchini y berenjena grillado, queso dambo y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
-      { name: 'Ternera', price: '$20.400', desc: 'Pan de focaccia, lactonesa de albahaca, rúcula, tomates frescos, ternera desmenuzada en vino tinto y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+      { name: 'Macerata', price: '$13.100', desc: 'Pan artesanal, lactonesa de la casa, queso dambo, jamón crudo, tomates frescos, rúcula, y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+      { name: 'Vegetariano', price: '$15.900', desc: 'Pan de focaccia, salsa Bruzz, lechuga, tomate fresco, zucchini y berenjena grillado, queso dambo y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
+      { name: 'Ternera', price: '$21.000', desc: 'Pan de focaccia, lactonesa de albahaca, rúcula, tomates frescos, ternera desmenuzada en vino tinto y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
     ],
   },
 
