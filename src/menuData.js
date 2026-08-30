@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/08/2026 23:16
+// menuData.js — Generado el 30/08/2026 23:19
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -137,9 +137,9 @@ export const MENU = {
       { sep: 'Cervezas en Botella' },
       { name: 'Imperial Litro', price: '$9.500', desc: 'Golden o Extra Lagger.', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg' },
       { name: 'Heineken Litro', price: '$10.500', desc: '', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
-      { name: 'Heineken 330 CC', price: '$4.200', desc: '', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
-      { name: 'Heineken 0.0 330 CC', price: '$5.500', desc: 'Sin Alcohol.', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
-      { name: 'Imperial 330 CC', price: '$4.400', desc: '', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg' },
+      { name: 'Heineken 330 CC', price: '$5.500', desc: '', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
+      { name: 'Heineken 0.0 330 CC', price: '$4.400', desc: 'Sin Alcohol.', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg' },
+      { name: 'Imperial 330 CC', price: '$4.200', desc: '', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg' },
       { sep: 'Para Disfrutar con amigos' },
       { name: 'Balde Heineken x6', price: '$27.500', desc: 'Paga 5 y te llevas 6.', imageUrl: 'https://bruzz.com.ar/img/heineken.jpg', badge: 'Balde' },
       { name: 'Balde Imperial Golden x6', price: '$21.000', desc: 'Paga 5 y te llevas 6.', imageUrl: 'https://bruzz.com.ar/img/imperial.jpg', badge: 'Balde' },
