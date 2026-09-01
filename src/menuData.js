@@ -221,13 +221,5 @@ export const CAFETERIA = [
   { name: 'Limonada', price: '$6.900', desc: 'Limonada fresca.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
 ];
 
-export const PROMOS = [
-  {
-    id: 1,
-    titulo: 'Happy',
-    desc: 'testeo',
-    precio: '15',
-    tag: 'A',
-    activa: true,
-  },
+
 ];
