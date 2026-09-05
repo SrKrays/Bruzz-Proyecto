@@ -6,9 +6,7 @@ export const CATEGORIAS = [
   { id: 'bebidas',   name: 'Bebidas',   desc: 'Cervezas, gaseosas, Vinos..', imageUrl: 'https://bruzz.com.ar/img/pintas.jpg' },
   { id: 'tragos',    name: 'Tragos',    desc: 'Los Mejores Cócteles',        imageUrl: 'https://bruzz.com.ar/img/gin.png' },
   { id: 'postres',   name: 'Postres',   desc: 'Dulce final perfecto',        imageUrl: 'https://bruzz.com.ar/img/postres.jpg' },
-  { id: 'cafeteria', name: 'Cafetería', desc: 'Café, infusiones y más',      imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
-  { id: 'promos',    name: 'Promos',    desc: '¡Ofertas de hoy!',            imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
-];
+  { id: 'cafeteria', name: 'Cafetería', desc: 'Café, infusiones y más',      imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },];
 
 export const SUBCATEGORIAS = {
   comidas: [
