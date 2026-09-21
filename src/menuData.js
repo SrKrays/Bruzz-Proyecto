@@ -1,4 +1,4 @@
-// menuData.js — Generado el 21/09/2026 00:54
+// menuData.js — Generado el 21/09/2026 00:55
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -112,7 +112,6 @@ export const MENU = {
     title: 'Sin Alcohol', back: 'bebidas',
     items: [
       { name: 'Coca 1.25', price: '$8.100', desc: 'sin alcohol', imageUrl: 'https://bruzz.com.ar/img/1783215054-logotipo-de-coca-cola-en-la-pantalla-de-.webp' },
-      { name: 'Coca 1.5 descartable ', price: '$8.100', desc: 'Solo para delivery o Take Away ', imageUrl: 'https://bruzz.com.ar/img/1783718243-carta3--.jpg' },
       { name: 'Agua mineral CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua con gas CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua Saborisada CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/aquarius.png' },
