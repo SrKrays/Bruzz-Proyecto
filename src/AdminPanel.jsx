@@ -277,6 +277,23 @@ const ADMIN_CSS = `
   }
   .adm-cat-filter-btn--active .adm-cat-filter-count { color: var(--gold); background: rgba(245,200,66,0.12); }
 
+  .adm-cat-filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+  .adm-cat-filter-subs {
+    display: flex; flex-direction: column; gap: 0.2rem;
+    padding-left: 0.6rem; margin-top: 0.15rem;
+    border-left: 1px solid rgba(255,255,255,0.08);
+  }
+  .adm-cat-filter-subbtn {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid transparent;
+    background: transparent; color: var(--muted); font-size: 0.78rem; text-align: left;
+    transition: background var(--fast), border-color var(--fast), color var(--fast);
+  }
+  .adm-cat-filter-subbtn:hover { background: rgba(255,255,255,0.05); color: var(--cream); }
+  .adm-cat-filter-subbtn--active {
+    background: rgba(245,200,66,0.08); border-color: var(--gold-border); color: var(--gold); font-weight: 600;
+  }
+
   /* ── Formulario agregar ─────────────────────────────── */
   .adm-form-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 520px; }
   .adm-check-label { color: var(--cream); display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; cursor: pointer; }
@@ -739,6 +756,12 @@ function Dashboard({ token, nombre, onLogout }) {
   const [mensaje, setMensaje]     = useState('');
   const [filtro, setFiltro]       = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState(null); // null = todas
+  const [subcatActiva, setSubcatActiva] = useState(null); // null = todas las de la categoría
+
+  const seleccionarCategoria = (id) => {
+    setCategoriaActiva(id === categoriaActiva ? null : id);
+    setSubcatActiva(null);
+  };
 
   const headers = {
     'Content-Type': 'application/json',
@@ -915,10 +938,19 @@ function Dashboard({ token, nombre, onLogout }) {
       .filter(g => g.subcatGrupos.length > 0);
   }, [categorias, subcats, itemsFiltrados]);
 
-  // ── Filtro por categoría elegida en el panel derecho ──
-  const gruposVisibles = categoriaActiva
-    ? gruposPorCategoria.filter(g => g.categoria.id === categoriaActiva)
-    : gruposPorCategoria;
+  // ── Filtro por categoría (y opcionalmente subcategoría) elegida en el panel derecho ──
+  const gruposVisibles = useMemo(() => {
+    let grupos = categoriaActiva
+      ? gruposPorCategoria.filter(g => g.categoria.id === categoriaActiva)
+      : gruposPorCategoria;
+    if (subcatActiva) {
+      grupos = grupos.map(g => ({
+        ...g,
+        subcatGrupos: g.subcatGrupos.filter(sg => sg.subcat.id === subcatActiva),
+      })).filter(g => g.subcatGrupos.length > 0);
+    }
+    return grupos;
+  }, [gruposPorCategoria, categoriaActiva, subcatActiva]);
 
   return (
     <div className="adm-root">
@@ -1030,22 +1062,44 @@ function Dashboard({ token, nombre, onLogout }) {
                           <span className="adm-cat-filter-title">Categorías</span>
                           <button
                             className={`adm-cat-filter-btn${categoriaActiva === null ? ' adm-cat-filter-btn--active' : ''}`}
-                            onClick={() => setCategoriaActiva(null)}
+                            onClick={() => seleccionarCategoria(null)}
                           >
                             <span>Todas</span>
                             <span className="adm-cat-filter-count">{itemsFiltrados.length}</span>
                           </button>
                           {gruposPorCategoria.map(({ categoria, subcatGrupos }) => {
                             const total = subcatGrupos.reduce((acc, g) => acc + g.items.length, 0);
+                            const activa = categoriaActiva === categoria.id;
                             return (
-                              <button
-                                key={categoria.id}
-                                className={`adm-cat-filter-btn${categoriaActiva === categoria.id ? ' adm-cat-filter-btn--active' : ''}`}
-                                onClick={() => setCategoriaActiva(categoria.id === categoriaActiva ? null : categoria.id)}
-                              >
-                                <span>{categoria.nombre}</span>
-                                <span className="adm-cat-filter-count">{total}</span>
-                              </button>
+                              <div key={categoria.id} className="adm-cat-filter-group">
+                                <button
+                                  className={`adm-cat-filter-btn${activa ? ' adm-cat-filter-btn--active' : ''}`}
+                                  onClick={() => seleccionarCategoria(categoria.id)}
+                                >
+                                  <span>{categoria.nombre}</span>
+                                  <span className="adm-cat-filter-count">{total}</span>
+                                </button>
+                                {activa && (
+                                  <div className="adm-cat-filter-subs">
+                                    <button
+                                      className={`adm-cat-filter-subbtn${subcatActiva === null ? ' adm-cat-filter-subbtn--active' : ''}`}
+                                      onClick={() => setSubcatActiva(null)}
+                                    >
+                                      Todas
+                                    </button>
+                                    {subcatGrupos.map(({ subcat, items: itemsSub }) => (
+                                      <button
+                                        key={subcat.id}
+                                        className={`adm-cat-filter-subbtn${subcatActiva === subcat.id ? ' adm-cat-filter-subbtn--active' : ''}`}
+                                        onClick={() => setSubcatActiva(subcat.id === subcatActiva ? null : subcat.id)}
+                                      >
+                                        <span>↳ {subcat.nombre}</span>
+                                        <span className="adm-cat-filter-count">{itemsSub.length}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
                         </aside>
