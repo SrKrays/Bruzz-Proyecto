@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import logo from './assets/logo.png';
 
 const API = 'https://bruzz-api.onrender.com';
@@ -210,7 +210,42 @@ const ADMIN_CSS = `
   .adm-item-desc-row .adm-input { flex: 1; }
   .adm-item-desc-texto { color: var(--muted); font-size: 0.85rem; flex: 1; }
 
-  .adm-item-papas-check { margin-top: 0.5rem; font-size: 0.82rem; }
+  /* ── Chip de papas sazonadas ─────────────────────────── */
+  .adm-chip-papas {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.6rem; padding: 0.35rem 0.8rem;
+    border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    background: rgba(255,255,255,0.04); color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer; transition: filter var(--fast), transform var(--fast), background var(--fast), color var(--fast), border-color var(--fast);
+  }
+  .adm-chip-papas:hover { transform: translateY(-1px); border-color: rgba(255,159,67,0.4); }
+  .adm-chip-papas-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.25); flex-shrink: 0;
+    transition: background var(--fast);
+  }
+  .adm-chip-papas--on {
+    background: linear-gradient(135deg, rgba(255,159,67,0.22), rgba(255,111,0,0.14));
+    color: #ffb26b; border-color: rgba(255,159,67,0.5);
+  }
+  .adm-chip-papas--on .adm-chip-papas-dot { background: #ff9f43; box-shadow: 0 0 6px rgba(255,159,67,0.8); }
+  .adm-chip-papas--sm { font-size: 0.76rem; padding: 0.3rem 0.7rem; }
+
+  /* ── Agrupado por Categoría / Subcategoría ───────────── */
+  .adm-grupos { display: flex; flex-direction: column; gap: 2rem; }
+  .adm-categoria-grupo { display: flex; flex-direction: column; gap: 1.1rem; }
+  .adm-categoria-titulo {
+    color: var(--gold); font-size: 1.15rem; letter-spacing: 0.03em;
+    text-transform: uppercase; border-bottom: 1px solid var(--gold-border);
+    padding-bottom: 0.5rem; margin: 0;
+  }
+  .adm-subcat-grupo { display: flex; flex-direction: column; gap: 0.7rem; }
+  .adm-subcat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.6rem;
+  }
+  .adm-subcat-titulo { color: var(--cream); font-size: 0.98rem; margin: 0; opacity: 0.85; }
 
   /* ── Formulario agregar ─────────────────────────────── */
   .adm-form-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 520px; }
@@ -572,14 +607,14 @@ function ItemRow({ item, subcats, onPrecio, onDescripcion, onMover, onTogglePapa
       </div>
 
       {/* ── Papas sazonadas (solo tiene sentido si el plato viene con papas) ── */}
-      <label className="adm-check-label adm-item-papas-check">
-        <input
-          type="checkbox"
-          checked={!!item.tienePapasFritas}
-          onChange={() => onTogglePapas(item)}
-        />
-        🌶 Ofrecer papas sazonadas (sabor Dorito) para este plato
-      </label>
+      <button
+        type="button"
+        className={`adm-chip-papas adm-chip-papas--sm${item.tienePapasFritas ? ' adm-chip-papas--on' : ''}`}
+        onClick={() => onTogglePapas(item)}
+      >
+        <span className="adm-chip-papas-dot" />
+        🌶 {item.tienePapasFritas ? 'Sazonadas activadas' : 'Ofrecer papas sazonadas'}
+      </button>
 
       {/* ── Panel de imagen (se despliega al tocar 🖼 Imagen) ── */}
       {mostrarImg && (
@@ -661,12 +696,13 @@ function AgregarProducto({ token, subcats, onGuardado }) {
 
 // ── Dashboard ────────────────────────────────────────────────
 function Dashboard({ token, nombre, onLogout }) {
-  const [seccion, setSeccion] = useState('items');
-  const [items, setItems]     = useState([]);
-  const [subcats, setSubcats] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [mensaje, setMensaje] = useState('');
-  const [filtro, setFiltro]   = useState('');
+  const [seccion, setSeccion]     = useState('items');
+  const [items, setItems]         = useState([]);
+  const [subcats, setSubcats]     = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [loading, setLoading]     = useState(false);
+  const [mensaje, setMensaje]     = useState('');
+  const [filtro, setFiltro]       = useState('');
 
   const headers = {
     'Content-Type': 'application/json',
@@ -684,6 +720,7 @@ function Dashboard({ token, nombre, onLogout }) {
       const dataMenu  = await resMenu.json();
       setItems(dataItems);
       setSubcats(dataMenu.subcategorias);
+      setCategorias(dataMenu.categorias);
     } catch {
       setMensaje('❌ Error al cargar datos');
     } finally {
@@ -737,6 +774,25 @@ function Dashboard({ token, nombre, onLogout }) {
       toast('✅ Actualizado');
     } catch {
       toast('❌ Error al actualizar');
+    }
+  };
+
+  const handleBulkPapas = async (subcategoriaId, activar) => {
+    const afectados = items.filter(i => i.subcategoriaId === subcategoriaId && !i.esSeparador);
+    if (afectados.length === 0) return;
+    try {
+      await Promise.all(afectados.map(it =>
+        fetch(`${API}/api/items/${it.id}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ ...it, tienePapasFritas: activar })
+        })
+      ));
+      const ids = new Set(afectados.map(a => a.id));
+      setItems(prev => prev.map(i => ids.has(i.id) ? { ...i, tienePapasFritas: activar } : i));
+      toast(activar ? '✅ Sazonadas activadas para toda la categoría' : '✅ Sazonadas desactivadas para toda la categoría');
+    } catch {
+      toast('❌ Error al actualizar la categoría');
     }
   };
 
@@ -804,6 +860,25 @@ function Dashboard({ token, nombre, onLogout }) {
     i.nombre.toLowerCase().includes(filtro.toLowerCase())
   );
 
+  // ── Agrupar por Categoría > Subcategoría, en el mismo orden que la carta real ──
+  const gruposPorCategoria = useMemo(() => {
+    const subcatsOrdenadas    = [...subcats].sort((a, b) => a.orden - b.orden);
+    const categoriasOrdenadas = [...categorias].sort((a, b) => a.orden - b.orden);
+
+    return categoriasOrdenadas
+      .map(cat => {
+        const subcatGrupos = subcatsOrdenadas
+          .filter(s => s.categoriaId === cat.id)
+          .map(sub => ({
+            subcat: sub,
+            items: itemsFiltrados.filter(i => i.subcategoriaId === sub.id),
+          }))
+          .filter(g => g.items.length > 0);
+        return { categoria: cat, subcatGrupos };
+      })
+      .filter(g => g.subcatGrupos.length > 0);
+  }, [categorias, subcats, itemsFiltrados]);
+
   return (
     <div className="adm-root">
       <div className="adm-dash">
@@ -857,24 +932,47 @@ function Dashboard({ token, nombre, onLogout }) {
                 </div>
                 {loading
                   ? <p className="adm-loading">Cargando productos...</p>
-                  : itemsFiltrados.length === 0
+                  : gruposPorCategoria.length === 0
                     ? <p className="adm-empty">No se encontraron productos.</p>
                     : (
-                      <div className="adm-tabla">
-                        {itemsFiltrados.map(item => (
-                          <ItemRow
-                            key={item.id}
-                            item={item}
-                            subcats={subcats}
-                            token={token}
-                            onPrecio={handlePrecio}
-                            onDescripcion={handleDescripcion}
-                            onMover={handleMover}
-                            onTogglePapas={handleTogglePapas}
-                            onToggle={handleToggle}
-                            onEliminar={handleEliminar}
-                            onImagenActualizada={handleImagenActualizada}
-                          />
+                      <div className="adm-grupos">
+                        {gruposPorCategoria.map(({ categoria, subcatGrupos }) => (
+                          <section key={categoria.id} className="adm-categoria-grupo">
+                            <h2 className="adm-categoria-titulo">{categoria.nombre}</h2>
+                            {subcatGrupos.map(({ subcat, items: itemsSub }) => {
+                              const todasSazonadas = itemsSub.every(i => i.tienePapasFritas);
+                              return (
+                                <div key={subcat.id} className="adm-subcat-grupo">
+                                  <div className="adm-subcat-header">
+                                    <h3 className="adm-subcat-titulo">{subcat.nombre}</h3>
+                                    <button
+                                      className={`adm-chip-papas${todasSazonadas ? ' adm-chip-papas--on' : ''}`}
+                                      onClick={() => handleBulkPapas(subcat.id, !todasSazonadas)}
+                                    >
+                                      🌶 {todasSazonadas ? 'Sazonadas activas para todos' : 'Activar sazonadas para todos'}
+                                    </button>
+                                  </div>
+                                  <div className="adm-tabla">
+                                    {itemsSub.map(item => (
+                                      <ItemRow
+                                        key={item.id}
+                                        item={item}
+                                        subcats={subcats}
+                                        token={token}
+                                        onPrecio={handlePrecio}
+                                        onDescripcion={handleDescripcion}
+                                        onMover={handleMover}
+                                        onTogglePapas={handleTogglePapas}
+                                        onToggle={handleToggle}
+                                        onEliminar={handleEliminar}
+                                        onImagenActualizada={handleImagenActualizada}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </section>
                         ))}
                       </div>
                     )
