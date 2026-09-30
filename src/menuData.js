@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/09/2026 06:39
+// menuData.js — Generado el 30/09/2026 23:59
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -42,13 +42,13 @@ export const MENU = {
       { name: 'Quattro Formaggi', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Margherita', price: '$18.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, albahaca fresca, aceite de oliva.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Pizza Bruzz', price: '$24.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cebolla caramelizada con roquefort, morrón, lomo ahumado, orégano.', imageUrl: 'https://bruzz.com.ar/img/image.png', badge: '✦ Firma' },
-      { name: 'Napolitana', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, muzzarella, rodajas de tomate fresco, aceite de ajo y orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
+      { name: 'Napolitana', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, muzzarella, rodajas de tomate fresco, chimi de la casa y orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Dolce Pera', price: '$24.900', desc: 'Pizza estilo napolitano, base de aceite de oliva extra virgen, muzzarella, roquefort, pera, nueces, miel, cebolla de verdeo.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Dolce', price: '$22.900', desc: 'Pizza estilo napolitano, base de aceite de oliva extra virgen, muzzarella, roquefort, sardo, nueces, miel.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Panceta Affumicata', price: '$24.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, panceta ahumada, romero, humo, queso parmesano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
       { name: 'Acciuga', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, cherrys confitados en oliva, filete de anchoa, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Speciale', price: '$24.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, morrón, jamón, huevo hilado, aceitunas, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg', badge: '✦ Firma' },
-      { name: 'Fugazza', price: '$22.600', desc: 'Pizza estilo napolitano, mozzarella, abundante cebolla en pluma, aceite de oliva, aceitunas negras, sal de campo.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
+      { name: 'Fugazza', price: '$22.600', desc: 'Pizza estilo napolitano, mozzarella, abundante cebolla en pluma, aceite de oliva, aceitunas negras, chimi de la casa y sal de campo.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
     ],
   },
 
@@ -203,6 +203,7 @@ export const POSTRES = [
 ];
 
 export const CAFETERIA = [
+  { name: 'Licuado mas tostado ', price: '$11.900', desc: 'Tostado con pan de molde lactonesa, jamón y queso mas un licuado a elección. (frutilla, banana o durazno) ', imageUrl: '' },
   { sep: 'Cafetería' },
   { name: 'Corto', price: '$2.500', desc: 'Café chico.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Lungo', price: '$2.600', desc: 'Café en jarro.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
