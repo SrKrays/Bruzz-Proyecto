@@ -247,6 +247,36 @@ const ADMIN_CSS = `
   }
   .adm-subcat-titulo { color: var(--cream); font-size: 0.98rem; margin: 0; opacity: 0.85; }
 
+  /* ── Layout con panel de categorías a la derecha ─────── */
+  .adm-items-layout { display: flex; align-items: flex-start; gap: 1.5rem; }
+  .adm-items-main { flex: 1; min-width: 0; }
+  .adm-cat-filter-panel {
+    width: 220px; flex-shrink: 0;
+    background: var(--dark2); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 1rem;
+    position: sticky; top: 1.5rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .adm-cat-filter-title {
+    color: var(--muted); font-size: 0.72rem; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 0.25rem;
+  }
+  .adm-cat-filter-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    padding: 0.55rem 0.75rem; border-radius: 10px; border: 1px solid transparent;
+    background: transparent; color: var(--cream); font-size: 0.85rem; text-align: left;
+    transition: background var(--fast), border-color var(--fast), color var(--fast);
+  }
+  .adm-cat-filter-btn:hover { background: rgba(255,255,255,0.05); }
+  .adm-cat-filter-btn--active {
+    background: var(--gold-ghost); border-color: var(--gold-border); color: var(--gold); font-weight: 600;
+  }
+  .adm-cat-filter-count {
+    font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.06);
+    border-radius: 999px; padding: 0.1rem 0.5rem;
+  }
+  .adm-cat-filter-btn--active .adm-cat-filter-count { color: var(--gold); background: rgba(245,200,66,0.12); }
+
   /* ── Formulario agregar ─────────────────────────────── */
   .adm-form-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 520px; }
   .adm-check-label { color: var(--cream); display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; cursor: pointer; }
@@ -318,6 +348,7 @@ const ADMIN_CSS = `
     .adm-content-body { padding: 1.25rem 1.5rem; }
     .adm-item-row { flex-wrap: wrap; }
     .adm-item-acciones { flex-wrap: wrap; justify-content: flex-end; }
+    .adm-cat-filter-panel { width: 180px; }
   }
 
   /* ── Responsive celular (600px) — recién acá la sidebar deja de
@@ -352,6 +383,10 @@ const ADMIN_CSS = `
     .adm-btn-sm { font-size: 0.78rem; padding: 0.45rem 0.65rem; }
 
     .adm-toast { left: 1rem; right: 1rem; top: 1rem; }
+
+    .adm-items-layout { flex-direction: column-reverse; }
+    .adm-cat-filter-panel { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; }
+    .adm-cat-filter-title { width: 100%; }
   }
 `;
 
@@ -703,6 +738,7 @@ function Dashboard({ token, nombre, onLogout }) {
   const [loading, setLoading]     = useState(false);
   const [mensaje, setMensaje]     = useState('');
   const [filtro, setFiltro]       = useState('');
+  const [categoriaActiva, setCategoriaActiva] = useState(null); // null = todas
 
   const headers = {
     'Content-Type': 'application/json',
@@ -879,6 +915,11 @@ function Dashboard({ token, nombre, onLogout }) {
       .filter(g => g.subcatGrupos.length > 0);
   }, [categorias, subcats, itemsFiltrados]);
 
+  // ── Filtro por categoría elegida en el panel derecho ──
+  const gruposVisibles = categoriaActiva
+    ? gruposPorCategoria.filter(g => g.categoria.id === categoriaActiva)
+    : gruposPorCategoria;
+
   return (
     <div className="adm-root">
       <div className="adm-dash">
@@ -935,45 +976,79 @@ function Dashboard({ token, nombre, onLogout }) {
                   : gruposPorCategoria.length === 0
                     ? <p className="adm-empty">No se encontraron productos.</p>
                     : (
-                      <div className="adm-grupos">
-                        {gruposPorCategoria.map(({ categoria, subcatGrupos }) => (
-                          <section key={categoria.id} className="adm-categoria-grupo">
-                            <h2 className="adm-categoria-titulo">{categoria.nombre}</h2>
-                            {subcatGrupos.map(({ subcat, items: itemsSub }) => {
-                              const todasSazonadas = itemsSub.every(i => i.tienePapasFritas);
-                              return (
-                                <div key={subcat.id} className="adm-subcat-grupo">
-                                  <div className="adm-subcat-header">
-                                    <h3 className="adm-subcat-titulo">{subcat.nombre}</h3>
-                                    <button
-                                      className={`adm-chip-papas${todasSazonadas ? ' adm-chip-papas--on' : ''}`}
-                                      onClick={() => handleBulkPapas(subcat.id, !todasSazonadas)}
-                                    >
-                                      🌶 {todasSazonadas ? 'Sazonadas activas para todos' : 'Activar sazonadas para todos'}
-                                    </button>
-                                  </div>
-                                  <div className="adm-tabla">
-                                    {itemsSub.map(item => (
-                                      <ItemRow
-                                        key={item.id}
-                                        item={item}
-                                        subcats={subcats}
-                                        token={token}
-                                        onPrecio={handlePrecio}
-                                        onDescripcion={handleDescripcion}
-                                        onMover={handleMover}
-                                        onTogglePapas={handleTogglePapas}
-                                        onToggle={handleToggle}
-                                        onEliminar={handleEliminar}
-                                        onImagenActualizada={handleImagenActualizada}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </section>
-                        ))}
+                      <div className="adm-items-layout">
+                        <div className="adm-items-main">
+                          {gruposVisibles.length === 0
+                            ? <p className="adm-empty">No hay productos en esta categoría.</p>
+                            : (
+                              <div className="adm-grupos">
+                                {gruposVisibles.map(({ categoria, subcatGrupos }) => (
+                                  <section key={categoria.id} className="adm-categoria-grupo">
+                                    <h2 className="adm-categoria-titulo">{categoria.nombre}</h2>
+                                    {subcatGrupos.map(({ subcat, items: itemsSub }) => {
+                                      const todasSazonadas = itemsSub.every(i => i.tienePapasFritas);
+                                      return (
+                                        <div key={subcat.id} className="adm-subcat-grupo">
+                                          <div className="adm-subcat-header">
+                                            <h3 className="adm-subcat-titulo">{subcat.nombre}</h3>
+                                            <button
+                                              className={`adm-chip-papas${todasSazonadas ? ' adm-chip-papas--on' : ''}`}
+                                              onClick={() => handleBulkPapas(subcat.id, !todasSazonadas)}
+                                            >
+                                              🌶 {todasSazonadas ? 'Sazonadas activas para todos' : 'Activar sazonadas para todos'}
+                                            </button>
+                                          </div>
+                                          <div className="adm-tabla">
+                                            {itemsSub.map(item => (
+                                              <ItemRow
+                                                key={item.id}
+                                                item={item}
+                                                subcats={subcats}
+                                                token={token}
+                                                onPrecio={handlePrecio}
+                                                onDescripcion={handleDescripcion}
+                                                onMover={handleMover}
+                                                onTogglePapas={handleTogglePapas}
+                                                onToggle={handleToggle}
+                                                onEliminar={handleEliminar}
+                                                onImagenActualizada={handleImagenActualizada}
+                                              />
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </section>
+                                ))}
+                              </div>
+                            )
+                          }
+                        </div>
+
+                        {/* ── Panel derecho: filtro rápido por categoría ── */}
+                        <aside className="adm-cat-filter-panel">
+                          <span className="adm-cat-filter-title">Categorías</span>
+                          <button
+                            className={`adm-cat-filter-btn${categoriaActiva === null ? ' adm-cat-filter-btn--active' : ''}`}
+                            onClick={() => setCategoriaActiva(null)}
+                          >
+                            <span>Todas</span>
+                            <span className="adm-cat-filter-count">{itemsFiltrados.length}</span>
+                          </button>
+                          {gruposPorCategoria.map(({ categoria, subcatGrupos }) => {
+                            const total = subcatGrupos.reduce((acc, g) => acc + g.items.length, 0);
+                            return (
+                              <button
+                                key={categoria.id}
+                                className={`adm-cat-filter-btn${categoriaActiva === categoria.id ? ' adm-cat-filter-btn--active' : ''}`}
+                                onClick={() => setCategoriaActiva(categoria.id === categoriaActiva ? null : categoria.id)}
+                              >
+                                <span>{categoria.nombre}</span>
+                                <span className="adm-cat-filter-count">{total}</span>
+                              </button>
+                            );
+                          })}
+                        </aside>
                       </div>
                     )
                 }
