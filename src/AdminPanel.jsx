@@ -857,12 +857,22 @@ function Dashboard({ token, nombre, onLogout }) {
 
   const handleMover = async (id, direccion) => {
     try {
-      await fetch(`${API}/api/items/${id}/mover`, {
+      const res  = await fetch(`${API}/api/items/${id}/mover`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ direccion })
       });
-      await cargarDatos();
+      const data = await res.json();
+      // El backend devuelve los nuevos "orden" del item movido y su vecino
+      // (swap). Actualizamos el estado local en vez de recargar todo desde
+      // cero, así no hay parpadeo ni se pierde el scroll/filtro activo.
+      if (data.item && data.vecino) {
+        setItems(prev => prev.map(i => {
+          if (i.id === data.item.id)   return { ...i, orden: data.item.orden };
+          if (i.id === data.vecino.id) return { ...i, orden: data.vecino.orden };
+          return i;
+        }));
+      }
     } catch {
       toast('❌ Error al reordenar');
     }
@@ -930,7 +940,7 @@ function Dashboard({ token, nombre, onLogout }) {
           .filter(s => s.categoriaId === cat.id)
           .map(sub => ({
             subcat: sub,
-            items: itemsFiltrados.filter(i => i.subcategoriaId === sub.id),
+            items: itemsFiltrados.filter(i => i.subcategoriaId === sub.id).sort((a, b) => a.orden - b.orden),
           }))
           .filter(g => g.items.length > 0);
         return { categoria: cat, subcatGrupos };
