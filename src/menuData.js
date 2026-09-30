@@ -75,7 +75,7 @@ export const MENU = {
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
       { name: 'Combo Simple', price: '$15.300', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
       { name: 'Combo Completa', price: '$17.100', desc: 'Hamburguesa completa mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
-      { name: 'Di Lusso', price: '$14.400', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/di.jpeg' },
+      { name: 'Combo Di Lusso', price: '$17.100', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/di.jpeg', badge: 'Combo' },
 
       { name: 'Combo Bruzz', price: '$17.500', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: 'Combo' },
       { name: 'Combo Veggie', price: '$15.900', desc: 'Hamburguesa vegana mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo' },
@@ -154,7 +154,6 @@ export const MENU = {
     items: [
       { sep: 'Vinos' },
       { name: 'Copa de Vino', price: '$4.000', desc: 'Copa de vino de Las Perdices Malbec reserva.', imageUrl: 'https://bruzz.com.ar/img/vino.jpg' },
-      { name: 'Santa Julia Chardonnay', price: '$8.500', desc: 'Vino blanco Chardonnay, Santa Julia.', imageUrl: 'https://bruzz.com.ar/img/santa.jpeg' },
       { name: 'Espumante Dada 7', price: '$19.900', desc: 'Espumante Dada 7.', imageUrl: 'https://bruzz.com.ar/img/dada.jpg' },
       { name: 'Luigi Bosca Malbec', price: '$25.300', desc: 'Vino tinto Malbec, Luigi Bosca.', imageUrl: 'https://bruzz.com.ar/img/bosca.jpg' },
       { name: 'Alma Mora Malbec', price: '$9.500', desc: 'Vino tinto Malbec, Alma Mora.', imageUrl: 'https://bruzz.com.ar/img/alma.jpg' },

@@ -5,7 +5,7 @@
 //  - Pintas: ahora es un carrusel con TODAS las pintas. Click
 //    no navega a ningún lado — abre una ficha de detalle.
 //  - Promos Dely: click abre la misma ficha de detalle, con
-//    botón "Agregar al carrito" (carrito real de la app).
+//    botón "Agregar al carrito" (carrito real de la app)
 //  - Promos de la semana: ya no se dan vuelta (se sacó el flip).
 //    Click abre la misma ficha de detalle, con botón
 //    "Llamar mozo" (WhatsApp).
@@ -127,12 +127,12 @@ const PINTAS_EJEMPLO = [
 const PROMOS_DELY = [
   {
     id: 2, titulo: '2 Sandwiches de Ternera', desc: 'Completos. Con papas!', tag: 'DELY',
-    precio: '$25.000',
-    imageUrl: 'https://bruzz.com.ar/img/ternera-promo.jpg',
+    precio: '$37.000',
+    imageUrl: 'https://bruzz.com.ar/img/ternera-promo2.png',
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
   },
   {
@@ -141,48 +141,35 @@ const PROMOS_DELY = [
     imageUrl: 'https://bruzz.com.ar/img/pizza-promo.jpg',
     atributos: [
       { icon: '🍕', label: 'Incluye', value: '3 pizzas a elección' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
     opciones: ['Prosciutto Cotto', 'Quattro Formaggi', 'Margherita', 'Napolitana', 'Dolce'],
     maxSelect: 3,
   },
   {
     id: 4, titulo: '2 Burgers Completas', desc: 'Completas. Con papas!', tag: 'DELY',
-    precio: '$25.000',
-    imageUrl: 'https://bruzz.com.ar/img/burger-promo.jpg',
+    precio: '$24.500',
+    imageUrl: 'https://bruzz.com.ar/img/Pburger.png',
     atributos: [
       { icon: '🍔', label: 'Incluye', value: '2 hamburguesas completas + Papas fritas' },
-      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely' },
-      { icon: '🕐', label: 'Válido', value: 'Lunes , Martes , Miercoles , Jueves y Domingo' },
+      { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
+      { icon: '🕐', label: 'Válido', value: 'Martes , Miercoles , Jueves y Domingo' },
     ],
   },
 ];
 
 // ── Promos semanales — click abre ficha con botón "Llamar
 //    mozo" (ya no se dan vuelta in-place). ────────────────────
-// ⚠️ EVENTO PUNTUAL — "Circuito Gastronómico: Siete Días de Pizzas"
-// (27 jul – 2 ago). Mientras dure, las promos de consumo local de
-// siempre quedan pausadas (`disponible: false`, se ve atenuada la
-// card y no abre la ficha) y esta es la única activa. Pasada la
-// semana: borrar `w0` y sacar `disponible: false` de w1/w2/w3.
 const PROMOS_SEMANALES = [
   {
-    id: 'w0', dia: 'Circuito Gastronómico', titulo: '30% OFF en Pizzas',
-    desc: 'Toda la semana (27 jul al 2 ago), pagando en efectivo o transferencia',
-    condicion: 'Efectivo o transferencia',
-    imageUrl: 'https://bruzz.com.ar/img/pizza-promo.jpg',
-    destacado: true,
-  },
-  {
     id: 'w1', dia: 'Martes', titulo: '3x2 en Pintas y 50% en la segunda Pizza',
-    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', condicion: 'Efectivo o transferencia',
+    desc: '3x2 en pintas de cerveza y 50% en la segunda Pizza', condicion: 'Efectivo o transferencia  (Solo consumo local)',
     imageUrl: 'https://bruzz.com.ar/img/pintas.jpg',
     imgPosition: '50% 25%', // ⚠️ smartcrop la recortaba muy cerrada — encuadre manual, ajustá el % si hace falta
-    disponible: false,
   },
-  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa', condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', disponible: false },
-  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',     condicion: 'Efectivo o transferencia', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg', disponible: false },
+  { id: 'w2', dia: 'Miércoles', titulo: '50% OFF', desc: '50% en la segunda hamburguesa',  condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
+  { id: 'w3', dia: 'Jueves',    titulo: '20% OFF', desc: '20% en Sandwich de Ternera',     condicion: 'Efectivo o transferencia  (Solo consumo local)', imageUrl: 'https://bruzz.com.ar/img/ternera.jpg' },
 ];
 
 // ── Entrada escalonada del mosaico ────────────────────────
@@ -965,7 +952,7 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
       />
 
       {/* ── Promos Dely (carrusel, click abre ficha + agregar al carrito) ── */}
-      <PromoSectionLabel icon="🛵">Promos Dely</PromoSectionLabel>
+      <PromoSectionLabel icon="🛵">Promos Dely o Take away </PromoSectionLabel>
       <PromoCarousel
         promos={PROMOS_DELY}
         onCardClick={(promo) => setDetalle({ promo, tipo: 'dely' })}
