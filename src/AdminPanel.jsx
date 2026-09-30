@@ -202,6 +202,16 @@ const ADMIN_CSS = `
   .adm-btn-toggle-show { background: rgba(76,175,80,0.1); color: #6fcf97; border: 1px solid rgba(76,175,80,0.25); }
   .adm-btn-del    { background: rgba(224,82,82,0.1);  color: #f87171; border: 1px solid rgba(224,82,82,0.25); padding: 0.4rem 0.6rem; }
 
+  .adm-item-orden { display: flex; flex-direction: column; gap: 2px; }
+  .adm-btn-mover  { background: var(--dark3); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); padding: 0.15rem 0.5rem; line-height: 1; }
+  .adm-btn-mover:hover { color: var(--gold); border-color: var(--gold-border); }
+
+  .adm-item-desc-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.06); }
+  .adm-item-desc-row .adm-input { flex: 1; }
+  .adm-item-desc-texto { color: var(--muted); font-size: 0.85rem; flex: 1; }
+
+  .adm-item-papas-check { margin-top: 0.5rem; font-size: 0.82rem; }
+
   /* ── Formulario agregar ─────────────────────────────── */
   .adm-form-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 520px; }
   .adm-check-label { color: var(--cream); display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; cursor: pointer; }
@@ -466,9 +476,11 @@ function LoginPage({ onLogin }) {
 }
 
 // ── Fila de item ─────────────────────────────────────────────
-function ItemRow({ item, subcats, onPrecio, onToggle, onEliminar, onImagenActualizada, token }) {
+function ItemRow({ item, subcats, onPrecio, onDescripcion, onMover, onTogglePapas, onToggle, onEliminar, onImagenActualizada, token }) {
   const [editando, setEditando]       = useState(false);
   const [precio, setPrecio]           = useState(item.precio);
+  const [editandoDesc, setEditandoDesc] = useState(false);
+  const [descripcion, setDescripcion] = useState(item.descripcion);
   const [mostrarImg, setMostrarImg]   = useState(false);
   const sub = subcats.find(s => s.id === item.subcategoriaId);
 
@@ -530,9 +542,44 @@ function ItemRow({ item, subcats, onPrecio, onToggle, onEliminar, onImagenActual
           >
             {item.activo ? '○ Ocultar' : '● Mostrar'}
           </button>
+          <div className="adm-item-orden">
+            <button className="adm-btn-sm adm-btn-mover" onClick={() => onMover(item.id, 'arriba')} aria-label="Subir">▲</button>
+            <button className="adm-btn-sm adm-btn-mover" onClick={() => onMover(item.id, 'abajo')} aria-label="Bajar">▼</button>
+          </div>
           <button className="adm-btn-sm adm-btn-del" onClick={() => onEliminar(item.id)}>🗑</button>
         </div>
       </div>
+
+      {/* ── Descripción (editable) ── */}
+      <div className="adm-item-desc-row">
+        {editandoDesc ? (
+          <>
+            <input
+              className="adm-input"
+              value={descripcion}
+              onChange={e => setDescripcion(e.target.value)}
+              autoFocus
+            />
+            <button className="adm-btn-sm adm-btn-save" onClick={() => { onDescripcion(item, descripcion); setEditandoDesc(false); }}>✓ Guardar</button>
+            <button className="adm-btn-sm adm-btn-cancel" onClick={() => { setDescripcion(item.descripcion); setEditandoDesc(false); }}>✕</button>
+          </>
+        ) : (
+          <>
+            <span className="adm-item-desc-texto">{item.descripcion || <em>Sin descripción</em>}</span>
+            <button className="adm-btn-sm adm-btn-edit" onClick={() => { setDescripcion(item.descripcion); setEditandoDesc(true); }}>✏ Descripción</button>
+          </>
+        )}
+      </div>
+
+      {/* ── Papas sazonadas (solo tiene sentido si el plato viene con papas) ── */}
+      <label className="adm-check-label adm-item-papas-check">
+        <input
+          type="checkbox"
+          checked={!!item.tienePapasFritas}
+          onChange={() => onTogglePapas(item)}
+        />
+        🌶 Ofrecer papas sazonadas (sabor Dorito) para este plato
+      </label>
 
       {/* ── Panel de imagen (se despliega al tocar 🖼 Imagen) ── */}
       {mostrarImg && (
@@ -551,7 +598,7 @@ function AgregarProducto({ token, subcats, onGuardado }) {
   const [form, setForm] = useState({
     subcategoriaId: subcats[0]?.id || 1,
     nombre: '', precio: '', descripcion: '',
-    imageUrl: '', badge: '', sinTacc: false, orden: 0
+    imageUrl: '', badge: '', sinTacc: false, tienePapasFritas: false, orden: 0
   });
 
   const headers = {
@@ -591,6 +638,10 @@ function AgregarProducto({ token, subcats, onGuardado }) {
       <label className="adm-check-label">
         <input type="checkbox" checked={form.sinTacc} onChange={e => setForm({ ...form, sinTacc: e.target.checked })} />
         Sin TACC
+      </label>
+      <label className="adm-check-label">
+        <input type="checkbox" checked={form.tienePapasFritas} onChange={e => setForm({ ...form, tienePapasFritas: e.target.checked })} />
+        🌶 Viene con papas fritas (ofrecer opción sazonadas)
       </label>
 
       {/* ── Imagen ── */}
@@ -658,6 +709,47 @@ function Dashboard({ token, nombre, onLogout }) {
       toast('✅ Precio actualizado');
     } catch {
       toast('❌ Error al actualizar');
+    }
+  };
+
+  const handleDescripcion = async (item, nuevaDescripcion) => {
+    try {
+      await fetch(`${API}/api/items/${item.id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ ...item, descripcion: nuevaDescripcion })
+      });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, descripcion: nuevaDescripcion } : i));
+      toast('✅ Descripción actualizada');
+    } catch {
+      toast('❌ Error al actualizar');
+    }
+  };
+
+  const handleTogglePapas = async (item) => {
+    try {
+      await fetch(`${API}/api/items/${item.id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ ...item, tienePapasFritas: !item.tienePapasFritas })
+      });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, tienePapasFritas: !i.tienePapasFritas } : i));
+      toast('✅ Actualizado');
+    } catch {
+      toast('❌ Error al actualizar');
+    }
+  };
+
+  const handleMover = async (id, direccion) => {
+    try {
+      await fetch(`${API}/api/items/${id}/mover`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ direccion })
+      });
+      await cargarDatos();
+    } catch {
+      toast('❌ Error al reordenar');
     }
   };
 
@@ -776,6 +868,9 @@ function Dashboard({ token, nombre, onLogout }) {
                             subcats={subcats}
                             token={token}
                             onPrecio={handlePrecio}
+                            onDescripcion={handleDescripcion}
+                            onMover={handleMover}
+                            onTogglePapas={handleTogglePapas}
                             onToggle={handleToggle}
                             onEliminar={handleEliminar}
                             onImagenActualizada={handleImagenActualizada}

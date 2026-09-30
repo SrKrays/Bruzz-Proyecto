@@ -7,6 +7,12 @@ import { launchConfetti } from './confettiCheckout';
 
 const WHATSAPP_NUMBER = 543543512248;
 
+// ── Estilo de papas fritas ────────────────────────────────
+const PAPAS_ESTILOS = [
+  { id: 'clasicas',   name: 'Clásicas', desc: 'Con la sal de siempre.' },
+  { id: 'sazonadas',  name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.' },
+];
+
 // ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
 const VARIEDADES_SINTACC = [
   { id: 'napolitana',   name: 'Napolitana',    desc: 'Salsa de tomate fresca, mozzarella, rodajas de tomate fresco, aceite de ajo y orégano.' },
@@ -147,10 +153,11 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
                   {item.note && <p className="cart-panel-item-note">↳ {item.note}</p>}
                   {item.sintaccVariedad && <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>}
                   {item.medallon && <p className="cart-panel-item-note">🌿 {item.medallon}</p>}
+                  {item.papasStyle && <p className="cart-panel-item-note">🍟 {item.papasStyle}</p>}
                   <div className="cart-panel-item-controls">
                     <button className="cart-panel-ctrl" onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
                     <span className="cart-panel-item-qty">{item.qty}</span>
-                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '' })} aria-label="Sumar uno">+</button>
+                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', papasStyle: item.papasStyle || '' })} aria-label="Sumar uno">+</button>
                     <button className="cart-panel-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑</button>
                   </div>
                 </li>
@@ -246,6 +253,37 @@ function SinTaccSelector({ selected, onChange, error }) {
   );
 }
 
+function PapasSelector({ selected, onChange }) {
+  return (
+    <div className="medallon-wrap sintacc-wrap">
+      <div className="medallon-header">
+        <span className="medallon-label"><span>🍟</span> Elegí el estilo de tus papas</span>
+      </div>
+      <div className="medallon-list">
+        {PAPAS_ESTILOS.map((p) => {
+          const isActive = selected === p.id;
+          return (
+            <div key={p.id} className={`medallon-opt${isActive ? ' medallon-opt--active sintacc-opt--active' : ''}`} onClick={() => onChange(p.id)} style={{ cursor: 'pointer' }}>
+              <div className="medallon-opt-text">
+                <span className="medallon-opt-name">
+                  {p.name}
+                  {p.badge && <span className="badge badge--pulse" style={{ marginLeft: 8 }}>{p.badge}</span>}
+                </span>
+                <span className="medallon-opt-desc">{p.desc}</span>
+              </div>
+              <div className="medallon-opt-controls">
+                <div className={`sintacc-radio${isActive ? ' sintacc-radio--on' : ''}`}>
+                  {isActive && <span className="sintacc-radio-dot" />}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 
 // ════════════════════════════════════════════════════════════
 //  📦 EXPANDABLE ITEM CARD
@@ -256,14 +294,16 @@ function SinTaccSelector({ selected, onChange, error }) {
 // ════════════════════════════════════════════════════════════
 
 function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
-  const isVeggie  = item.name === 'Veggie';
-  const isSinTacc = item.sinTacc === true;
+  const isVeggie   = item.name === 'Veggie';
+  const isSinTacc  = item.sinTacc === true;
+  const tienePapas = item.tienePapas === true;
   const [qty, setQty]                     = useState(1);
   const [note, setNote]                   = useState('');
   const [medallones, setMedallones]       = useState({});
   const [medallonError, setMedallonError] = useState('');
   const [sintaccVar, setSintaccVar]       = useState('');
   const [sintaccError, setSintaccError]   = useState('');
+  const [papasStyle, setPapasStyle]       = useState('clasicas');
 
   // FX 11: parallax en imagen del body
   const imgRef  = useRef(null);
@@ -301,6 +341,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
     if (!isExpanded) {
       setQty(1); setNote(''); setMedallones({});
       setMedallonError(''); setSintaccVar(''); setSintaccError('');
+      setPapasStyle('clasicas');
     }
   }, [isExpanded]);
 
@@ -316,8 +357,9 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       .map(([id, n]) => { const name = MEDALLONES.find((m) => m.id === id)?.name ?? id; return n > 1 ? `${n}x ${name}` : name; })
       .join(', ');
     const sintaccLabel = isSinTacc ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar : '';
+    const papasLabel   = tienePapas && papasStyle === 'sazonadas' ? 'Papas sazonadas 🧡' : '';
 
-    onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel });
+    onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel, papasStyle: papasLabel });
 
     if (e?.currentTarget) {
       emitFlyToCart({ rect: e.currentTarget.getBoundingClientRect(), imageUrl: item.imageUrl });
@@ -401,6 +443,12 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
                   selected={sintaccVar}
                   onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
                   error={sintaccError}
+                />
+              )}
+              {tienePapas && (
+                <PapasSelector
+                  selected={papasStyle}
+                  onChange={setPapasStyle}
                 />
               )}
 
@@ -505,6 +553,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
       let txt = `${i.qty}x ${i.name}: ${i.price}`;
       if (i.sintaccVariedad) txt += `\n   🌾 Variedad Sin T.A.C.C.: ${i.sintaccVariedad}`;
       if (i.medallon)        txt += `\n   🌿 Medallón: ${i.medallon}`;
+      if (i.papasStyle)      txt += `\n   🍟 ${i.papasStyle}`;
       if (i.note)            txt += `\n   ↳ ${i.note}`;
       return txt;
     });
@@ -557,6 +606,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
                 {i.name}
                 {i.sintaccVariedad ? <em> · 🌾 {i.sintaccVariedad}</em> : null}
                 {i.medallon ? <em> · 🌿 {i.medallon}</em> : null}
+                {i.papasStyle ? <em> · 🍟 {i.papasStyle}</em> : null}
                 {i.note     ? <em> · {i.note}</em>        : null}
               </span>
               <span className="checkout-row-price">{formatARS(parsePrice(i.price) * i.qty)}</span>
@@ -671,9 +721,9 @@ export default function Items({
   const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
   const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
 
-  const handleConfirmAdd = useCallback(({ qty, note, medallon, ...item }) => {
-    const key = item.name + '||' + (note || '') + '||' + (medallon || '');
-    onCartAdd({ ...item, qty, note: note || '', medallon: medallon || '', _key: key });
+  const handleConfirmAdd = useCallback(({ qty, note, medallon, papasStyle, ...item }) => {
+    const key = item.name + '||' + (note || '') + '||' + (medallon || '') + '||' + (papasStyle || '');
+    onCartAdd({ ...item, qty, note: note || '', medallon: medallon || '', papasStyle: papasStyle || '', _key: key });
   }, [onCartAdd]);
 
   if (showCheckout) {
