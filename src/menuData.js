@@ -1,4 +1,4 @@
-// menuData.js — Generado el 30/09/2026 05:23
+// menuData.js — Generado el 30/09/2026 06:21
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -64,7 +64,7 @@ export const MENU = {
   hamburgesas: {
     title: 'Hamburgesas', back: 'comidas',
     items: [
-      { name: 'Di Lusso', price: '$14.400', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml', imageUrl: 'https://bruzz.com.ar/img/1790743900-di-1.jpeg' },
+      { name: 'Di Lusso', price: '$14.400', desc: 'Pan de papa, carne de res, cheddar, lactonesa de la casa, ketchup, cebolla, bacon y papas fritas', imageUrl: 'https://bruzz.com.ar/img/1790743900-di-1.jpeg' },
       { name: 'Combo Di Lusso', price: '$17.100', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml', imageUrl: 'https://bruzz.com.ar/img/1790743914-di-1.jpeg' },
       { name: 'Hamburgesa Bambino', price: '$17.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png' },
       { name: 'Simple', price: '$12.500', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
