@@ -1,4 +1,4 @@
-// menuData.js — Generado el 01/10/2026 00:17
+// menuData.js — Generado el 01/10/2026 00:18
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -204,6 +204,7 @@ export const POSTRES = [
 
 export const CAFETERIA = [
   { name: 'Licuado mas tostado ', price: '$11.900', desc: 'Tostado con pan de molde lactonesa, jamón y queso mas un licuado a elección. (frutilla, banana o durazno) ', imageUrl: 'https://bruzz.com.ar/img/1790812976-tostado-2.jpg' },
+  { name: 'Combo Tostato ', price: '$9.900', desc: 'Tostado con pan de molde lactonesa, jamón y queso mas un café doble. (A elección)', imageUrl: 'https://bruzz.com.ar/img/1790813815-tostado-2.jpg' },
   { sep: 'Cafetería' },
   { name: 'Corto', price: '$2.500', desc: 'Café chico.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Lungo', price: '$2.600', desc: 'Café en jarro.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
