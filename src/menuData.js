@@ -1,4 +1,4 @@
-// menuData.js — Generado el 01/10/2026 00:30
+// menuData.js — Generado el 01/10/2026 00:34
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -204,8 +204,8 @@ export const POSTRES = [
 
 export const CAFETERIA = [
   { name: 'Licuado mas tostado ', price: '$11.900', desc: 'Tostado con pan de molde lactonesa, jamón, queso y licuado a elección. (frutilla, banana o durazno) ', imageUrl: 'https://bruzz.com.ar/img/1790812976-tostado-2.jpg' },
-  { name: 'Combo Tostato ', price: '$9.900', desc: 'Tostado con pan de molde lactonesa, jamón, queso y café doble (A elección).', imageUrl: 'https://bruzz.com.ar/img/1790813815-tostado-2.jpg' },
-  { name: 'Combo Proteico ', price: '$8.500', desc: 'Dos tostadas integrales, 2 fetas de jamón cocido, 2 fetas de queso tybo, dip de queso crema, dip de frutos secos, huevo revuelto y café doble (A elección). ', imageUrl: 'https://bruzz.com.ar/img/1790814464-proteico.jpeg' },
+  { name: 'Combo Tostato ', price: '$9.900', desc: 'Tostado con pan de molde lactonesa, jamón, queso más infusión. ', imageUrl: 'https://bruzz.com.ar/img/1790813815-tostado-2.jpg' },
+  { name: 'Combo Proteico ', price: '$8.500', desc: 'Dos tostadas integrales, 2 fetas de jamón cocido, 2 fetas de queso tybo, dip de queso crema, dip de frutos secos, huevo revuelto más infusión.. ', imageUrl: 'https://bruzz.com.ar/img/1790814464-proteico.jpeg' },
   { sep: 'Cafetería' },
   { name: 'Corto', price: '$2.500', desc: 'Café chico.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
   { name: 'Lungo', price: '$2.600', desc: 'Café en jarro.', imageUrl: 'https://bruzz.com.ar/img/cafe.jpg' },
