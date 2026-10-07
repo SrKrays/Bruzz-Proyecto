@@ -1,4 +1,4 @@
-// menuData.js — Generado el 01/10/2026 00:43
+// menuData.js — Generado el 07/10/2026 21:05
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -65,11 +65,11 @@ export const MENU = {
     title: 'Hamburgesas', back: 'comidas',
     items: [
       { name: 'Hamburgesa Bambino', price: '$17.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png', tienePapas: true },
-      { name: 'Simple', price: '$12.500', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
-      { name: 'Completa', price: '$14.400', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
-      { name: 'Di Lusso', price: '$14.400', desc: 'Pan de papa, carne de res, cheddar, lactonesa de la casa, ketchup, cebolla, bacon y papas fritas', imageUrl: 'https://bruzz.com.ar/img/1790743900-di-1.jpeg', tienePapas: true },
-      { name: 'Hamb Bruzz', price: '$14.900', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: '✦ Firma', tienePapas: true },
-      { name: 'Veggie', price: '$13.100', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
+      { name: 'Simple', price: '$13.000', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
+      { name: 'Completa', price: '$14.900', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
+      { name: 'Di Lusso', price: '$14.900', desc: 'Pan de papa, carne de res, cheddar, lactonesa de la casa, ketchup, cebolla, bacon y papas fritas', imageUrl: 'https://bruzz.com.ar/img/1790743900-di-1.jpeg', tienePapas: true },
+      { name: 'Hamb Bruzz', price: '$15.400', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: '✦ Firma', tienePapas: true },
+      { name: 'Veggie', price: '$13.600', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
       { name: 'Medallón extra', price: '$2.000', desc: 'Extra Carne para una Gran Hamburguesa.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
       { name: 'Combo Simple', price: '$15.300', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
@@ -83,9 +83,9 @@ export const MENU = {
   lomitos: {
     title: 'Lomitos', back: 'comidas',
     items: [
-      { name: 'Lomito Simple', price: '$22.900', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
-      { name: 'Lomito Completo', price: '$23.800', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
-      { name: 'Lomito Americano', price: '$24.300', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
+      { name: 'Lomito Simple', price: '$23.700', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
+      { name: 'Lomito Completo', price: '$24.600', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, queso tybo, jamón cocido, huevo, lechuga, tomate, chimi de la casa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
+      { name: 'Lomito Americano', price: '$25.100', desc: 'Pan de focaccia, lomo 180g, lactonesa de la casa, barbacoa, queso cheddar, panceta, huevo, cebolla morada caramelizada y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg', tienePapas: true },
       { name: 'Bife extra (100g)', price: '$8.000', desc: 'Lomo 100%.', imageUrl: 'https://bruzz.com.ar/img/lomoamericano.jpg' },
     ],
   },
@@ -103,9 +103,9 @@ export const MENU = {
   papas: {
     title: 'Papas', back: 'comidas',
     items: [
-      { name: 'Patatines', price: '$9.500', desc: 'Papas fritas Clasicas.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
-      { name: 'Papas Carbonara', price: '$12.500', desc: 'Papas fritas, huevo revuelto, parmesano y panceta.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
-      { name: 'Papas con Cheddar', price: '$13.500', desc: 'Papas fritas con cheddar, bacon y cebolla de verdeo.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
+      { name: 'Patatines', price: '$10.500', desc: 'Papas fritas Clasicas.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
+      { name: 'Papas Carbonara', price: '$13.500', desc: 'Papas fritas, huevo revuelto, parmesano y panceta.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
+      { name: 'Papas con Cheddar', price: '$14.500', desc: 'Papas fritas con cheddar, bacon y cebolla de verdeo.', imageUrl: 'https://bruzz.com.ar/img/papas.jpg', tienePapas: true },
     ],
   },
 
