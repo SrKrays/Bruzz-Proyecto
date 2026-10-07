@@ -1,4 +1,4 @@
-// menuData.js — Generado el 07/10/2026 21:06
+// menuData.js — Generado el 07/10/2026 21:12
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -72,11 +72,11 @@ export const MENU = {
       { name: 'Veggie', price: '$13.600', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
       { name: 'Medallón extra', price: '$2.000', desc: 'Extra Carne para una Gran Hamburguesa.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
-      { name: 'Combo Simple', price: '$15.300', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
-      { name: 'Combo Completa', price: '$17.100', desc: 'Hamburguesa completa mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
-      { name: 'Combo Di Lusso', price: '$17.100', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml', imageUrl: 'https://bruzz.com.ar/img/1790743914-di-1.jpeg', tienePapas: true },
-      { name: 'Combo Bruzz', price: '$17.500', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: 'Combo', tienePapas: true },
-      { name: 'Combo Veggie', price: '$15.900', desc: 'Hamburguesa vegana mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
+      { name: 'Combo Simple', price: '$15.800', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
+      { name: 'Combo Completa', price: '$17.500', desc: 'Hamburguesa completa mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
+      { name: 'Combo Di Lusso', price: '$17.500', desc: 'Hamburgesa Di Lusso mas gaseosa de 500ml', imageUrl: 'https://bruzz.com.ar/img/1790743914-di-1.jpeg', tienePapas: true },
+      { name: 'Combo Bruzz', price: '$18.000', desc: 'Hamburguesa bruzz mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: 'Combo', tienePapas: true },
+      { name: 'Combo Veggie', price: '$16.500', desc: 'Hamburguesa vegana mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
     ],
   },
 
