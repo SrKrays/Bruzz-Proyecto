@@ -157,7 +157,7 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
                   <div className="cart-panel-item-controls">
                     <button className="cart-panel-ctrl" onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
                     <span className="cart-panel-item-qty">{item.qty}</span>
-                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', papasStyle: item.papasStyle || '' })} aria-label="Sumar uno">+</button>
+                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', sintaccVariedad: item.sintaccVariedad || '', papasStyle: item.papasStyle || '' })} aria-label="Sumar uno">+</button>
                     <button className="cart-panel-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑</button>
                   </div>
                 </li>

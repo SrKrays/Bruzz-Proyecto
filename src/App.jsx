@@ -147,7 +147,8 @@ export default function App() {
     const note            = item.note            ?? '';
     const medallon        = item.medallon        ?? '';
     const sintaccVariedad = item.sintaccVariedad ?? '';
-    const key = item.name + '||' + note + '||' + medallon + '||' + sintaccVariedad;
+    const papasStyle      = item.papasStyle      ?? '';
+    const key = item.name + '||' + note + '||' + medallon + '||' + sintaccVariedad + '||' + papasStyle;
     setCart((prev) => {
       const exists = prev.find((c) => c._key === key);
       if (exists) {
@@ -155,7 +156,7 @@ export default function App() {
           c._key === key ? { ...c, qty: c.qty + qty } : c
         );
       }
-      return [...prev, { _key: key, name: item.name, price: item.price, note, medallon, sintaccVariedad, sinTacc: item.sinTacc ?? false, qty }];
+      return [...prev, { _key: key, name: item.name, price: item.price, note, medallon, sintaccVariedad, papasStyle, sinTacc: item.sinTacc ?? false, qty }];
     });
   }, []);
 
