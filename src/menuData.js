@@ -1,4 +1,4 @@
-// menuData.js — Generado el 11/10/2026 21:37
+// menuData.js — Generado el 11/10/2026 23:37
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -37,7 +37,6 @@ export const MENU = {
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
       { name: 'Pepe', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
       { name: 'Prosciutto Cotto', price: '$22.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
-      { name: 'Fungo', price: '$26.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.', imageUrl: 'https://bruzz.com.ar/img/fungo.png' },
       { name: 'Rúcula', price: '$25.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.', imageUrl: 'https://bruzz.com.ar/img/rucula.jpg' },
       { name: 'Quattro Formaggi', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Margherita', price: '$18.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, albahaca fresca, aceite de oliva.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
