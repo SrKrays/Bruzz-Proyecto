@@ -56,7 +56,6 @@ export const MENU = {
     items: [
       { name: 'Calzone Margherita', price: '$18.900', desc: 'Salsa de tomate fresca, mozzarella, albahaca fresca, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
       { name: 'Calzone Prosciutto Cotto', price: '$22.900', desc: 'Salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, orégano, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
-      { name: 'Calzone Fungo', price: '$26.200', desc: 'Salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
     ],
   },
 
