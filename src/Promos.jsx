@@ -739,9 +739,18 @@ function PromoDetailSheet({ promo, tipo, onClose, actionLabel, actionVariant = '
               <h3 className="promo-sheet-title">{promo.titulo}</h3>
               {promo.desc && <p className="promo-sheet-desc">{promo.desc}</p>}
 
-              {promo.atributos?.length > 0 && (
+              {(promo.precio || promo.atributos?.length > 0) && (
                 <div className="promo-sheet-attrs">
-                  {promo.atributos.map((attr) => (
+                  {promo.precio && (
+                    <div className="promo-sheet-attr">
+                      <span className="promo-sheet-attr-icon">💰</span>
+                      <div>
+                        <span className="promo-sheet-attr-label">Precio</span>
+                        <span className="promo-sheet-attr-value" style={{ fontWeight: 700 }}>{promo.precio}</span>
+                      </div>
+                    </div>
+                  )}
+                  {promo.atributos?.map((attr) => (
                     <div className="promo-sheet-attr" key={attr.label}>
                       <span className="promo-sheet-attr-icon">{attr.icon}</span>
                       <div>
