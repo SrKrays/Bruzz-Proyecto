@@ -1,4 +1,4 @@
-// menuData.js — Generado el 07/10/2026 21:12
+// menuData.js — Generado el 14/10/2026 01:39
 // ⚠️ No editar manualmente — usar el panel admin
 
 export const CATEGORIAS = [
@@ -37,7 +37,6 @@ export const MENU = {
       { sep: 'Estilo Napolitano - Napolitana Clasica' },
       { name: 'Pepe', price: '$24.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, pepperoni, orégano.', imageUrl: 'https://bruzz.com.ar/img/pepe.jpg' },
       { name: 'Prosciutto Cotto', price: '$22.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, olivas verdes, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
-      { name: 'Fungo', price: '$26.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz.', imageUrl: 'https://bruzz.com.ar/img/fungo.png' },
       { name: 'Rúcula', price: '$25.200', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, rúcula, jamón crudo, hebras de parmesano, aceite de oliva, olivas negras.', imageUrl: 'https://bruzz.com.ar/img/rucula.jpg' },
       { name: 'Quattro Formaggi', price: '$22.500', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
       { name: 'Margherita', price: '$18.900', desc: 'Pizza estilo napolitano, salsa de tomate fresca, mozzarella, albahaca fresca, aceite de oliva.', imageUrl: 'https://bruzz.com.ar/img/pizzageneral.jpg' },
@@ -57,7 +56,6 @@ export const MENU = {
     items: [
       { name: 'Calzone Margherita', price: '$18.900', desc: 'Salsa de tomate fresca, mozzarella, albahaca fresca, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
       { name: 'Calzone Prosciutto Cotto', price: '$22.900', desc: 'Salsa de tomate fresca, mozzarella, jamón cocido, albahaca fresca, orégano, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
-      { name: 'Calzone Fungo', price: '$26.200', desc: 'Salsa de tomate fresca, mozzarella, champignones y cherrys confitados en aceite de oliva, pesto Bruzz, envuelto en masa napolitana.', imageUrl: 'https://bruzz.com.ar/img/calzone.jpg' },
     ],
   },
 
@@ -65,12 +63,12 @@ export const MENU = {
     title: 'Hamburgesas', back: 'comidas',
     items: [
       { name: 'Hamburgesa Bambino', price: '$17.000', desc: 'Burger Simple + Gaseosa + Helado + Juguete todo en UNO.', imageUrl: 'https://bruzz.com.ar/img/bambino2.png', tienePapas: true },
-      { name: 'Simple', price: '$13.000', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
+      { name: 'Simple', price: '$13.000', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/1791941587-simple.jpeg', tienePapas: true },
       { name: 'Completa', price: '$14.900', desc: 'Pan de papa Americano, carne de res, lactonesa de la casa, lechuga, tomates fresco, bacon, cheddar y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
       { name: 'Di Lusso', price: '$14.900', desc: 'Pan de papa, carne de res, cheddar, lactonesa de la casa, ketchup, cebolla, bacon y papas fritas', imageUrl: 'https://bruzz.com.ar/img/1790743900-di-1.jpeg', tienePapas: true },
       { name: 'Hamb Bruzz', price: '$15.400', desc: 'Pan de papa Americano, carne de res, cheddar, salsa Bruzz, rúcula, cebolla morada, bacon, pepinos encurtidos, barbacoa y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/Bbruzz.jpg', badge: '✦ Firma', tienePapas: true },
       { name: 'Veggie', price: '$13.600', desc: 'Pan de papa Americano, medallón Veggie (hay 5 variedades), lechuga, tomate fresco, cheddar, lactonesa de albahaca y papas fritas.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg', tienePapas: true },
-      { name: 'Medallón extra', price: '$2.000', desc: 'Extra Carne para una Gran Hamburguesa.', imageUrl: 'https://bruzz.com.ar/img/hamburgesa.jpg' },
+      { name: 'Medallón extra', price: '$2.000', desc: 'Extra Carne para una Gran Hamburguesa.', imageUrl: 'https://bruzz.com.ar/img/1791941976-medallon.webp' },
       { sep: 'Combos de Hamburgesa + Gaseosa para Ahorrar unos Pesos' },
       { name: 'Combo Simple', price: '$15.800', desc: 'Hamburguesa simple mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
       { name: 'Combo Completa', price: '$17.500', desc: 'Hamburguesa completa mas gaseosa de 500ml.', imageUrl: 'https://bruzz.com.ar/img/combo.png', badge: 'Combo', tienePapas: true },
@@ -113,6 +111,7 @@ export const MENU = {
     title: 'Sin Alcohol', back: 'bebidas',
     items: [
       { name: 'Coca 1.25', price: '$8.100', desc: 'sin alcohol', imageUrl: 'https://bruzz.com.ar/img/1783215054-logotipo-de-coca-cola-en-la-pantalla-de-.webp' },
+      { name: 'Coca 1.5 descartable ', price: '$8.100', desc: 'Solo para delivery o Take Away ', imageUrl: 'https://bruzz.com.ar/img/1783718243-carta3--.jpg' },
       { name: 'Agua mineral CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua con gas CC', price: '$3.800', desc: '', imageUrl: 'https://bruzz.com.ar/img/agua.jpg' },
       { name: 'Agua Saborisada CC', price: '$4.000', desc: '', imageUrl: 'https://bruzz.com.ar/img/aquarius.png' },
