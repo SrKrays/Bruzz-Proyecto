@@ -128,7 +128,7 @@ const PROMOS_DELY = [
   {
     id: 2, titulo: '2 Sandwiches de Ternera', desc: 'Completos. Con papas!', tag: 'DELY',
     precio: '$37.000',
-    imageUrl: 'https://bruzz.com.ar/img/ternera-promo2.png',
+    imageUrl: 'https://bruzz.com.ar/img/terneraPromo.png',
     atributos: [
       { icon: '🥪', label: 'Incluye', value: '2 sandwiches de ternera completos + Papas fritas' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
@@ -138,7 +138,7 @@ const PROMOS_DELY = [
   {
     id: 3, titulo: '3 Pizzas a Elección', desc: 'Elegí tus 3 sabores para el pedido', tag: 'DELY',
     precio: '$56.700',
-    imageUrl: 'https://bruzz.com.ar/img/pizza-promo.jpg',
+    imageUrl: 'https://bruzz.com.ar/img/pizzaPromo.png',
     atributos: [
       { icon: '🍕', label: 'Incluye', value: '3 pizzas a elección' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
@@ -150,7 +150,7 @@ const PROMOS_DELY = [
   {
     id: 4, titulo: '2 Burgers Completas', desc: 'Completas. Con papas!', tag: 'DELY',
     precio: '$24.500',
-    imageUrl: 'https://bruzz.com.ar/img/Pburger.png',
+    imageUrl: 'https://bruzz.com.ar/img/BurgerPromo.png',
     atributos: [
       { icon: '🍔', label: 'Incluye', value: '2 hamburguesas completas + Papas fritas' },
       { icon: '🏷️', label: 'Exclusivo Web', value: 'Promo solo para Dely o Take away (No incluye costo de envio)' },
