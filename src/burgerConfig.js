@@ -111,25 +111,25 @@ export function parseIngredientes(desc = '') {
 }
 
 const CARNE_BURGER = {
-  tab: 'Carne', title: 'Medallones', icon: '🍔',
+  tab: 'Carne', title: 'Medallones', question: '¿Cuántos medallones querés?', icon: '🍔',
   intro: 'Elegí cuántos medallones de carne querés.',
   unit: 'medallón', options: MEDALLON_OPCIONES, extraPrecio: MEDALLON_EXTRA_PRECIO,
   line: (total) => (total === 2 ? 'Doble (2 medallones)' : `Triple (${total} medallones)`),
 };
 const CARNE_LOMO = {
-  tab: 'Lomo', title: 'Lomo', icon: '🥩',
+  tab: 'Lomo', title: 'Lomo', question: '¿Querés más lomo?', icon: '🥩',
   intro: 'Sumá más lomo a tu sándwich.',
   unit: 'bife', options: BIFE_OPCIONES, extraPrecio: BIFE_EXTRA_PRECIO,
   line: (total) => (total === 2 ? '1 bife extra (100g)' : `${total - 1} bifes extra (100g)`),
 };
 
 const VARIANTS_VEGGIE = {
-  tab: 'Medallón', title: 'Elegí tu medallón', icon: '🌿', multi: true,
+  tab: 'Medallón', title: 'Elegí tu medallón', question: '¿Qué medallón querés?', icon: '🌿', multi: true,
   intro: 'Elegí el medallón Veggie de tu hamburguesa.',
   options: MEDALLONES,
 };
 const VARIANTS_SINTACC = {
-  tab: 'Variedad', title: 'Tu variedad Sin T.A.C.C.', icon: '🌾', multi: false,
+  tab: 'Variedad', title: 'Tu variedad Sin T.A.C.C.', question: '¿Qué variedad querés?', icon: '🌾', multi: false,
   intro: 'Elegí la variedad de tu pizza con masa libre de gluten.',
   options: VARIEDADES_SINTACC,
   byId: Object.fromEntries(VARIEDADES_SINTACC.map((v) => [v.id, parseIngredientes(v.desc)])),

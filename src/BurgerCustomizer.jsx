@@ -18,19 +18,24 @@ const buzz = (ms = 12) => {
 
 const NO_DIPS = [];
 const KIND_TEXT = {
-  burger:   { tab: 'La burger',  title: 'La hamburguesa', small: 'Armá tu',    emoji: '🍔' },
-  lomo:     { tab: 'El lomito',  title: 'El lomito',      small: 'Armá tu',    emoji: '🥩' },
-  sandwich: { tab: 'El sanguche', title: 'El sándwich',   small: 'Armá tu',    emoji: '🥪' },
-  papas:    { tab: 'Las papas',  title: 'Las papas',      small: 'Elegí tus',  emoji: '🍟' },
-  pizza:    { tab: 'El plato',   title: 'El plato',       small: 'Mirá tu',    emoji: '🍕' },
+  burger:   { tab: 'La burger',  title: 'Así viene tu hamburguesa', small: 'Armá tu',    emoji: '🍔' },
+  lomo:     { tab: 'El lomito',  title: 'Así viene tu lomito',      small: 'Armá tu',    emoji: '🥩' },
+  sandwich: { tab: 'El sanguche', title: 'Así viene tu sándwich',   small: 'Armá tu',    emoji: '🥪' },
+  papas:    { tab: 'Las papas',  title: 'Así vienen tus papas',      small: 'Elegí tus',  emoji: '🍟' },
+  pizza:    { tab: 'El plato',   title: 'Así viene tu plato',       small: 'Mirá tu',    emoji: '🍕' },
 };
 
 // Arma las pestañas según lo que el producto permite personalizar
-function buildSteps(config, hasPapas) {
+function buildSteps(config, hasPapas, ingList) {
   const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
-  const steps = [{ key: 'info', label: config.kind === 'pizza' ? 'El plato' : 'Armar', title: k.title, icon: '📖' }];
-  if (config.carne || config.extras.length || config.dips) steps.push({ key: 'extras', label: 'Extras', title: 'Extras y salsas', icon: '➕' });
-  if (hasPapas) steps.push({ key: 'papas', label: 'Papas', title: 'Papas fritas', icon: '🍟' });
+  const steps = [{ key: 'info', title: k.title }];
+  if (config.variants) steps.push({ key: 'variante', title: config.variants.question });
+  if (ingList.length || config.variants?.byId) steps.push({ key: 'sacar', title: '¿Querés sacar algún ingrediente?' });
+  if (config.carne) steps.push({ key: 'carne', title: config.carne.question });
+  if (config.extras.length) steps.push({ key: 'extras', title: '¿Querés agregarle algo más?' });
+  if (config.dips) steps.push({ key: 'dips', title: '¿Querés una salsa aparte?' });
+  if (hasPapas) steps.push({ key: 'papas', title: '¿Cómo querés las papas?' });
+  steps.push({ key: 'resumen', title: 'Revisá tu pedido' });
   return steps;
 }
 
@@ -195,7 +200,7 @@ export default function BurgerCustomizer({
     [vcfg, variantValue, config.ingredientes],
   );
   const infoChips = vcfg?.byId && vcfg.byId[variantValue] ? vcfg.byId[variantValue] : config.infoChips;
-  const steps = useMemo(() => buildSteps(config, !!papasOptions), [config, papasOptions]);
+  const steps = useMemo(() => buildSteps(config, !!papasOptions, ingList), [config, papasOptions, ingList]);
   const [variantErr, setVariantErr] = useState('');
   const extrasList = useMemo(() => EXTRAS.filter((e) => config.extras.includes(e.id)), [config]);
   const dipsList = config.dips ? DIPS : NO_DIPS;
@@ -365,16 +370,22 @@ export default function BurgerCustomizer({
     stopTour();
     setDir(n > step ? 1 : -1); setStep(n); buzz(8);
   };
+  // La variante (medallón / variedad) es obligatoria: si falta, lleva a esa pantalla
+  const variantMissing = () => !!vcfg && variantCount < (vcfg.multi ? qty : 1);
+  const failVariant = () => {
+    const need = vcfg.multi ? qty : 1;
+    setVariantErr(vcfg.multi ? `Elegí ${need} medallón${need > 1 ? 'es' : ''} para continuar` : 'Elegí una opción para continuar');
+    const vi = steps.findIndex((x) => x.key === 'variante');
+    if (vi >= 0 && vi !== step) { setDir(vi > step ? 1 : -1); setStep(vi); }
+    buzz(30);
+  };
+  const goNext = () => {
+    if (stepKey === 'variante' && variantMissing()) { failVariant(); return; }
+    goTo(step + 1);
+  };
   const confirm = () => {
     stopTour();
-    if (vcfg) {
-      const need = vcfg.multi ? qty : 1;
-      if (variantCount < need) {
-        setVariantErr(vcfg.multi ? `Seleccioná ${need} medallón${need > 1 ? 'es' : ''} para continuar` : 'Elegí una variedad para continuar');
-        setDir(-1); setStep(0); buzz(30);
-        return;
-      }
-    }
+    if (variantMissing()) { failVariant(); return; }
     launchConfetti(); buzz(35);
     onConfirm && onConfirm();
   };
@@ -416,29 +427,30 @@ export default function BurgerCustomizer({
     : [];
   const dipTotal = Object.values(dips).reduce((s, n) => s + n, 0);
 
-  // Indicadores (punto) de pestañas con cambios
-  const tabChanged = (key) => (
-    key === 'info' ? (quitados.length > 0 || variantCount > 0)
-    : key === 'extras' ? (medallones > 1 || Object.keys(extras).length > 0 || Object.keys(dips).length > 0)
-    : key === 'papas' ? papasStyle === 'sazonadas'
-    : false
-  );
-
-
   const isLast = step === steps.length - 1;
   const stepKey = steps[step].key;
-  const nextStep = steps[step + 1];
 
-  // ── Resumen final ("Tu pedido") + observaciones ──────────
+  // Texto del botón principal: claro sobre qué pasa si no se toca nada
+  const nextLabel = (() => {
+    if (isLast) return `✅ Agregar al pedido · ${formatARS(totalUnidad * qty)}`;
+    const touched = (
+      stepKey === 'sacar' ? quitados.length > 0
+      : stepKey === 'carne' ? medallones > 1
+      : stepKey === 'extras' ? Object.keys(extras).length > 0
+      : stepKey === 'dips' ? Object.keys(dips).length > 0
+      : true
+    );
+    if (touched) return 'Siguiente →';
+    return stepKey === 'sacar' ? 'Dejarlo así →' : stepKey === 'carne' ? 'Así está bien →' : 'No, gracias →';
+  })();
+
+  // ── Resumen final ────────────────────────────────────────
   const recap = (
     <>
-      <motion.div className="bw-recap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <div className="bw-recap-title">Tu pedido{qty > 1 ? ` · ${qty} unidades iguales` : ''}</div>
+      <motion.div className="bw-recap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <div className="bw-recap-title">{kindText.emoji} {name}</div>
         <ul className="bw-recap-list">
-          <li>
-            {kindText.emoji} {name}
-            {carne ? ` · ${carne.options.find((o) => o.total === medallones)?.name || ''}` : ''}
-          </li>
+          {carne && <li>🍔 {carne.options.find((o) => o.total === medallones)?.name}</li>}
           {vcfg && variantCount > 0 && (
             <li>
               {vcfg.icon}{' '}
@@ -453,32 +465,29 @@ export default function BurgerCustomizer({
                 key={l}
                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
               >
-                {l.startsWith('Sin ') ? '🚫' : '➕'} {l}
+                {l.startsWith('Sin ') ? '❌' : '➕'} {l}
               </motion.li>
             ))}
           </AnimatePresence>
           {papasOptions && <li>🍟 Papas {papasStyle === 'sazonadas' ? 'sazonadas 🧡' : 'clásicas'}</li>}
-          {lines.length === 0 && !papasOptions && <li className="bw-recap-empty">Tal cual la receta original ✨</li>}
-          {config.sides.map((s) => <li key={s.label}>{s.emoji} {s.label} incluido</li>)}
+          {config.sides.map((sd) => <li key={sd.label}>{sd.emoji} {sd.label} incluido</li>)}
+          {lines.length === 0 && <li className="bw-recap-empty">✅ Tal cual la receta original</li>}
         </ul>
       </motion.div>
+
+      <div className="bw-qty-row">
+        <span className="bw-qty-label">¿Cuántos querés?</span>
+        <div className="bw-qty">
+          <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
+          <motion.span key={qty} className="bw-qty-val" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{qty}</motion.span>
+          <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(qty + 1)} aria-label="Más">+</button>
+        </div>
+      </div>
     </>
   );
 
-  const nextInline = nextStep ? (
-    <motion.button
-      type="button" className="bw-next-inline" onClick={() => goTo(step + 1)} whileTap={{ scale: 0.96 }}
-    >
-      Siguiente: {nextStep.title} <span>→</span>
-    </motion.button>
-  ) : null;
-
-  // ── Secciones reutilizables ───────────────────────────────
-  const tail = isLast ? recap : nextInline;
-
-  // Variante obligatoria (medallón Veggie / variedad Sin T.A.C.C.)
+  // ── Pantallas (una decisión por vez) ─────────────────────
   const sectionVariant = () => {
-    if (!vcfg) return null;
     const need = vcfg.multi ? qty : 1;
     const setSingle = (id) => { stopTour(); onVariantChange(id); setVariantErr(''); bump(); buzz(14); };
     const setMulti = (id, d) => {
@@ -490,12 +499,12 @@ export default function BurgerCustomizer({
       onVariantChange(next); setVariantErr(''); bump(); buzz(12);
     };
     return (
-      <div className="bw-sec">
-        <div className="bw-sec-title">
-          {vcfg.icon} {vcfg.title}
-          {vcfg.multi && <em> · {variantCount}/{need}</em>}
-          <span className="bw-req">obligatorio</span>
-        </div>
+      <>
+        <p className="bw-step-intro">
+          {vcfg.multi
+            ? <>Tocá el <b>+</b> para elegir{need > 1 ? ` (${variantCount} de ${need})` : ''}.</>
+            : <>Tocá una opción para elegirla.</>}
+        </p>
         {variantErr && <p className="medallon-error">⚠ {variantErr}</p>}
         <div className="bw-cards">
           {vcfg.options.map((o, i) => {
@@ -522,12 +531,12 @@ export default function BurgerCustomizer({
             );
           })}
         </div>
-      </div>
+      </>
     );
   };
 
-  // Ingredientes: tocar = verlo en el plato · ✕ = sacarlo (sin costo)
-  const sectionIngredients = () => {
+  // Pantalla 1: solo mirar (qué lleva), sin botones que confundan
+  const sectionLleva = () => {
     const chips = isPhoto
       ? [...config.base.map((n) => ({ n, base: true })), ...infoChips.map((n) => ({ n, base: false }))]
       : [...config.base.map((n) => ({ n, base: true })), ...ingList.map((n) => ({ n, base: false }))];
@@ -537,20 +546,15 @@ export default function BurgerCustomizer({
         <button type="button" className="bw-ing" onClick={onClick}>
           <span className="bw-ing-emoji">{emojiStr}</span>
           <span className="bw-ing-name">{label}</span>
-          <span className="bw-ing-tag bw-ing-tag--base">incl.</span>
+          <span className="bw-ing-tag bw-ing-tag--base">incluido</span>
         </button>
       </motion.div>
     );
     return (
       <div className="bw-sec">
-        <div className="bw-sec-title">
-          Ingredientes <em>· tocá para verlo · ✕ para sacarlo</em>
-        </div>
-        {vcfg?.byId && ingList.length === 0 && <p className="bw-hint">Elegí la variedad y después podés sacar ingredientes.</p>}
+        <div className="bw-sec-title">Lleva <em>· tocá uno para verlo</em></div>
         <div className="bw-ing-grid">
           {chips.map(({ n, base }, i) => {
-            const off = quitados.includes(n);
-            const removable = !base && ingList.includes(n);
             const live = isPhoto && (tourOn ? tokenNow : heroPop) === n;
             return (
               <motion.div
@@ -558,25 +562,11 @@ export default function BurgerCustomizer({
                 initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.03, type: 'spring', stiffness: 380, damping: 24 }}
               >
-                <button
-                  type="button"
-                  className={`bw-ing${off ? ' bw-ing--off' : ''}${live ? ' bw-ing--live' : ''}`}
-                  onClick={() => onChip(n)}
-                >
+                <button type="button" className={`bw-ing${live ? ' bw-ing--live' : ''}`} onClick={() => onChip(n)}>
                   <span className="bw-ing-emoji">{emojiOf(n)}</span>
                   <span className="bw-ing-name">{n}</span>
-                  {off && <span className="bw-ing-tag">sin</span>}
-                  {base && !off && <span className="bw-ing-tag bw-ing-tag--base">base</span>}
+                  {base && <span className="bw-ing-tag bw-ing-tag--base">base</span>}
                 </button>
-                {removable && (
-                  <motion.button
-                    type="button" className={`bw-ing-x${off ? ' bw-ing-x--back' : ''}`}
-                    onClick={() => toggleIngrediente(n)} whileTap={{ scale: 0.8 }}
-                    aria-label={off ? `Volver a poner ${n}` : `Sacar ${n}`}
-                  >
-                    {off ? '↩' : '✕'}
-                  </motion.button>
-                )}
               </motion.div>
             );
           })}
@@ -587,9 +577,46 @@ export default function BurgerCustomizer({
     );
   };
 
-  const sectionCarne = () => carne && (
-    <div className="bw-sec">
-      <div className="bw-sec-title">{carne.icon} {carne.title} <em>· cada {carne.unit} extra +{formatARS(carne.extraPrecio)}</em></div>
+  // Pantalla "sacar": mosaicos grandes, tocar = sacar
+  const sectionSacar = () => (
+    <>
+      <p className="bw-step-intro">Tocá los que <b>NO querés</b>. Es gratis. Si querés todo, seguí con el botón de abajo.</p>
+      {ingList.length === 0 && <p className="bw-hint">Primero elegí la opción anterior.</p>}
+      <div className="bw-tiles">
+        {ingList.map((ing, i) => {
+          const off = quitados.includes(ing);
+          return (
+            <motion.button
+              type="button" key={ing}
+              className={`bw-tile${off ? ' bw-tile--off' : ''}`}
+              onClick={() => toggleIngrediente(ing)}
+              aria-pressed={!off}
+              initial={{ opacity: 0, y: 18, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: i * 0.04, type: 'spring', stiffness: 380, damping: 22 }}
+              whileTap={{ scale: 0.92 }}
+            >
+              <span className="bw-tile-emoji">{emojiOf(ing)}</span>
+              <span className="bw-tile-name">{ing}</span>
+              <span className="bw-tile-state">{off ? 'SIN' : 'LLEVA'}</span>
+              <motion.span
+                className="bw-tile-badge"
+                key={off ? 'off' : 'on'}
+                initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+              >
+                {off ? '✕' : '✓'}
+              </motion.span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </>
+  );
+
+  const sectionCarne = () => (
+    <>
+      <p className="bw-step-intro">{carne.intro} <b>Cada {carne.unit} extra suma {formatARS(carne.extraPrecio)}.</b></p>
       <div className="bw-meds">
         {carne.options.map((o, i) => {
           const active = medallones === o.total;
@@ -615,12 +642,12 @@ export default function BurgerCustomizer({
           );
         })}
       </div>
-    </div>
+    </>
   );
 
-  const sectionCards = (title, list, values, change) => list.length > 0 && (
-    <div className="bw-sec">
-      <div className="bw-sec-title">{title}</div>
+  const sectionCards = (intro, list, values, change) => (
+    <>
+      <p className="bw-step-intro">{intro}</p>
       <div className="bw-cards">
         {list.map((e, i) => {
           const n = values[e.id] || 0;
@@ -649,14 +676,14 @@ export default function BurgerCustomizer({
           );
         })}
       </div>
-    </div>
+    </>
   );
 
   const sectionPapas = () => (
-    <div className="bw-sec">
-      <div className="bw-sec-title">
-        🍟 {config.kind === 'papas' ? 'Estilo de tus papas' : 'Tus papas fritas'} <em>· sazonadas es gratis 🧡</em>
-      </div>
+    <>
+      <p className="bw-step-intro">
+        {config.kind === 'papas' ? 'Elegí el estilo de tus papas.' : 'Tus papas fritas ya vienen incluidas.'} <b>Sazonadas es gratis</b> 🧡
+      </p>
       <div className="bw-meds">
         {papasOptions.map((o, i) => {
           const active = papasStyle === o.id;
@@ -685,24 +712,20 @@ export default function BurgerCustomizer({
           );
         })}
       </div>
-    </div>
+    </>
   );
 
-  // ── Contenido de cada pestaña (3 como máximo: Armar · Extras · Papas) ──
   const renderStep = () => {
     if (stepKey === 'info') {
       return (
         <>
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
           <p className="bw-info-desc">{desc}</p>
-
-          {sectionVariant()}
-          {sectionIngredients()}
-
+          {sectionLleva()}
           <div className="bw-info-actions">
             {tourTokens.length > 0 && (
               <motion.button type="button" className="bw-tour-btn" onClick={tourOn ? stopTour : startTour} whileTap={{ scale: 0.96 }}>
-                {tourOn ? '⏹ Detener recorrido' : '▶ Ver ingredientes uno por uno'}
+                {tourOn ? '⏹ Detener' : '▶ Ver ingrediente por ingrediente'}
               </motion.button>
             )}
             {!isPhoto && (
@@ -714,7 +737,6 @@ export default function BurgerCustomizer({
               </button>
             )}
           </div>
-
           {imageUrl && !isPhoto && (
             <motion.button
               type="button" className={`bw-photo${photoZoom ? ' bw-photo--zoom' : ''}`}
@@ -724,25 +746,19 @@ export default function BurgerCustomizer({
               <span className="bw-photo-tag">📷 Foto real · tocá para {photoZoom ? 'achicar' : 'agrandar'}</span>
             </motion.button>
           )}
-
-          {tail}
+          <button type="button" className="bw-skip" onClick={() => goTo(steps.length - 1)}>
+            ⚡ La quiero tal cual viene
+          </button>
         </>
       );
     }
-
-    if (stepKey === 'papas') {
-      return (<>{sectionPapas()}{tail}</>);
-    }
-
-    // extras: carne + extras + dips en una sola pantalla
-    return (
-      <>
-        {sectionCarne()}
-        {sectionCards('➕ Extras', extrasList, extras, changeExtra)}
-        {sectionCards('🥣 Salsas y dips', dipsList, dips, changeDip)}
-        {tail}
-      </>
-    );
+    if (stepKey === 'variante') return sectionVariant();
+    if (stepKey === 'sacar') return sectionSacar();
+    if (stepKey === 'carne') return sectionCarne();
+    if (stepKey === 'extras') return sectionCards('Sumá lo que quieras con el botón +. No hay límite.', extrasList, extras, changeExtra);
+    if (stepKey === 'dips') return sectionCards('Agregá una salsa o dip aparte. Es opcional.', dipsList, dips, changeDip);
+    if (stepKey === 'papas') return sectionPapas();
+    return recap;
   };
 
   return (
@@ -755,7 +771,7 @@ export default function BurgerCustomizer({
             transition={{ duration: 0.22 }}
           >
             <motion.div
-              className={`bw-shell${steps.length === 1 ? ' bw-shell--single' : ''}`} role="dialog" aria-modal="true" aria-label={`${kindText.small} ${name}`}
+              className="bw-shell" role="dialog" aria-modal="true" aria-label={`${kindText.small} ${name}`}
               initial={{ y: 80, scale: 0.96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 80, scale: 0.97, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
@@ -770,27 +786,16 @@ export default function BurgerCustomizer({
                 <button type="button" className="bw-close" onClick={closeWizard} aria-label="Cerrar">✕</button>
               </header>
 
-              {/* Pestañas */}
-              <div className="bw-tabs" role="tablist" hidden={steps.length === 1}>
-                {steps.map((s, i) => (
-                  <button
-                    type="button" key={s.key} role="tab" aria-selected={i === step}
-                    className={`bw-tab${i === step ? ' bw-tab--on' : ''}`}
-                    onClick={() => goTo(i)}
-                  >
-                    <span className="bw-tab-icon">{s.icon}</span>
-                    <span className="bw-tab-label">{s.label}</span>
-                    {tabChanged(s.key) && <motion.span className="bw-tab-dot" initial={{ scale: 0 }} animate={{ scale: 1 }} />}
-                    {i === step && <motion.span layoutId="bw-tab-ind" className="bw-tab-ind" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
-                  </button>
-                ))}
-              </div>
-              <div className="bw-bar" hidden={steps.length === 1}>
-                <motion.span
-                  className="bw-bar-fill" initial={false}
-                  animate={{ scaleX: (step + 1) / steps.length }}
-                  transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-                />
+              {/* Progreso */}
+              <div className="bw-progress">
+                <span className="bw-progress-text">Paso {step + 1} de {steps.length}</span>
+                <div className="bw-bar">
+                  <motion.span
+                    className="bw-bar-fill" initial={false}
+                    animate={{ scaleX: (step + 1) / steps.length }}
+                    transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+                  />
+                </div>
               </div>
 
               {/* Cuerpo: escenario + panel */}
@@ -850,31 +855,31 @@ export default function BurgerCustomizer({
                       transition={{ type: 'spring', stiffness: 340, damping: 32, duration: 0.2 }}
                       className="bw-step"
                     >
-                      <h3 className="bw-step-heading"><span className="bw-step-n">{step + 1}.</span> {steps[step].title}</h3>
+                      <h3 className="bw-step-heading">{steps[step].title}</h3>
                       {renderStep()}
                     </motion.div>
                   </AnimatePresence>
                 </div>
               </div>
 
-              {/* Footer fijo: precio + cantidad + agregar (siempre disponible) */}
-              <footer className="bw-footer">
+              {/* Footer fijo: precio + atrás + botón principal grande */}
+              <footer className="bw-footer bw-footer--guided">
                 <div className="bw-footer-price">
-                  <span className="bw-footer-label">Total por unidad</span>
-                  <RollPrice value={totalUnidad} className="bw-footer-val" />
-                  <span className="bw-footer-sub">
-                    {medallonesExtra || extrasTotal ? `Base ${formatARS(basePrice)} · +${formatARS(extrasTotal)}` : `Base ${formatARS(basePrice)}`}
-                  </span>
+                  <span className="bw-footer-label">Total</span>
+                  <RollPrice value={totalUnidad * qty} className="bw-footer-val" />
                 </div>
-                <div className="bw-qty">
-                  <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
-                  <motion.span key={qty} className="bw-qty-val" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{qty}</motion.span>
-                  <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(qty + 1)} aria-label="Más">+</button>
+                <div className="bw-footer-actions">
+                  {step > 0 && (
+                    <button type="button" className="bw-back" onClick={() => goTo(step - 1)}>← Atrás</button>
+                  )}
+                  <motion.button
+                    type="button" className="bw-btn-next bw-btn-next--big"
+                    onClick={isLast ? confirm : goNext} whileTap={{ scale: 0.96 }}
+                  >
+                    <span className="bw-btn-shine" />
+                    {nextLabel}
+                  </motion.button>
                 </div>
-                <motion.button type="button" className="bw-btn-next" onClick={confirm} whileTap={{ scale: 0.95 }}>
-                  <span className="bw-btn-shine" />
-                  Agregar · {formatARS(totalUnidad * qty)}
-                </motion.button>
               </footer>
 
               {/* Partículas al sumar cosas */}
