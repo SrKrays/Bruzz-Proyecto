@@ -30,6 +30,7 @@ export const LAYER_LABELS = {
   veggie: 'Medallón Veggie', ternera: 'Ternera desmenuzada', bunBottom: 'Pan de papa (base)',
 };
 const PAN_LABEL = { papa: 'Pan de papa', focaccia: 'Pan de focaccia', artesanal: 'Pan artesanal' };
+const EXTRA_LABEL = { egg: 'Huevo extra', bacon: 'Panceta extra', cheddar: 'Cheddar extra' };
 
 function norm(s) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -91,6 +92,10 @@ export function emojiOf(ingrediente) {
   if (n.includes('pera')) return '🍐';
   if (n.includes('cherry')) return '🍒';
   if (n.includes('morron')) return '🫑';
+  if (n.includes('anchoa')) return '🐟';
+  if (n.includes('miel')) return '🍯';
+  if (n.includes('ahumad') || n.includes('humo')) return '🔥';
+  if (n.includes('sal de campo')) return '🧂';
   if (n.includes('papa')) return '🍟';
   if (/helado/.test(n)) return '🍦';
   if (/bebida|gaseosa/.test(n)) return '🥤';
@@ -103,29 +108,33 @@ export function emojiOf(ingrediente) {
 export function buildLayers({ ingredientes, quitados, medallones, extras, mainType = 'patty' }) {
   const kept = ingredientes.filter((i) => !quitados.includes(i));
   const types = new Set(kept.map(layerTypeOf).filter(Boolean));
-  const out = [{ id: 'bun-top', type: 'bunTop' }];
+  // Cada capa se rotula con el nombre real del ingrediente de la receta
+  const nameOf = {};
+  kept.forEach((i) => { const t = layerTypeOf(i); if (t && !nameOf[t]) nameOf[t] = i; });
+  const L = (id, type, label) => ({ id, type, label: label || nameOf[type] || LAYER_LABELS[type] });
+  const out = [L('bun-top', 'bunTop', 'pan:top')];
 
-  VEG_ORDER.forEach((t) => { if (types.has(t)) out.push({ id: t, type: t }); });
+  VEG_ORDER.forEach((t) => { if (types.has(t)) out.push(L(t, t)); });
 
   const eggs = (types.has('egg') ? 1 : 0) + (extras.huevo || 0);
-  for (let i = 0; i < eggs; i++) out.push({ id: `egg-${i}`, type: 'egg' });
-  ['ham', 'prosciutto', 'cheese'].forEach((t) => { if (types.has(t)) out.push({ id: t, type: t }); });
+  for (let i = 0; i < eggs; i++) out.push(L(`egg-${i}`, 'egg', i === 0 && types.has('egg') ? nameOf.egg : EXTRA_LABEL.egg));
+  ['ham', 'prosciutto', 'cheese'].forEach((t) => { if (types.has(t)) out.push(L(t, t)); });
 
   const bacon = (types.has('bacon') ? 1 : 0) + (extras.panceta || 0);
-  for (let i = 0; i < bacon; i++) out.push({ id: `bacon-${i}`, type: 'bacon' });
+  for (let i = 0; i < bacon; i++) out.push(L(`bacon-${i}`, 'bacon', i === 0 && types.has('bacon') ? nameOf.bacon : EXTRA_LABEL.bacon));
 
   const cheddar = (types.has('cheddar') ? 1 : 0) + (extras.cheddar || 0);
-  for (let i = 0; i < cheddar; i++) out.push({ id: `cheddar-${i}`, type: 'cheddar' });
+  for (let i = 0; i < cheddar; i++) out.push(L(`cheddar-${i}`, 'cheddar', i === 0 && types.has('cheddar') ? nameOf.cheddar : EXTRA_LABEL.cheddar));
 
-  if (mainType) for (let i = 0; i < medallones; i++) out.push({ id: `${mainType}-${i}`, type: mainType });
-  out.push({ id: 'bun-bottom', type: 'bunBottom' });
+  if (mainType) for (let i = 0; i < medallones; i++) out.push(L(`${mainType}-${i}`, mainType, i === 0 ? 'main' : 'main:extra'));
+  out.push(L('bun-bottom', 'bunBottom', 'pan:bottom'));
   return out;
 }
 
 export default function LiveBurger({
   ingredientes, quitados, medallones, extras, dips, papas, bounceKey,
   highlight = null, exploded = false, friesHighlight = false,
-  pan = 'papa', mainType = 'patty',
+  pan = 'papa', mainType = 'patty', panName = null, mainName = null,
 }) {
   const controls = useAnimationControls();
 
@@ -140,10 +149,13 @@ export default function LiveBurger({
     () => buildLayers({ ingredientes, quitados, medallones, extras, mainType }),
     [ingredientes, quitados, medallones, extras, mainType],
   );
-  const labelOf = (type) => (
-    type === 'bunTop' ? `${PAN_LABEL[pan]} (tapa)`
-    : type === 'bunBottom' ? `${PAN_LABEL[pan]} (base)`
-    : LAYER_LABELS[type]
+  const panBase = panName || PAN_LABEL[pan];
+  const labelOf = (l) => (
+    l.label === 'pan:top' ? `${panBase} (tapa)`
+    : l.label === 'pan:bottom' ? `${panBase} (base)`
+    : l.label === 'main' ? (mainName || LAYER_LABELS[l.type])
+    : l.label === 'main:extra' ? `${mainName || LAYER_LABELS[l.type]} extra`
+    : l.label
   );
 
   // Escala para que la pila siempre entre en el escenario
@@ -156,6 +168,7 @@ export default function LiveBurger({
   return (
     <div className={`lb-stage lb-pan-${pan}`}>
       <div className="lb-glow" />
+      <div className="fx-steam" aria-hidden="true"><span /><span /><span /></div>
       <div className="lb-embers" aria-hidden="true">
         {Array.from({ length: 10 }).map((_, i) => <span key={i} style={{ '--i': i }} />)}
       </div>
@@ -185,7 +198,7 @@ export default function LiveBurger({
                   >
                     <div className={`lb-layer lb-${l.type}${isHl ? ' lb-hl' : ''}${isDim ? ' lb-dim' : ''}`} />
                     <span className={`lb-label${showLabel ? ' lb-label--on' : ''}${isHl ? ' lb-label--hl' : ''}`}>
-                      {labelOf(l.type)}
+                      {labelOf(l)}
                     </span>
                   </motion.div>
                 );

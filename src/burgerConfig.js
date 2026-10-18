@@ -63,7 +63,7 @@ const BURGER_INGREDIENTES = {
 const LOMO_INGREDIENTES = {
   'Lomito Simple':   ['Lactonesa de la casa', 'Queso tybo', 'Jamón cocido', 'Chimi de la casa'],
   'Lomito Completo': ['Lactonesa de la casa', 'Queso tybo', 'Jamón cocido', 'Huevo', 'Lechuga', 'Tomate', 'Chimi de la casa'],
-  'Lomito Americano': ['Lactonesa de la casa', 'Barbacoa', 'Cheddar', 'Panceta', 'Huevo', 'Cebolla morada caramelizada'],
+  'Lomito Americano': ['Lactonesa de la casa', 'Barbacoa', 'Queso cheddar', 'Panceta', 'Huevo', 'Cebolla morada caramelizada'],
 };
 
 const SANDWICH = {
@@ -202,12 +202,12 @@ export function getPanelConfig(menuKey, item) {
   if (menuKey === 'pizza' || menuKey === 'calzone') {
     const sinTacc = item.sinTacc === true;
     const bambino = name === 'Mini Pizza Bambino';
-    const chips = bambino ? ['Salsa de tomate', 'Muzzarella'] : parseIngredientes(item.desc);
+    const chips = bambino ? ['Muzzarella'] : parseIngredientes(item.desc);
     return {
       kind: 'pizza', visual: 'photo', pan: null, main: null,
-      base: [],
+      base: sinTacc ? ['Masa artesanal sin TACC'] : (bambino ? [] : ['Masa napolitana']),
       ingredientes: sinTacc ? [] : chips,
-      infoChips: sinTacc ? ['Masa artesanal sin TACC'] : chips,
+      infoChips: sinTacc ? [] : chips,
       carne: null, extras: ['muzza'], dips: false,
       sides: bambino
         ? [{ emoji: '🥤', label: 'Bebida' }, { emoji: '🍦', label: 'Helado' }, { emoji: '🧸', label: 'Juguete' }]

@@ -35,38 +35,69 @@ function buildSteps(config, hasPapas, ingList) {
   return steps;
 }
 
-// ── Hero con foto (pizza, calzone, papas): sin capas, solo muestra ──
-function ProductHero({ imageUrl, name, token, emoji, papas, dipCount, muzza, bounceKey }) {
+// ── Hero con foto (pizza, calzone, papas): plato giratorio con los
+//    ingredientes orbitando, vapor, y reacciones a cada cambio ──────────
+function ProductHero({ imageUrl, name, token, emoji, papas, orbit, rain, bounceKey }) {
+  const n = orbit.length;
   return (
     <div className="ph-stage">
       <div className="lb-glow" />
+      <div className="fx-steam fx-steam--hero" aria-hidden="true"><span /><span /><span /></div>
+      {rain && (
+        <div className="ph-rain" aria-hidden="true">
+          {Array.from({ length: 9 }).map((_, i) => <span key={i} style={{ '--i': i }}>{rain}</span>)}
+        </div>
+      )}
       <motion.div
         key={bounceKey}
-        className="ph-photo-wrap"
-        initial={{ scale: 0.9, rotate: -4, opacity: 0 }}
+        className={`ph-photo-wrap${papas === 'sazonadas' ? ' ph-photo-wrap--hot' : ''}`}
+        initial={{ scale: 0.82, rotate: -8, opacity: 0.6 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 13 }}
       >
         {imageUrl ? <img className="ph-photo" src={imageUrl} alt={name} /> : <span className="ph-fallback">{emoji}</span>}
-        <AnimatePresence mode="wait">
-          {token && (
-            <motion.span
-              key={token.label}
-              className="ph-pop"
-              initial={{ opacity: 0, scale: 0.3, y: 30, rotate: -25 }}
-              animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.4, y: -30 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 16 }}
-            >
-              <span className="ph-pop-emoji">{token.emoji}</span>
-              <span className="ph-pop-label">{token.label}</span>
-            </motion.span>
-          )}
-        </AnimatePresence>
-        {papas === 'sazonadas' && <span className="ph-tag ph-tag--hot">🧡 Sazonadas</span>}
-        {dipCount > 0 && <span className="ph-tag ph-tag--dip">🥣 x{dipCount}</span>}
-        {muzza > 0 && <span className="ph-tag ph-tag--muzza">🧀 Muzza extra x{muzza}</span>}
+        {papas === 'sazonadas' && (
+          <div className="ph-sparks" aria-hidden="true">
+            {Array.from({ length: 6 }).map((_, i) => <span key={i} style={{ '--i': i }}>✨</span>)}
+          </div>
+        )}
       </motion.div>
+
+      {/* Anillo de ingredientes que orbitan */}
+      <div className="ph-orbit" aria-hidden="true">
+        <AnimatePresence>
+          {orbit.map((o, i) => (
+            <motion.div
+              key={o.id} className="ph-orbit-slot"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: token && token.label === o.label ? 1.45 : 1 }}
+              exit={{ opacity: 0, scale: 0, rotate: 180 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 16 }}
+            >
+              <span className={`ph-orbit-item${token && token.label === o.label ? ' ph-orbit-item--on' : ''}`} style={{ '--a': `${(360 / Math.max(n, 1)) * i}deg` }}>
+                <span className="ph-orbit-icon">{o.emoji}</span>
+              </span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {token && (
+          <motion.span
+            key={token.label}
+            className="ph-pop"
+            initial={{ opacity: 0, scale: 0.3, y: 30, rotate: -25 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.4, y: -30 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 16 }}
+          >
+            <span className="ph-pop-emoji">{token.emoji}</span>
+            <span className="ph-pop-label">{token.label}</span>
+          </motion.span>
+        )}
+      </AnimatePresence>
+      {papas === 'sazonadas' && <span className="ph-tag ph-tag--hot">🧡 Sazonadas</span>}
     </div>
   );
 }
@@ -198,12 +229,12 @@ export default function BurgerCustomizer({
     [isPhoto, ingList, quitados, medallones, extras, mainType],
   );
   const tourTokens = useMemo(() => {
-    if (isPhoto) return infoChips;
+    if (isPhoto) return [...config.base, ...infoChips];
     const seen = [];
     layers.forEach((l) => { if (!seen.includes(l.type)) seen.push(l.type); });
     if (papasOptions) seen.push('fries');
     return seen;
-  }, [isPhoto, infoChips, layers, papasOptions]);
+  }, [isPhoto, infoChips, config.base, layers, papasOptions]);
 
   const stopTour = useCallback(() => {
     if (tourTimer.current) { clearInterval(tourTimer.current); tourTimer.current = null; }
@@ -376,6 +407,14 @@ export default function BurgerCustomizer({
   const variantCount = vcfg?.multi
     ? Object.values(variantValue || {}).reduce((s, n) => s + n, 0)
     : (variantValue ? 1 : 0);
+  // Ingredientes que orbitan alrededor del plato (los quitados desaparecen; los extras aparecen)
+  const orbit = isPhoto
+    ? [
+      ...[...config.base, ...infoChips].filter((x) => !quitados.includes(x)).map((x) => ({ id: x, label: x, emoji: emojiOf(x) })),
+      ...Array.from({ length: extras.muzza || 0 }).map((_, i) => ({ id: `muzza-${i}`, label: 'Muzza extra', emoji: '🧀' })),
+      ...Array.from({ length: dips.mayo || 0 }).map((_, i) => ({ id: `dip-${i}`, label: 'Dip de mayo', emoji: '🥣' })),
+    ].slice(0, 12)
+    : [];
   const dipTotal = Object.values(dips).reduce((s, n) => s + n, 0);
 
   // Indicadores (punto) de pestañas con cambios
@@ -441,7 +480,7 @@ export default function BurgerCustomizer({
   const renderStep = () => {
     if (stepKey === 'info') {
       const chips = isPhoto
-        ? infoChips.map((n) => ({ n, base: false }))
+        ? [...config.base.map((n) => ({ n, base: true })), ...infoChips.map((n) => ({ n, base: false }))]
         : [
           ...config.base.map((n) => ({ n, base: true })),
           ...ingList.map((n) => ({ n, base: false })),
@@ -797,7 +836,8 @@ export default function BurgerCustomizer({
                     <ProductHero
                       imageUrl={imageUrl} name={name} emoji={kindText.emoji}
                       token={heroToken} bounceKey={bounceKey}
-                      papas={papasOptions ? papasStyle : null} dipCount={dipTotal} muzza={extras.muzza || 0}
+                      papas={papasOptions ? papasStyle : null}
+                      orbit={orbit} rain={config.kind === 'papas' ? (papasStyle === 'sazonadas' ? '🧡' : '🍟') : null}
                     />
                   ) : (
                     <>
@@ -814,6 +854,8 @@ export default function BurgerCustomizer({
                         friesHighlight={friesHighlight}
                         pan={config.pan}
                         mainType={mainType}
+                        panName={config.base[0]}
+                        mainName={config.base[1]}
                       />
                       <button
                         type="button" className={`bw-explode${exploded ? ' bw-explode--on' : ''}`}
