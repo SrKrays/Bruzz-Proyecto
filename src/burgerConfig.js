@@ -42,3 +42,10 @@ export const BURGER_CONFIG = {
     ingredientes: ['Cheddar', 'Salsa Bruzz', 'Rúcula', 'Cebolla morada', 'Bacon', 'Pepinos encurtidos', 'Barbacoa'],
   },
 };
+
+// Estilos de papas fritas (gratis). Se usa en el último paso del personalizador
+// y en el selector de papas del resto de los productos.
+export const PAPAS_ESTILOS = [
+  { id: 'clasicas',  name: 'Clásicas',      desc: 'Con la sal de siempre.' },
+  { id: 'sazonadas', name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.' },
+];

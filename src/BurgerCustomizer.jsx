@@ -15,12 +15,13 @@ const buzz = (ms = 12) => {
   try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(ms); } catch { /* noop */ }
 };
 
-const STEPS = [
-  { key: 'receta',     label: 'Tu hamburguesa', short: 'Receta' },
-  { key: 'medallones', label: 'Medallones',     short: 'Carne' },
-  { key: 'extras',     label: 'Extras',         short: 'Extras' },
-  { key: 'dips',       label: 'Salsas y dips',  short: 'Dips' },
+const BASE_STEPS = [
+  { key: 'receta',     label: 'Tu hamburguesa' },
+  { key: 'medallones', label: 'Medallones' },
+  { key: 'extras',     label: 'Extras' },
+  { key: 'dips',       label: 'Salsas y dips' },
 ];
+const PAPAS_STEP = { key: 'papas', label: 'Papas fritas' };
 
 // ── Precio que "rueda" al cambiar ────────────────────────────
 function RollPrice({ value, className = '' }) {
@@ -89,14 +90,24 @@ function MiniPatties({ n }) {
 
 /**
  * Personalizador de hamburguesas — wizard inmersivo.
+ * Se abre OBLIGATORIAMENTE al tocar "Agregar" en una hamburguesa.
  * Props:
- *   name        → nombre de la hamburguesa
- *   basePrice   → precio base (número)
- *   config      → { ingredientes: string[] }
- *   onChange    → ({ extrasTotal, lines }) cada vez que cambia algo
+ *   name          → nombre de la hamburguesa
+ *   basePrice     → precio base (número)
+ *   config        → { ingredientes: string[] }
+ *   qty           → cantidad elegida en la tarjeta
+ *   open          → si el wizard está abierto
+ *   onClose       → cerrar sin agregar
+ *   onConfirm     → agregar al pedido
+ *   onChange      → ({ extrasTotal, lines }) cada vez que cambia algo
+ *   papasOptions  → (opcional) estilos de papas; suma un último paso
+ *   papasStyle / onPapasChange → estilo de papas elegido
  */
-export default function BurgerCustomizer({ name, basePrice, config, onChange }) {
-  const [open, setOpen]           = useState(false);
+export default function BurgerCustomizer({
+  name, basePrice, config, qty = 1, open, onClose, onConfirm, onChange,
+  papasOptions, papasStyle, onPapasChange,
+}) {
+  const steps = papasOptions ? [...BASE_STEPS, PAPAS_STEP] : BASE_STEPS;
   const [step, setStep]           = useState(0);
   const [dir, setDir]             = useState(1);
   const [quitados, setQuitados]   = useState([]);
@@ -169,12 +180,18 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
   const totalUnidad = basePrice + extrasTotal;
 
   // ── Wizard: abrir / cerrar / navegar ──────────────────────
-  const openWizard = () => { setStep(0); setDir(1); setOpen(true); buzz(15); };
-  const closeWizard = useCallback(() => setOpen(false), []);
+  useEffect(() => { if (open) { setStep(0); setDir(1); buzz(15); } }, [open]);
+  const closeWizard = useCallback(() => onClose && onClose(), [onClose]);
   const goTo = (n) => { if (n === step) return; setDir(n > step ? 1 : -1); setStep(n); buzz(8); };
   const next = () => {
-    if (step < STEPS.length - 1) { goTo(step + 1); return; }
-    launchConfetti(); buzz(35); setOpen(false);
+    if (step < steps.length - 1) { goTo(step + 1); return; }
+    launchConfetti(); buzz(35); onConfirm && onConfirm();
+  };
+  const pickPapas = (id) => {
+    if (id === papasStyle) return;
+    onPapasChange && onPapasChange(id);
+    if (id === 'sazonadas') spawnBurst('🧡');
+    bump(); buzz(16);
   };
 
   // Bloquear scroll del fondo + cerrar con ESC
@@ -193,9 +210,32 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
     exit:   (d) => ({ x: d > 0 ? -70 : 70, opacity: 0 }),
   };
 
+  // Resumen final ("Tu pedido") — se muestra en el último paso
+  const recap = (
+    <motion.div className="bw-recap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <div className="bw-recap-title">Tu pedido{qty > 1 ? ` · ${qty} unidades iguales` : ''}</div>
+      <ul className="bw-recap-list">
+        <li>🍔 {name} · {medallones === 1 ? 'Simple' : medallones === 2 ? 'Doble' : 'Triple'}</li>
+        <AnimatePresence initial={false}>
+          {lines.filter((l) => !/medallones de carne/.test(l)).map((l) => (
+            <motion.li
+              key={l}
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+            >
+              {l.startsWith('Sin ') ? '🚫' : '➕'} {l}
+            </motion.li>
+          ))}
+        </AnimatePresence>
+        {papasOptions && <li>🍟 Papas {papasStyle === 'sazonadas' ? 'sazonadas 🧡' : 'clásicas'}</li>}
+        {lines.length === 0 && !papasOptions && <li className="bw-recap-empty">Tal cual la receta original ✨</li>}
+      </ul>
+    </motion.div>
+  );
+
   // ── Contenido de cada paso ────────────────────────────────
+  const stepKey = steps[step].key;
   const renderStep = () => {
-    if (step === 0) {
+    if (stepKey === 'receta') {
       return (
         <>
           <p className="bw-step-intro">Estos ingredientes vienen incluidos. <b>Tocá los que no querés</b> y salen de tu hamburguesa.</p>
@@ -232,7 +272,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
       );
     }
 
-    if (step === 1) {
+    if (stepKey === 'medallones') {
       return (
         <>
           <p className="bw-step-intro">Elegí cuántos medallones de carne querés. <b>Cada uno extra suma {formatARS(MEDALLON_EXTRA_PRECIO)}.</b></p>
@@ -265,13 +305,50 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
       );
     }
 
-    const list = step === 2 ? EXTRAS : DIPS;
-    const values = step === 2 ? extras : dips;
-    const change = step === 2 ? changeExtra : changeDip;
+    if (stepKey === 'papas') {
+      return (
+        <>
+          <p className="bw-step-intro">Tus papas fritas vienen incluidas. <b>¿Las querés sazonadas?</b> Es gratis 🧡</p>
+          <div className="bw-meds">
+            {papasOptions.map((o, i) => {
+              const active = papasStyle === o.id;
+              const hot = o.id === 'sazonadas';
+              return (
+                <motion.button
+                  type="button" key={o.id}
+                  className={`bw-med bw-papa${active ? ' bw-med--active' : ''}${hot ? ' bw-papa--hot' : ''}`}
+                  onClick={() => pickPapas(o.id)}
+                  aria-pressed={active}
+                  initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.08, type: 'spring', stiffness: 360, damping: 24 }}
+                  whileTap={{ scale: 0.96 }}
+                >
+                  {active && <motion.span layoutId="bw-papa-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
+                  <span className="bw-papa-emoji">{hot ? '🍟🧡' : '🍟'}</span>
+                  <span className="bw-med-text">
+                    <span className="bw-med-name">
+                      {o.name}
+                      {o.badge && <span className="badge badge--pulse" style={{ marginLeft: 8 }}>{o.badge}</span>}
+                    </span>
+                    <span className="bw-med-desc">{o.desc}</span>
+                  </span>
+                  <span className="bw-med-price">{hot ? 'Gratis' : 'Incluidas'}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+          {recap}
+        </>
+      );
+    }
+
+    const list = stepKey === 'extras' ? EXTRAS : DIPS;
+    const values = stepKey === 'extras' ? extras : dips;
+    const change = stepKey === 'extras' ? changeExtra : changeDip;
     return (
       <>
         <p className="bw-step-intro">
-          {step === 2
+          {stepKey === 'extras'
             ? <>Sumá lo que quieras. <b>No hay límite de cantidad.</b></>
             : <>Agregá un dip o salsa extra. <b>Es opcional.</b></>}
         </p>
@@ -307,66 +384,15 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
           })}
         </div>
 
-        {step === 3 && (
-          <motion.div className="bw-recap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="bw-recap-title">Tu pedido</div>
-            <ul className="bw-recap-list">
-              <li>🍔 {name} · {medallones === 1 ? 'Simple' : medallones === 2 ? 'Doble' : 'Triple'}</li>
-              <AnimatePresence initial={false}>
-                {lines.filter((l) => !/medallones de carne/.test(l)).map((l) => (
-                  <motion.li
-                    key={l}
-                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                  >
-                    {l.startsWith('Sin ') ? '🚫' : '➕'} {l}
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-              {lines.length === 0 && <li className="bw-recap-empty">Tal cual la receta original ✨</li>}
-            </ul>
-          </motion.div>
-        )}
+        {!papasOptions && stepKey === 'dips' && recap}
       </>
     );
   };
 
-  const isLast = step === STEPS.length - 1;
+  const isLast = step === steps.length - 1;
 
   return (
     <>
-      {/* ── Botón que abre el personalizador ── */}
-      <div className="bl-wrap">
-        <motion.button
-          type="button" className="bl-btn" onClick={openWizard}
-          whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.015 }}
-        >
-          <span className="bl-shine" />
-          <span className="bl-emoji">🍔</span>
-          <span className="bl-text">
-            <span className="bl-title">Personalizá tu hamburguesa</span>
-            <span className="bl-sub">Quitá ingredientes · medallones · extras · dips</span>
-          </span>
-          <span className="bl-cta">{lines.length ? 'Editar' : 'Armar'} <span>→</span></span>
-        </motion.button>
-
-        <AnimatePresence initial={false}>
-          {lines.length > 0 && (
-            <motion.div
-              className="bl-summary"
-              initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            >
-              <div className="bl-chips">
-                {lines.map((l) => <span key={l} className="bl-chip">{l}</span>)}
-              </div>
-              <div className="bl-total">
-                <span>Total por unidad</span>
-                <RollPrice value={totalUnidad} className="bl-total-val" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
       {/* ── Wizard a pantalla completa ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
@@ -394,7 +420,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                 {/* Progreso */}
                 <div className="bw-progress">
                   <div className="bw-segments">
-                    {STEPS.map((s, i) => (
+                    {steps.map((s, i) => (
                       <button type="button" key={s.key} className="bw-seg" onClick={() => goTo(i)} aria-label={`Ir al paso ${i + 1}: ${s.label}`}>
                         <motion.span
                           className="bw-seg-fill"
@@ -406,14 +432,14 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                     ))}
                   </div>
                   <div className="bw-step-label">
-                    <span className="bw-step-num">Paso {step + 1} de {STEPS.length}</span>
+                    <span className="bw-step-num">Paso {step + 1} de {steps.length}</span>
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.span
                         key={step} className="bw-step-name"
                         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.16 }}
                       >
-                        {STEPS[step].label}
+                        {steps[step].label}
                       </motion.span>
                     </AnimatePresence>
                   </div>
@@ -428,6 +454,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                       medallones={medallones}
                       extras={extras}
                       dips={dips}
+                      papas={papasOptions ? papasStyle : null}
                       bounceKey={bounceKey}
                     />
                   </div>
@@ -440,7 +467,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                         transition={{ type: 'spring', stiffness: 340, damping: 32, duration: 0.2 }}
                         className="bw-step"
                       >
-                        <h3 className="bw-step-heading"><span className="bw-step-n">{step + 1}.</span> {STEPS[step].label}</h3>
+                        <h3 className="bw-step-heading"><span className="bw-step-n">{step + 1}.</span> {steps[step].label}</h3>
                         {renderStep()}
                       </motion.div>
                     </AnimatePresence>
@@ -454,6 +481,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                     <RollPrice value={totalUnidad} className="bw-footer-val" />
                     <span className="bw-footer-sub">
                       {medallonesExtra || extrasTotal ? `Base ${formatARS(basePrice)} · +${formatARS(extrasTotal)}` : `Base ${formatARS(basePrice)}`}
+                      {qty > 1 ? ` · ×${qty} = ${formatARS(totalUnidad * qty)}` : ''}
                     </span>
                   </div>
                   {step > 0 && (
@@ -461,7 +489,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
                   )}
                   <motion.button type="button" className="bw-btn-next" onClick={next} whileTap={{ scale: 0.95 }}>
                     <span className="bw-btn-shine" />
-                    {isLast ? 'Listo ✓' : 'Siguiente →'}
+                    {isLast ? `Agregar · ${formatARS(totalUnidad * qty)}` : 'Siguiente →'}
                   </motion.button>
                 </footer>
 

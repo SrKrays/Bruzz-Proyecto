@@ -5,15 +5,9 @@ import { emitFlyToCart } from './flyToCart';
 import RevealText from './RevealText';
 import { launchConfetti } from './confettiCheckout';
 import BurgerCustomizer from './BurgerCustomizer';
-import { BURGER_CONFIG } from './burgerConfig';
+import { BURGER_CONFIG, PAPAS_ESTILOS } from './burgerConfig';
 
 const WHATSAPP_NUMBER = 543543512248;
-
-// ── Estilo de papas fritas ────────────────────────────────
-const PAPAS_ESTILOS = [
-  { id: 'clasicas',   name: 'Clásicas', desc: 'Con la sal de siempre.' },
-  { id: 'sazonadas',  name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.' },
-];
 
 // ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
 const VARIEDADES_SINTACC = [
@@ -309,6 +303,8 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
   const [sintaccVar, setSintaccVar]       = useState('');
   const [sintaccError, setSintaccError]   = useState('');
   const [papasStyle, setPapasStyle]       = useState('clasicas');
+  const [wizardOpen, setWizardOpen]       = useState(false);
+  const addRectRef = useRef(null);
 
   // FX 11: parallax en imagen del body
   const imgRef  = useRef(null);
@@ -349,10 +345,12 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       setMedallonError(''); setSintaccVar(''); setSintaccError('');
       setPapasStyle('clasicas');
       setCustom({ extrasTotal: 0, lines: [] });
+      setWizardOpen(false);
     }
   }, [isExpanded]);
 
-  const handleAdd = (e) => {
+  // Agrega realmente al carrito. `rect` = posición del botón para la animación de vuelo.
+  const doAdd = (rect) => {
     if (isVeggie) {
       const totalSelected = Object.values(medallones).reduce((s, n) => s + n, 0);
       if (totalSelected < qty) { setMedallonError(`Seleccioná ${qty} medallón${qty > 1 ? 'es' : ''} para continuar`); return; }
@@ -372,10 +370,28 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
 
     onCartAdd({ ...item, ...custPart, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel, papasStyle: papasLabel });
 
-    if (e?.currentTarget) {
-      emitFlyToCart({ rect: e.currentTarget.getBoundingClientRect(), imageUrl: item.imageUrl });
+    if (rect) {
+      emitFlyToCart({ rect, imageUrl: item.imageUrl });
     }
     onToggle(null);
+  };
+
+  // Botón "Agregar": en hamburguesas abre el personalizador (obligatorio);
+  // el resto de los productos se agregan directo como siempre.
+  const handleAdd = (e) => {
+    const rect = e?.currentTarget ? e.currentTarget.getBoundingClientRect() : null;
+    if (burgerCfg) {
+      addRectRef.current = rect;
+      setWizardOpen(true);
+      return;
+    }
+    doAdd(rect);
+  };
+
+  // Confirmación desde el personalizador: cierra el wizard y recién ahí agrega.
+  const handleWizardConfirm = () => {
+    setWizardOpen(false);
+    setTimeout(() => doAdd(addRectRef.current), 260);
   };
 
   const hasBadge = !!item.badge;
@@ -461,10 +477,17 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
                   name={item.name}
                   basePrice={basePrice}
                   config={burgerCfg}
+                  qty={qty}
+                  open={wizardOpen}
+                  onClose={() => setWizardOpen(false)}
+                  onConfirm={handleWizardConfirm}
                   onChange={setCustom}
+                  papasOptions={tienePapas ? PAPAS_ESTILOS : null}
+                  papasStyle={papasStyle}
+                  onPapasChange={setPapasStyle}
                 />
               )}
-              {tienePapas && (
+              {tienePapas && !burgerCfg && (
                 <PapasSelector
                   selected={papasStyle}
                   onChange={setPapasStyle}
@@ -506,7 +529,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
                   <button className="exp-qty-btn" onClick={() => setQty((q) => q + 1)}>+</button>
                 </div>
                 <motion.button className="exp-add-btn" whileTap={{ scale: 0.96 }} onClick={handleAdd}>
-                  Agregar · <AnimatedPrice value={unitPrice * qty} />
+                  {burgerCfg ? '🍔 Armar y agregar' : 'Agregar'} · <AnimatedPrice value={unitPrice * qty} />
                 </motion.button>
               </div>
             </div>

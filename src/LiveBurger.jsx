@@ -47,7 +47,7 @@ export function emojiOf(ingrediente) {
   })[t] || '🍔';
 }
 
-export default function LiveBurger({ ingredientes, quitados, medallones, extras, dips, bounceKey }) {
+export default function LiveBurger({ ingredientes, quitados, medallones, extras, dips, papas, bounceKey }) {
   const controls = useAnimationControls();
 
   // "Rebote" de toda la hamburguesa cada vez que el cliente cambia algo
@@ -114,6 +114,18 @@ export default function LiveBurger({ ingredientes, quitados, medallones, extras,
       </motion.div>
 
       <div className="lb-plate" />
+
+      {papas && (
+        <motion.div
+          key={papas}
+          className={`lb-fries${papas === 'sazonadas' ? ' lb-fries--hot' : ''}`}
+          initial={{ opacity: 0, x: -50, scale: 0.5, rotate: -30 }}
+          animate={{ opacity: 1, x: 0, scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+        >
+          🍟{papas === 'sazonadas' && <span className="lb-fries-spark">🧡</span>}
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {dipCount > 0 && (
