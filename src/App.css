@@ -3330,3 +3330,31 @@ height: auto;
 .fx-steam span:nth-child(2) { left: 38px; animation-delay: 1s; }
 .fx-steam span:nth-child(3) { left: 64px; animation-delay: 2s; }
 @keyframes steamUp { 0% { transform: translateY(20px) scaleX(1); opacity: 0; } 30% { opacity: 0.7; } 100% { transform: translateY(-70px) scaleX(2); opacity: 0; } }
+
+/* ═══ Panel compacto: secciones + sacar ingredientes con ✕ ═══ */
+.bw-sec { margin-top: 14px; }
+.bw-sec-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.bw-sec-title em { font-style: normal; font-weight: 500; letter-spacing: 0; text-transform: none; color: rgba(255,255,255,0.55); font-size: 12px; }
+.bw-req { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(229,83,10,0.2); color: #ff9a5a; letter-spacing: 0.06em; }
+.bw-ing-wrap { position: relative; display: inline-flex; }
+.bw-ing-x {
+  position: absolute; top: -7px; right: -5px; z-index: 2; width: 22px; height: 22px; border-radius: 50%; padding: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; cursor: pointer;
+  background: #2a2a2a; color: #fff; border: 1px solid rgba(245,200,66,0.6);
+}
+.bw-ing-x--back { background: var(--gold); color: #111; border-color: transparent; }
+
+/* ═══ Rendimiento en celular: mismas animaciones, menos costo por frame ═══ */
+.bw-stage-col, .lb-stage, .ph-stage { contain: layout paint; }
+.ph-photo, .ph-orbit, .ph-orbit-icon, .lb-bounce { will-change: transform; }
+@media (max-width: 760px), (pointer: coarse) {
+  .lb-stack { filter: none; }
+  .lb-glow { filter: none; background: radial-gradient(circle, rgba(245,200,66,0.28) 0, transparent 68%); }
+  .fx-steam span { filter: none; background: radial-gradient(ellipse, rgba(255,255,255,0.35) 0, transparent 70%); }
+  .lb-embers span:nth-child(n+6) { display: none; }
+  .ph-rain span:nth-child(n+6) { display: none; }
+  .ph-sparks span:nth-child(n+4) { display: none; }
+  .bw-overlay { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0,0,0,0.88); }
+  .ph-photo { animation: phSpinSlow 60s linear infinite; }
+  .ph-photo-wrap--hot { animation: none; }
+}

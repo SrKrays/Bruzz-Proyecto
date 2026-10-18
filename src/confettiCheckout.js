@@ -20,9 +20,12 @@ export function launchConfetti() {
 }
 
 function fire(confetti) {
+  // En celulares, menos partículas para no trabar
+  const lite = typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+  const k = lite ? 0.55 : 1;
   // Ráfaga principal desde el centro-inferior
   confetti({
-    particleCount: 90,
+    particleCount: Math.round(90 * k),
     spread: 80,
     origin: { x: 0.5, y: 0.75 },
     colors: ['#f5c842', '#c9a230', '#fff8e1', '#ffffff', '#3d8a5a'],
@@ -33,7 +36,7 @@ function fire(confetti) {
   // Segunda ráfaga lateral izquierda con delay
   setTimeout(() => {
     confetti({
-      particleCount: 40,
+      particleCount: Math.round(40 * k),
       angle: 60,
       spread: 55,
       origin: { x: 0, y: 0.8 },
@@ -45,7 +48,7 @@ function fire(confetti) {
   // Lateral derecha
   setTimeout(() => {
     confetti({
-      particleCount: 40,
+      particleCount: Math.round(40 * k),
       angle: 120,
       spread: 55,
       origin: { x: 1, y: 0.8 },

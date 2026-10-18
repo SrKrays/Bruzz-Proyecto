@@ -9,6 +9,9 @@ function formatARS(n) {
   return '$' + Math.round(n).toLocaleString('es-AR');
 }
 
+// Celulares / pantallas táctiles: mismas animaciones pero con menos partículas
+const isLite = () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+
 const buzz = (ms = 12) => {
   try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(ms); } catch { /* noop */ }
 };
@@ -23,14 +26,10 @@ const KIND_TEXT = {
 };
 
 // Arma las pestañas según lo que el producto permite personalizar
-function buildSteps(config, hasPapas, ingList) {
+function buildSteps(config, hasPapas) {
   const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
-  const steps = [{ key: 'info', label: k.tab, title: k.title, icon: '📖' }];
-  if (config.variants) steps.push({ key: 'variante', label: config.variants.tab, title: config.variants.title, icon: config.variants.icon });
-  if (ingList.length || config.variants?.byId) steps.push({ key: 'receta', label: 'Receta', title: 'Tu receta', icon: '🥬' });
-  if (config.carne) steps.push({ key: 'carne', label: config.carne.tab, title: config.carne.title, icon: config.carne.icon });
-  if (config.extras.length) steps.push({ key: 'extras', label: 'Extras', title: 'Extras', icon: '➕' });
-  if (config.dips) steps.push({ key: 'dips', label: 'Dips', title: 'Salsas y dips', icon: '🥣' });
+  const steps = [{ key: 'info', label: config.kind === 'pizza' ? 'El plato' : 'Armar', title: k.title, icon: '📖' }];
+  if (config.carne || config.extras.length || config.dips) steps.push({ key: 'extras', label: 'Extras', title: 'Extras y salsas', icon: '➕' });
   if (hasPapas) steps.push({ key: 'papas', label: 'Papas', title: 'Papas fritas', icon: '🍟' });
   return steps;
 }
@@ -55,7 +54,7 @@ function ProductHero({ imageUrl, name, token, emoji, papas, orbit, rain, bounceK
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 240, damping: 13 }}
       >
-        {imageUrl ? <img className="ph-photo" src={imageUrl} alt={name} /> : <span className="ph-fallback">{emoji}</span>}
+        {imageUrl ? <img className="ph-photo" src={imageUrl} alt={name} decoding="async" /> : <span className="ph-fallback">{emoji}</span>}
         {papas === 'sazonadas' && (
           <div className="ph-sparks" aria-hidden="true">
             {Array.from({ length: 6 }).map((_, i) => <span key={i} style={{ '--i': i }}>✨</span>)}
@@ -196,7 +195,7 @@ export default function BurgerCustomizer({
     [vcfg, variantValue, config.ingredientes],
   );
   const infoChips = vcfg?.byId && vcfg.byId[variantValue] ? vcfg.byId[variantValue] : config.infoChips;
-  const steps = useMemo(() => buildSteps(config, !!papasOptions, ingList), [config, papasOptions, ingList]);
+  const steps = useMemo(() => buildSteps(config, !!papasOptions), [config, papasOptions]);
   const [variantErr, setVariantErr] = useState('');
   const extrasList = useMemo(() => EXTRAS.filter((e) => config.extras.includes(e.id)), [config]);
   const dipsList = config.dips ? DIPS : NO_DIPS;
@@ -269,7 +268,7 @@ export default function BurgerCustomizer({
 
   const spawnBurst = useCallback((emoji) => {
     const id = Date.now() + Math.random();
-    const parts = Array.from({ length: 7 }).map((_, i) => ({
+    const parts = Array.from({ length: isLite() ? 4 : 7 }).map((_, i) => ({
       id: `${id}-${i}`, emoji,
       dx: (Math.random() - 0.5) * 240,
       dy: 240 + Math.random() * 120,
@@ -372,7 +371,7 @@ export default function BurgerCustomizer({
       const need = vcfg.multi ? qty : 1;
       if (variantCount < need) {
         setVariantErr(vcfg.multi ? `Seleccioná ${need} medallón${need > 1 ? 'es' : ''} para continuar` : 'Elegí una variedad para continuar');
-        setDir(1); setStep(steps.findIndex((x) => x.key === 'variante')); buzz(30);
+        setDir(-1); setStep(0); buzz(30);
         return;
       }
     }
@@ -419,14 +418,12 @@ export default function BurgerCustomizer({
 
   // Indicadores (punto) de pestañas con cambios
   const tabChanged = (key) => (
-    key === 'receta' ? quitados.length > 0
-    : key === 'carne' ? medallones > 1
-    : key === 'variante' ? variantCount > 0
-    : key === 'extras' ? Object.keys(extras).length > 0
-    : key === 'dips' ? Object.keys(dips).length > 0
+    key === 'info' ? (quitados.length > 0 || variantCount > 0)
+    : key === 'extras' ? (medallones > 1 || Object.keys(extras).length > 0 || Object.keys(dips).length > 0)
     : key === 'papas' ? papasStyle === 'sazonadas'
     : false
   );
+
 
   const isLast = step === steps.length - 1;
   const stepKey = steps[step].key;
@@ -476,73 +473,231 @@ export default function BurgerCustomizer({
     </motion.button>
   ) : null;
 
-  // ── Contenido de cada pestaña ─────────────────────────────
+  // ── Secciones reutilizables ───────────────────────────────
+  const tail = isLast ? recap : nextInline;
+
+  // Variante obligatoria (medallón Veggie / variedad Sin T.A.C.C.)
+  const sectionVariant = () => {
+    if (!vcfg) return null;
+    const need = vcfg.multi ? qty : 1;
+    const setSingle = (id) => { stopTour(); onVariantChange(id); setVariantErr(''); bump(); buzz(14); };
+    const setMulti = (id, d) => {
+      stopTour();
+      const cur = variantValue || {};
+      if (d > 0 && variantCount >= need) return;
+      const next = { ...cur, [id]: Math.max(0, (cur[id] || 0) + d) };
+      if (!next[id]) delete next[id];
+      onVariantChange(next); setVariantErr(''); bump(); buzz(12);
+    };
+    return (
+      <div className="bw-sec">
+        <div className="bw-sec-title">
+          {vcfg.icon} {vcfg.title}
+          {vcfg.multi && <em> · {variantCount}/{need}</em>}
+          <span className="bw-req">obligatorio</span>
+        </div>
+        {variantErr && <p className="medallon-error">⚠ {variantErr}</p>}
+        <div className="bw-cards">
+          {vcfg.options.map((o, i) => {
+            const n = vcfg.multi ? ((variantValue || {})[o.id] || 0) : (variantValue === o.id ? 1 : 0);
+            return (
+              <motion.div
+                key={o.id} className={`bw-card${n ? ' bw-card--active' : ''}`}
+                initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05, type: 'spring', stiffness: 360, damping: 26 }}
+                onClick={vcfg.multi ? undefined : () => setSingle(o.id)}
+                style={vcfg.multi ? undefined : { cursor: 'pointer' }}
+              >
+                <span className="bw-card-emoji">{vcfg.icon}</span>
+                <span className="bw-card-text">
+                  <span className="bw-card-name">{o.name}</span>
+                  <span className="bw-card-desc">{o.desc}</span>
+                </span>
+                {vcfg.multi ? (
+                  <Stepper value={n} label={o.name} onMinus={() => setMulti(o.id, -1)} onPlus={() => setMulti(o.id, 1)} />
+                ) : (
+                  <span className={`sintacc-radio${n ? ' sintacc-radio--on' : ''}`}>{n ? <span className="sintacc-radio-dot" /> : null}</span>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Ingredientes: tocar = verlo en el plato · ✕ = sacarlo (sin costo)
+  const sectionIngredients = () => {
+    const chips = isPhoto
+      ? [...config.base.map((n) => ({ n, base: true })), ...infoChips.map((n) => ({ n, base: false }))]
+      : [...config.base.map((n) => ({ n, base: true })), ...ingList.map((n) => ({ n, base: false }))];
+    const onChip = (n) => (isPhoto ? flashHero(n) : flashHighlight(typesForIngredient(n)));
+    const sideChip = (key, emojiStr, label, i, onClick) => (
+      <motion.div className="bw-ing-wrap" key={key} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: (chips.length + i) * 0.03 }}>
+        <button type="button" className="bw-ing" onClick={onClick}>
+          <span className="bw-ing-emoji">{emojiStr}</span>
+          <span className="bw-ing-name">{label}</span>
+          <span className="bw-ing-tag bw-ing-tag--base">incl.</span>
+        </button>
+      </motion.div>
+    );
+    return (
+      <div className="bw-sec">
+        <div className="bw-sec-title">
+          Ingredientes <em>· tocá para verlo · ✕ para sacarlo</em>
+        </div>
+        {vcfg?.byId && ingList.length === 0 && <p className="bw-hint">Elegí la variedad y después podés sacar ingredientes.</p>}
+        <div className="bw-ing-grid">
+          {chips.map(({ n, base }, i) => {
+            const off = quitados.includes(n);
+            const removable = !base && ingList.includes(n);
+            const live = isPhoto && (tourOn ? tokenNow : heroPop) === n;
+            return (
+              <motion.div
+                className="bw-ing-wrap" key={n}
+                initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03, type: 'spring', stiffness: 380, damping: 24 }}
+              >
+                <button
+                  type="button"
+                  className={`bw-ing${off ? ' bw-ing--off' : ''}${live ? ' bw-ing--live' : ''}`}
+                  onClick={() => onChip(n)}
+                >
+                  <span className="bw-ing-emoji">{emojiOf(n)}</span>
+                  <span className="bw-ing-name">{n}</span>
+                  {off && <span className="bw-ing-tag">sin</span>}
+                  {base && !off && <span className="bw-ing-tag bw-ing-tag--base">base</span>}
+                </button>
+                {removable && (
+                  <motion.button
+                    type="button" className={`bw-ing-x${off ? ' bw-ing-x--back' : ''}`}
+                    onClick={() => toggleIngrediente(n)} whileTap={{ scale: 0.8 }}
+                    aria-label={off ? `Volver a poner ${n}` : `Sacar ${n}`}
+                  >
+                    {off ? '↩' : '✕'}
+                  </motion.button>
+                )}
+              </motion.div>
+            );
+          })}
+          {config.sides.map((sd, i) => sideChip(sd.label, sd.emoji, sd.label, i, () => flashHighlight(null)))}
+          {papasOptions && config.kind !== 'papas' && sideChip('papas', '🍟', 'Papas fritas', config.sides.length, () => flashHighlight(null, true))}
+        </div>
+      </div>
+    );
+  };
+
+  const sectionCarne = () => carne && (
+    <div className="bw-sec">
+      <div className="bw-sec-title">{carne.icon} {carne.title} <em>· cada {carne.unit} extra +{formatARS(carne.extraPrecio)}</em></div>
+      <div className="bw-meds">
+        {carne.options.map((o, i) => {
+          const active = medallones === o.total;
+          const extra = (o.total - 1) * carne.extraPrecio;
+          return (
+            <motion.button
+              type="button" key={o.total}
+              className={`bw-med${active ? ' bw-med--active' : ''}`}
+              onClick={() => pickMedallones(o.total)}
+              aria-pressed={active}
+              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05, type: 'spring', stiffness: 360, damping: 26 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              {active && <motion.span layoutId="bw-med-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
+              <MiniPatties n={o.total} />
+              <span className="bw-med-text">
+                <span className="bw-med-name">{o.name}</span>
+                <span className="bw-med-desc">{o.desc}</span>
+              </span>
+              <span className="bw-med-price">{extra > 0 ? `+${formatARS(extra)}` : 'Incluido'}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const sectionCards = (title, list, values, change) => list.length > 0 && (
+    <div className="bw-sec">
+      <div className="bw-sec-title">{title}</div>
+      <div className="bw-cards">
+        {list.map((e, i) => {
+          const n = values[e.id] || 0;
+          return (
+            <motion.div
+              key={e.id}
+              className={`bw-card${n ? ' bw-card--active' : ''}`}
+              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05, type: 'spring', stiffness: 360, damping: 26 }}
+            >
+              <motion.span
+                className="bw-card-emoji"
+                animate={n ? { rotate: [0, -12, 12, 0], scale: [1, 1.25, 1] } : { rotate: 0, scale: 1 }}
+                transition={{ duration: 0.45 }}
+                key={n}
+              >
+                {e.icon}
+              </motion.span>
+              <span className="bw-card-text">
+                <span className="bw-card-name">{e.name}</span>
+                <span className="bw-card-desc">{e.desc}</span>
+                <span className="bw-card-price">+{formatARS(e.precio)} c/u</span>
+              </span>
+              <Stepper value={n} label={e.name} onMinus={() => change(e.id, -1)} onPlus={() => change(e.id, 1)} />
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const sectionPapas = () => (
+    <div className="bw-sec">
+      <div className="bw-sec-title">
+        🍟 {config.kind === 'papas' ? 'Estilo de tus papas' : 'Tus papas fritas'} <em>· sazonadas es gratis 🧡</em>
+      </div>
+      <div className="bw-meds">
+        {papasOptions.map((o, i) => {
+          const active = papasStyle === o.id;
+          const hot = o.id === 'sazonadas';
+          return (
+            <motion.button
+              type="button" key={o.id}
+              className={`bw-med bw-papa${active ? ' bw-med--active' : ''}${hot ? ' bw-papa--hot' : ''}`}
+              onClick={() => pickPapas(o.id)}
+              aria-pressed={active}
+              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.06, type: 'spring', stiffness: 360, damping: 26 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              {active && <motion.span layoutId="bw-papa-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
+              <span className="bw-papa-emoji">{hot ? '🍟🧡' : '🍟'}</span>
+              <span className="bw-med-text">
+                <span className="bw-med-name">
+                  {o.name}
+                  {o.badge && <span className="badge badge--pulse" style={{ marginLeft: 8 }}>{o.badge}</span>}
+                </span>
+                <span className="bw-med-desc">{o.desc}</span>
+              </span>
+              <span className="bw-med-price">{hot ? 'Gratis' : 'Incluidas'}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── Contenido de cada pestaña (3 como máximo: Armar · Extras · Papas) ──
   const renderStep = () => {
     if (stepKey === 'info') {
-      const chips = isPhoto
-        ? [...config.base.map((n) => ({ n, base: true })), ...infoChips.map((n) => ({ n, base: false }))]
-        : [
-          ...config.base.map((n) => ({ n, base: true })),
-          ...ingList.map((n) => ({ n, base: false })),
-        ];
-      const onChip = (n) => (isPhoto ? flashHero(n) : flashHighlight(typesForIngredient(n)));
       return (
         <>
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
           <p className="bw-info-desc">{desc}</p>
 
-          <div className="bw-info-block">
-            <div className="bw-info-sub">
-              Ingredientes <em>· tocá uno para {isPhoto ? 'destacarlo' : 'verlo en el plato'}</em>
-            </div>
-            <div className="bw-ing-grid">
-              {chips.map(({ n, base }, i) => {
-                const off = quitados.includes(n);
-                const live = isPhoto && (tourOn ? tokenNow : heroPop) === n;
-                return (
-                  <motion.button
-                    type="button" key={n}
-                    className={`bw-ing${off ? ' bw-ing--off' : ''}${live ? ' bw-ing--live' : ''}`}
-                    onClick={() => onChip(n)}
-                    initial={{ opacity: 0, scale: 0.8, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: i * 0.04, type: 'spring', stiffness: 380, damping: 20 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <span className="bw-ing-emoji">{emojiOf(n)}</span>
-                    <span className="bw-ing-name">{n}</span>
-                    {off && <span className="bw-ing-tag">sin</span>}
-                    {base && !off && <span className="bw-ing-tag bw-ing-tag--base">base</span>}
-                  </motion.button>
-                );
-              })}
-              {config.sides.map((s, i) => (
-                <motion.button
-                  type="button" key={s.label} className="bw-ing"
-                  onClick={() => flashHighlight(null)}
-                  initial={{ opacity: 0, scale: 0.8, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: (chips.length + i) * 0.04, type: 'spring', stiffness: 380, damping: 20 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <span className="bw-ing-emoji">{s.emoji}</span>
-                  <span className="bw-ing-name">{s.label}</span>
-                  <span className="bw-ing-tag bw-ing-tag--base">incl.</span>
-                </motion.button>
-              ))}
-              {papasOptions && config.kind !== 'papas' && (
-                <motion.button
-                  type="button" className="bw-ing"
-                  onClick={() => flashHighlight(null, true)}
-                  initial={{ opacity: 0, scale: 0.8, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: chips.length * 0.04, type: 'spring', stiffness: 380, damping: 20 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <span className="bw-ing-emoji">🍟</span>
-                  <span className="bw-ing-name">Papas fritas</span>
-                  <span className="bw-ing-tag bw-ing-tag--base">incl.</span>
-                </motion.button>
-              )}
-            </div>
-          </div>
+          {sectionVariant()}
+          {sectionIngredients()}
 
           <div className="bw-info-actions">
             {tourTokens.length > 0 && (
@@ -570,213 +725,22 @@ export default function BurgerCustomizer({
             </motion.button>
           )}
 
-          {isLast ? recap : nextInline}
-        </>
-      );
-    }
-
-    if (stepKey === 'variante') {
-      const need = vcfg.multi ? qty : 1;
-      const setSingle = (id) => { stopTour(); onVariantChange(id); setVariantErr(''); bump(); buzz(14); };
-      const setMulti = (id, d) => {
-        stopTour();
-        const cur = variantValue || {};
-        if (d > 0 && variantCount >= need) return;
-        const next = { ...cur, [id]: Math.max(0, (cur[id] || 0) + d) };
-        if (!next[id]) delete next[id];
-        onVariantChange(next); setVariantErr(''); bump(); buzz(12);
-      };
-      return (
-        <>
-          <p className="bw-step-intro">
-            {vcfg.intro}{vcfg.multi && <> <b>{variantCount}/{need} seleccionado{need !== 1 ? 's' : ''}.</b></>}
-          </p>
-          {variantErr && <p className="medallon-error">⚠ {variantErr}</p>}
-          <div className="bw-cards">
-            {vcfg.options.map((o, i) => {
-              const n = vcfg.multi ? ((variantValue || {})[o.id] || 0) : (variantValue === o.id ? 1 : 0);
-              return (
-                <motion.div
-                  key={o.id} className={`bw-card${n ? ' bw-card--active' : ''}`}
-                  initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.07, type: 'spring', stiffness: 360, damping: 24 }}
-                  onClick={vcfg.multi ? undefined : () => setSingle(o.id)}
-                  style={vcfg.multi ? undefined : { cursor: 'pointer' }}
-                >
-                  <span className="bw-card-emoji">{vcfg.icon}</span>
-                  <span className="bw-card-text">
-                    <span className="bw-card-name">{o.name}</span>
-                    <span className="bw-card-desc">{o.desc}</span>
-                  </span>
-                  {vcfg.multi ? (
-                    <Stepper value={n} label={o.name} onMinus={() => setMulti(o.id, -1)} onPlus={() => setMulti(o.id, 1)} />
-                  ) : (
-                    <span className={`sintacc-radio${n ? ' sintacc-radio--on' : ''}`}>{n ? <span className="sintacc-radio-dot" /> : null}</span>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-          {isLast ? recap : nextInline}
-        </>
-      );
-    }
-
-    if (stepKey === 'receta') {
-      return (
-        <>
-          <p className="bw-step-intro">Estos ingredientes vienen incluidos. <b>Tocá los que no querés</b> y salen de tu hamburguesa.</p>
-          {ingList.length === 0 && <p className="bw-hint">Primero elegí la variedad y después podés sacar ingredientes.</p>}
-          <div className="bw-tiles">
-            {ingList.map((ing, i) => {
-              const off = quitados.includes(ing);
-              return (
-                <motion.button
-                  type="button" key={ing}
-                  className={`bw-tile${off ? ' bw-tile--off' : ''}`}
-                  onClick={() => toggleIngrediente(ing)}
-                  aria-pressed={!off}
-                  initial={{ opacity: 0, y: 18, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: i * 0.05, type: 'spring', stiffness: 380, damping: 22 }}
-                  whileTap={{ scale: 0.9, rotate: off ? 0 : -3 }}
-                >
-                  <span className="bw-tile-emoji">{emojiOf(ing)}</span>
-                  <span className="bw-tile-name">{ing}</span>
-                  <motion.span
-                    className="bw-tile-badge"
-                    key={off ? 'off' : 'on'}
-                    initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-                  >
-                    {off ? '✕' : '✓'}
-                  </motion.span>
-                </motion.button>
-              );
-            })}
-          </div>
-          <p className="bw-hint">Los ingredientes que quitás no se cobran ni se descuentan.</p>
-          {nextInline}
-        </>
-      );
-    }
-
-    if (stepKey === 'carne') {
-      return (
-        <>
-          <p className="bw-step-intro">{carne.intro} <b>Cada {carne.unit} extra suma {formatARS(carne.extraPrecio)}.</b></p>
-          <div className="bw-meds">
-            {carne.options.map((o, i) => {
-              const active = medallones === o.total;
-              const extra = (o.total - 1) * carne.extraPrecio;
-              return (
-                <motion.button
-                  type="button" key={o.total}
-                  className={`bw-med${active ? ' bw-med--active' : ''}`}
-                  onClick={() => pickMedallones(o.total)}
-                  aria-pressed={active}
-                  initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.07, type: 'spring', stiffness: 360, damping: 24 }}
-                  whileTap={{ scale: 0.96 }}
-                >
-                  {active && <motion.span layoutId="bw-med-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
-                  <MiniPatties n={o.total} />
-                  <span className="bw-med-text">
-                    <span className="bw-med-name">{o.name}</span>
-                    <span className="bw-med-desc">{o.desc}</span>
-                  </span>
-                  <span className="bw-med-price">{extra > 0 ? `+${formatARS(extra)}` : 'Incluido'}</span>
-                </motion.button>
-              );
-            })}
-          </div>
-          {nextInline}
+          {tail}
         </>
       );
     }
 
     if (stepKey === 'papas') {
-      return (
-        <>
-          {config.kind === 'papas'
-            ? <p className="bw-step-intro">Elegí el estilo de tus papas. <b>Sazonadas es gratis</b> 🧡</p>
-            : <p className="bw-step-intro">Tus papas fritas vienen incluidas. <b>¿Las querés sazonadas?</b> Es gratis 🧡</p>}
-          <div className="bw-meds">
-            {papasOptions.map((o, i) => {
-              const active = papasStyle === o.id;
-              const hot = o.id === 'sazonadas';
-              return (
-                <motion.button
-                  type="button" key={o.id}
-                  className={`bw-med bw-papa${active ? ' bw-med--active' : ''}${hot ? ' bw-papa--hot' : ''}`}
-                  onClick={() => pickPapas(o.id)}
-                  aria-pressed={active}
-                  initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.08, type: 'spring', stiffness: 360, damping: 24 }}
-                  whileTap={{ scale: 0.96 }}
-                >
-                  {active && <motion.span layoutId="bw-papa-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
-                  <span className="bw-papa-emoji">{hot ? '🍟🧡' : '🍟'}</span>
-                  <span className="bw-med-text">
-                    <span className="bw-med-name">
-                      {o.name}
-                      {o.badge && <span className="badge badge--pulse" style={{ marginLeft: 8 }}>{o.badge}</span>}
-                    </span>
-                    <span className="bw-med-desc">{o.desc}</span>
-                  </span>
-                  <span className="bw-med-price">{hot ? 'Gratis' : 'Incluidas'}</span>
-                </motion.button>
-              );
-            })}
-          </div>
-          {isLast ? recap : nextInline}
-        </>
-      );
+      return (<>{sectionPapas()}{tail}</>);
     }
 
-    // extras / dips
-    const list = stepKey === 'extras' ? extrasList : dipsList;
-    const values = stepKey === 'extras' ? extras : dips;
-    const change = stepKey === 'extras' ? changeExtra : changeDip;
+    // extras: carne + extras + dips en una sola pantalla
     return (
       <>
-        <p className="bw-step-intro">
-          {stepKey === 'extras'
-            ? <>Sumá lo que quieras. <b>No hay límite de cantidad.</b></>
-            : <>Agregá un dip o salsa extra. <b>Es opcional.</b></>}
-        </p>
-        <div className="bw-cards">
-          {list.map((e, i) => {
-            const n = values[e.id] || 0;
-            return (
-              <motion.div
-                key={e.id}
-                className={`bw-card${n ? ' bw-card--active' : ''}`}
-                initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07, type: 'spring', stiffness: 360, damping: 24 }}
-              >
-                <motion.span
-                  className="bw-card-emoji"
-                  animate={n ? { rotate: [0, -12, 12, 0], scale: [1, 1.25, 1] } : { rotate: 0, scale: 1 }}
-                  transition={{ duration: 0.45 }}
-                  key={n}
-                >
-                  {e.icon}
-                </motion.span>
-                <span className="bw-card-text">
-                  <span className="bw-card-name">{e.name}</span>
-                  <span className="bw-card-desc">{e.desc}</span>
-                  <span className="bw-card-price">+{formatARS(e.precio)} c/u</span>
-                </span>
-                <Stepper
-                  value={n} label={e.name}
-                  onMinus={() => change(e.id, -1)} onPlus={() => change(e.id, 1)}
-                />
-              </motion.div>
-            );
-          })}
-        </div>
-        {isLast ? recap : nextInline}
+        {sectionCarne()}
+        {sectionCards('➕ Extras', extrasList, extras, changeExtra)}
+        {sectionCards('🥣 Salsas y dips', dipsList, dips, changeDip)}
+        {tail}
       </>
     );
   };

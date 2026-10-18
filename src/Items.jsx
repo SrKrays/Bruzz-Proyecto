@@ -373,7 +373,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
 
     // Hamburguesas personalizables: el precio unitario incluye extras y se
     // guardan las modificaciones (mods) para el carrito y el WhatsApp.
-    const custPart = burgerCfg ? { price: formatARS(unitPrice), mods: custom.lines } : {};
+    const custPart = burgerCfg ? { price: formatARS(unitPrice), mods: custom.lines.length ? custom.lines : ['Receta original'] } : {};
 
     onCartAdd({ ...item, ...custPart, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel, papasStyle: papasLabel });
 
@@ -603,47 +603,45 @@ function CheckoutScreen({ cart, onBack, onClear }) {
     // FX 12: ¡Confetti!
     launchConfetti();
 
-    const fecha     = formatDate();
-    const mapsUrl   = entrega === 'envio' && direccion.trim()
+    const fecha = formatDate();
+    const mapsUrl = entrega === 'envio' && direccion.trim()
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion.trim())}`
       : null;
-    const entregaLabel = entrega === 'retiro'
-      ? 'Retira personalmente'
-      : `Envío — ${direccion.trim()}${mapsUrl ? `\n   📍 ${mapsUrl}` : ''}`;
-    const zonaLabel  = zona === 'local' ? 'Dentro del Talar' : zona === 'fuera' ? 'Fuera del Talar' : '';
-    const pagoLabel  = pago === 'efectivo'
+    const zonaLabel = zona === 'local' ? 'Dentro del Talar' : zona === 'fuera' ? 'Fuera del Talar' : '';
+    const pagoLabel = pago === 'efectivo'
       ? `Efectivo${vuelto.trim() ? ` (abona con ${vuelto.trim()})` : ''}`
-      : pago === 'tarjeta' ? 'Tarjeta débito/crédito' : 'Mercado Pago';
+      : pago === 'tarjeta' ? 'Tarjeta' : 'Mercado Pago';
 
-    const lines      = cart.map((i) => {
-      let txt = `${i.qty}x ${i.name}: ${i.price}`;
-      if (i.sintaccVariedad) txt += `\n   🌾 Variedad Sin T.A.C.C.: ${i.sintaccVariedad}`;
-      if (i.medallon)        txt += `\n   🌿 Medallón: ${i.medallon}`;
-      if (i.papasStyle)      txt += `\n   🍟 ${i.papasStyle}`;
-      (i.mods || []).forEach((m) => { txt += `\n   • ${m}`; });
-      if (i.note)            txt += `\n   ↳ ${i.note}`;
+    // Cada producto: nombre + cantidad, y debajo SOLO lo que cambia respecto de la receta
+    const lines = cart.map((i) => {
+      const mods  = i.mods || [];
+      const sin   = mods.filter((m) => /^sin /i.test(m)).map((m) => m.replace(/^sin /i, ''));
+      const extra = mods.filter((m) => !/^sin /i.test(m) && m !== 'Receta original');
+      const subt  = formatARS(parsePrice(i.price) * i.qty);
+      let txt = `*${i.qty}x ${i.name.toUpperCase()}* — ${subt}`;
+      if (i.sintaccVariedad) txt += `\n   🌾 *SIN TACC:* ${i.sintaccVariedad}`;
+      if (i.medallon)        txt += `\n   🌿 *Medallón:* ${i.medallon}`;
+      if (sin.length)        txt += `\n   ❌ *SIN:* ${sin.join(', ')}`;
+      if (extra.length)      txt += `\n   ➕ *AGREGAR:* ${extra.join(', ')}`;
+      if (i.papasStyle)      txt += `\n   🍟 ${i.papasStyle.replace(/\s*🧡/, '')}`;
+      if (mods.includes('Receta original') && !sin.length && !extra.length) txt += '\n   ✅ Receta original';
+      if (i.note) txt += `\n   ↳ ${i.note}`;
       return txt;
     });
-    const totalLines = entrega === 'envio'
-      ? [`Subtotal: ${formatARS(subtotal)}`, `Envío (${zonaLabel}): + ${formatARS(costoEnvio)}`, `TOTAL: ${formatARS(total)}`]
-      : [`TOTAL: ${formatARS(total)}`];
 
     const body = [
-      '¡Hola! Te paso el resumen de mi pedido 🍕',
+      `🔥 *PEDIDO BRUZZ* · ${fecha}`,
+      `👤 ${name.trim()} · 📞 ${phone.trim()}`,
+      entrega === 'retiro'
+        ? '🏃 *RETIRA* en el local'
+        : `🛵 *ENVÍO* (${zonaLabel}): ${direccion.trim()}${mapsUrl ? `\n📍 ${mapsUrl}` : ''}`,
+      `💳 ${pagoLabel}`,
       '',
-      `Fecha: ${fecha}`,
-      `Nombre: ${name.trim()}`,
-      `Teléfono: ${phone.trim()}`,
-      `Forma de pago: ${pagoLabel}`,
-      `Entrega: ${entregaLabel}`,
-      ...(entrega === 'envio' ? [`Zona: ${zonaLabel}`] : []),
-      '',
-      'Mi pedido:',
       ...lines,
       '',
-      ...totalLines,
-      '',
-      'Espero tu respuesta para confirmar 🙌',
+      entrega === 'envio'
+        ? `💰 *TOTAL: ${formatARS(total)}* (envío ${formatARS(costoEnvio)} incl.)`
+        : `💰 *TOTAL: ${formatARS(total)}*`,
     ].join('\n');
 
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank');

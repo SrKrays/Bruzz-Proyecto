@@ -114,7 +114,7 @@ const CARNE_BURGER = {
   tab: 'Carne', title: 'Medallones', icon: '🍔',
   intro: 'Elegí cuántos medallones de carne querés.',
   unit: 'medallón', options: MEDALLON_OPCIONES, extraPrecio: MEDALLON_EXTRA_PRECIO,
-  line: (total) => `${total} medallones de carne (+${total - 1} extra)`,
+  line: (total) => (total === 2 ? 'Doble (2 medallones)' : `Triple (${total} medallones)`),
 };
 const CARNE_LOMO = {
   tab: 'Lomo', title: 'Lomo', icon: '🥩',

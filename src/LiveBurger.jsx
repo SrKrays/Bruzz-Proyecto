@@ -189,7 +189,7 @@ export default function LiveBurger({
                 return (
                   <motion.div
                     key={l.id}
-                    layout
+                    layout="position"
                     className="lb-row"
                     initial={{ opacity: 0, y: -90, scale: 0.6, rotate: idx % 2 ? 14 : -14 }}
                     animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
