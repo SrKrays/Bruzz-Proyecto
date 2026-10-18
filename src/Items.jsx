@@ -4,6 +4,8 @@ import { MENU, POSTRES, CAFETERIA } from './menuData';
 import { emitFlyToCart } from './flyToCart';
 import RevealText from './RevealText';
 import { launchConfetti } from './confettiCheckout';
+import BurgerCustomizer from './BurgerCustomizer';
+import { BURGER_CONFIG } from './burgerConfig';
 
 const WHATSAPP_NUMBER = 543543512248;
 
@@ -154,10 +156,11 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
                   {item.sintaccVariedad && <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>}
                   {item.medallon && <p className="cart-panel-item-note">🌿 {item.medallon}</p>}
                   {item.papasStyle && <p className="cart-panel-item-note">🍟 {item.papasStyle}</p>}
+                  {(item.mods || []).map((m, mi) => <p key={mi} className="cart-panel-item-note">• {m}</p>)}
                   <div className="cart-panel-item-controls">
                     <button className="cart-panel-ctrl" onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
                     <span className="cart-panel-item-qty">{item.qty}</span>
-                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', sintaccVariedad: item.sintaccVariedad || '', papasStyle: item.papasStyle || '' })} aria-label="Sumar uno">+</button>
+                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', sintaccVariedad: item.sintaccVariedad || '', papasStyle: item.papasStyle || '', mods: item.mods || [] })} aria-label="Sumar uno">+</button>
                     <button className="cart-panel-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑</button>
                   </div>
                 </li>
@@ -297,6 +300,8 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
   const isVeggie   = item.name === 'Veggie';
   const isSinTacc  = item.sinTacc === true;
   const tienePapas = item.tienePapas === true;
+  const burgerCfg  = BURGER_CONFIG[item.name];          // hamburguesas personalizables
+  const [custom, setCustom]               = useState({ extrasTotal: 0, lines: [] });
   const [qty, setQty]                     = useState(1);
   const [note, setNote]                   = useState('');
   const [medallones, setMedallones]       = useState({});
@@ -310,7 +315,8 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
   const wrapRef = useRef(null);
 
   const MAX_NOTE  = 150;
-  const unitPrice = parsePrice(item.price);
+  const basePrice = parsePrice(item.price);
+  const unitPrice = basePrice + (burgerCfg ? custom.extrasTotal : 0);
 
   // ── FX 11: scroll parallax en la imagen grande ────────────
   useEffect(() => {
@@ -342,6 +348,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       setQty(1); setNote(''); setMedallones({});
       setMedallonError(''); setSintaccVar(''); setSintaccError('');
       setPapasStyle('clasicas');
+      setCustom({ extrasTotal: 0, lines: [] });
     }
   }, [isExpanded]);
 
@@ -359,7 +366,11 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
     const sintaccLabel = isSinTacc ? VARIEDADES_SINTACC.find((v) => v.id === sintaccVar)?.name ?? sintaccVar : '';
     const papasLabel   = tienePapas && papasStyle === 'sazonadas' ? 'Papas sazonadas 🧡' : '';
 
-    onCartAdd({ ...item, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel, papasStyle: papasLabel });
+    // Hamburguesas personalizables: el precio unitario incluye extras y se
+    // guardan las modificaciones (mods) para el carrito y el WhatsApp.
+    const custPart = burgerCfg ? { price: formatARS(unitPrice), mods: custom.lines } : {};
+
+    onCartAdd({ ...item, ...custPart, qty, note: note.trim(), medallon: medallonLabel, sintaccVariedad: sintaccLabel, papasStyle: papasLabel });
 
     if (e?.currentTarget) {
       emitFlyToCart({ rect: e.currentTarget.getBoundingClientRect(), imageUrl: item.imageUrl });
@@ -443,6 +454,13 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
                   selected={sintaccVar}
                   onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
                   error={sintaccError}
+                />
+              )}
+              {burgerCfg && (
+                <BurgerCustomizer
+                  basePrice={basePrice}
+                  config={burgerCfg}
+                  onChange={setCustom}
                 />
               )}
               {tienePapas && (
@@ -554,6 +572,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
       if (i.sintaccVariedad) txt += `\n   🌾 Variedad Sin T.A.C.C.: ${i.sintaccVariedad}`;
       if (i.medallon)        txt += `\n   🌿 Medallón: ${i.medallon}`;
       if (i.papasStyle)      txt += `\n   🍟 ${i.papasStyle}`;
+      (i.mods || []).forEach((m) => { txt += `\n   • ${m}`; });
       if (i.note)            txt += `\n   ↳ ${i.note}`;
       return txt;
     });
@@ -607,6 +626,7 @@ function CheckoutScreen({ cart, onBack, onClear }) {
                 {i.sintaccVariedad ? <em> · 🌾 {i.sintaccVariedad}</em> : null}
                 {i.medallon ? <em> · 🌿 {i.medallon}</em> : null}
                 {i.papasStyle ? <em> · 🍟 {i.papasStyle}</em> : null}
+                {(i.mods || []).map((m, mi) => <em key={mi}> · {m}</em>)}
                 {i.note     ? <em> · {i.note}</em>        : null}
               </span>
               <span className="checkout-row-price">{formatARS(parsePrice(i.price) * i.qty)}</span>
@@ -721,9 +741,9 @@ export default function Items({
   const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
   const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
 
-  const handleConfirmAdd = useCallback(({ qty, note, medallon, papasStyle, ...item }) => {
-    const key = item.name + '||' + (note || '') + '||' + (medallon || '') + '||' + (papasStyle || '');
-    onCartAdd({ ...item, qty, note: note || '', medallon: medallon || '', papasStyle: papasStyle || '', _key: key });
+  const handleConfirmAdd = useCallback(({ qty, note, medallon, papasStyle, mods, ...item }) => {
+    const key = item.name + '||' + (note || '') + '||' + (medallon || '') + '||' + (papasStyle || '') + '||' + (mods || []).join('|');
+    onCartAdd({ ...item, qty, note: note || '', medallon: medallon || '', papasStyle: papasStyle || '', mods: mods || [], _key: key });
   }, [onCartAdd]);
 
   if (showCheckout) {

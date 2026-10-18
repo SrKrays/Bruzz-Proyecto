@@ -148,7 +148,8 @@ export default function App() {
     const medallon        = item.medallon        ?? '';
     const sintaccVariedad = item.sintaccVariedad ?? '';
     const papasStyle      = item.papasStyle      ?? '';
-    const key = item.name + '||' + note + '||' + medallon + '||' + sintaccVariedad + '||' + papasStyle;
+    const mods            = item.mods            ?? [];
+    const key = item.name + '||' + note + '||' + medallon + '||' + sintaccVariedad + '||' + papasStyle + '||' + mods.join('|') + '||' + item.price;
     setCart((prev) => {
       const exists = prev.find((c) => c._key === key);
       if (exists) {
@@ -156,7 +157,7 @@ export default function App() {
           c._key === key ? { ...c, qty: c.qty + qty } : c
         );
       }
-      return [...prev, { _key: key, name: item.name, price: item.price, note, medallon, sintaccVariedad, papasStyle, sinTacc: item.sinTacc ?? false, qty }];
+      return [...prev, { _key: key, name: item.name, price: item.price, note, medallon, sintaccVariedad, papasStyle, mods, sinTacc: item.sinTacc ?? false, qty }];
     });
   }, []);
 
