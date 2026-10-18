@@ -304,6 +304,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
   const [sintaccError, setSintaccError]   = useState('');
   const [papasStyle, setPapasStyle]       = useState('clasicas');
   const [wizardOpen, setWizardOpen]       = useState(false);
+  const [resetKey, setResetKey]           = useState(0);
   const addRectRef = useRef(null);
 
   // FX 11: parallax en imagen del body
@@ -374,6 +375,24 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       emitFlyToCart({ rect, imageUrl: item.imageUrl });
     }
     onToggle(null);
+
+    // Las hamburguesas no se expanden en la lista: se limpia el panel a mano
+    if (burgerCfg) {
+      setQty(1); setNote(''); setPapasStyle('clasicas');
+      setCustom({ extrasTotal: 0, lines: [] });
+      setResetKey((k) => k + 1);
+    }
+  };
+
+  // Tocar la tarjeta: las hamburguesas abren directo el panel completo
+  // (info + personalización); el resto se expande como siempre.
+  const handleHeadClick = (e) => {
+    if (burgerCfg) {
+      addRectRef.current = e?.currentTarget ? e.currentTarget.getBoundingClientRect() : null;
+      setWizardOpen(true);
+      return;
+    }
+    onToggle(isExpanded ? null : item.name);
   };
 
   // Botón "Agregar": en hamburguesas abre el personalizador (obligatorio);
@@ -409,7 +428,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
       <span className="exp-card-glow" aria-hidden="true" />
 
       {/* Cabecera */}
-      <motion.div className="exp-card-head" onClick={() => onToggle(isExpanded ? null : item.name)} whileTap={{ scale: 0.99 }}>
+      <motion.div className="exp-card-head" onClick={handleHeadClick} whileTap={{ scale: 0.99 }} aria-haspopup={burgerCfg ? 'dialog' : undefined}>
         {item.imageUrl && (
           <div className="exp-card-thumb">
             <img src={item.imageUrl} alt={item.name} />
@@ -427,6 +446,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
         <div className="exp-card-head-right">
           {/* ALTA 1: precio con shimmer */}
           <ShimmerPrice value={item.price} />
+          {burgerCfg && <span className="exp-card-armar">Armar</span>}
           <span className={`exp-card-chevron${isExpanded ? ' exp-card-chevron--open' : ''}`}>›</span>
         </div>
       </motion.div>
@@ -470,21 +490,6 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
                   selected={sintaccVar}
                   onChange={(id) => { setSintaccVar(id); setSintaccError(''); }}
                   error={sintaccError}
-                />
-              )}
-              {burgerCfg && (
-                <BurgerCustomizer
-                  name={item.name}
-                  basePrice={basePrice}
-                  config={burgerCfg}
-                  qty={qty}
-                  open={wizardOpen}
-                  onClose={() => setWizardOpen(false)}
-                  onConfirm={handleWizardConfirm}
-                  onChange={setCustom}
-                  papasOptions={tienePapas ? PAPAS_ESTILOS : null}
-                  papasStyle={papasStyle}
-                  onPapasChange={setPapasStyle}
                 />
               )}
               {tienePapas && !burgerCfg && (
@@ -536,6 +541,29 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {burgerCfg && (
+        <BurgerCustomizer
+          name={item.name}
+          desc={item.desc}
+          imageUrl={item.imageUrl}
+          badge={item.badge}
+          basePrice={basePrice}
+          config={burgerCfg}
+          qty={qty}
+          onQtyChange={setQty}
+          note={note}
+          onNoteChange={setNote}
+          open={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          onConfirm={handleWizardConfirm}
+          onChange={setCustom}
+          papasOptions={tienePapas ? PAPAS_ESTILOS : null}
+          papasStyle={papasStyle}
+          onPapasChange={setPapasStyle}
+          resetKey={resetKey}
+        />
+      )}
     </motion.div>
   );
 }

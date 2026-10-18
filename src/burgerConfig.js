@@ -49,3 +49,7 @@ export const PAPAS_ESTILOS = [
   { id: 'clasicas',  name: 'Clásicas',      desc: 'Con la sal de siempre.' },
   { id: 'sazonadas', name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.' },
 ];
+
+// Ingredientes base de toda hamburguesa (no se pueden quitar). Se muestran en
+// la pestaña de información para que el cliente vea la composición completa.
+export const BASE_INGREDIENTES = ['Pan de papa Americano', 'Carne de res'];
