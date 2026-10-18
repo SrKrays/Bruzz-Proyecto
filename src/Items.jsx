@@ -458,6 +458,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
               )}
               {burgerCfg && (
                 <BurgerCustomizer
+                  name={item.name}
                   basePrice={basePrice}
                   config={burgerCfg}
                   onChange={setCustom}
