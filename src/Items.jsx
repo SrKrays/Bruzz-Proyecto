@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MENU, POSTRES, CAFETERIA } from './menuData';
 import { emitFlyToCart } from './flyToCart';
 import RevealText from './RevealText';
 import { launchConfetti } from './confettiCheckout';
 import BurgerCustomizer from './BurgerCustomizer';
-import { BURGER_CONFIG, PAPAS_ESTILOS } from './burgerConfig';
+import { getPanelConfig, PAPAS_ESTILOS } from './burgerConfig';
 
 const WHATSAPP_NUMBER = 543543512248;
 
@@ -290,11 +290,15 @@ function PapasSelector({ selected, onChange }) {
 //  ✅ FX 11: parallax en imagen expandida
 // ════════════════════════════════════════════════════════════
 
-function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
+function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) {
   const isVeggie   = item.name === 'Veggie';
   const isSinTacc  = item.sinTacc === true;
-  const tienePapas = item.tienePapas === true;
-  const burgerCfg  = BURGER_CONFIG[item.name];          // hamburguesas personalizables
+  // Panel de producto (null = tarjeta clásica). Memoizado: el panel depende de la identidad del objeto.
+  const burgerCfg  = useMemo(
+    () => getPanelConfig(menuKey, item),
+    [menuKey, item.name, item.desc, item.sinTacc], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const tienePapas = item.tienePapas === true || burgerCfg?.kind === 'papas';
   const [custom, setCustom]               = useState({ extrasTotal: 0, lines: [] });
   const [qty, setQty]                     = useState(1);
   const [note, setNote]                   = useState('');
@@ -446,7 +450,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd }) {
         <div className="exp-card-head-right">
           {/* ALTA 1: precio con shimmer */}
           <ShimmerPrice value={item.price} />
-          {burgerCfg && <span className="exp-card-armar">Armar</span>}
+          {burgerCfg && <span className="exp-card-armar">{burgerCfg.kind === 'pizza' ? 'Ver' : burgerCfg.kind === 'papas' ? 'Elegir' : 'Armar'}</span>}
           <span className={`exp-card-chevron${isExpanded ? ' exp-card-chevron--open' : ''}`}>›</span>
         </div>
       </motion.div>
@@ -820,6 +824,7 @@ export default function Items({
             <ExpandableItemCard
               key={`${item.name}-${i}`}
               item={item}
+              menuKey={menuKey}
               isExpanded={expandedKey === item.name}
               onToggle={setExpandedKey}
               onCartAdd={handleConfirmAdd}

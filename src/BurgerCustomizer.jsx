@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  MEDALLON_EXTRA_PRECIO, MEDALLON_OPCIONES, EXTRAS, DIPS, BASE_INGREDIENTES,
-} from './burgerConfig';
+import { EXTRAS, DIPS } from './burgerConfig';
 import LiveBurger, { emojiOf, typesForIngredient, buildLayers } from './LiveBurger';
 import { launchConfetti } from './confettiCheckout';
 
@@ -15,14 +13,61 @@ const buzz = (ms = 12) => {
   try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(ms); } catch { /* noop */ }
 };
 
-const BASE_STEPS = [
-  { key: 'info',       label: 'La burger', title: 'La hamburguesa', icon: '📖' },
-  { key: 'receta',     label: 'Receta',    title: 'Tu receta',      icon: '🥬' },
-  { key: 'medallones', label: 'Carne',     title: 'Medallones',     icon: '🍔' },
-  { key: 'extras',     label: 'Extras',    title: 'Extras',         icon: '➕' },
-  { key: 'dips',       label: 'Dips',      title: 'Salsas y dips',  icon: '🥣' },
-];
-const PAPAS_STEP = { key: 'papas', label: 'Papas', title: 'Papas fritas', icon: '🍟' };
+const NO_DIPS = [];
+const KIND_TEXT = {
+  burger:   { tab: 'La burger',  title: 'La hamburguesa', small: 'Armá tu',    emoji: '🍔' },
+  lomo:     { tab: 'El lomito',  title: 'El lomito',      small: 'Armá tu',    emoji: '🥩' },
+  sandwich: { tab: 'El sanguche', title: 'El sándwich',   small: 'Armá tu',    emoji: '🥪' },
+  papas:    { tab: 'Las papas',  title: 'Las papas',      small: 'Elegí tus',  emoji: '🍟' },
+  pizza:    { tab: 'El plato',   title: 'El plato',       small: 'Mirá tu',    emoji: '🍕' },
+};
+
+// Arma las pestañas según lo que el producto permite personalizar
+function buildSteps(config, hasPapas) {
+  const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
+  const steps = [{ key: 'info', label: k.tab, title: k.title, icon: '📖' }];
+  if (config.ingredientes.length) steps.push({ key: 'receta', label: 'Receta', title: 'Tu receta', icon: '🥬' });
+  if (config.carne) steps.push({ key: 'carne', label: config.carne.tab, title: config.carne.title, icon: config.carne.icon });
+  if (config.extras.length) steps.push({ key: 'extras', label: 'Extras', title: 'Extras', icon: '➕' });
+  if (config.dips) steps.push({ key: 'dips', label: 'Dips', title: 'Salsas y dips', icon: '🥣' });
+  if (hasPapas) steps.push({ key: 'papas', label: 'Papas', title: 'Papas fritas', icon: '🍟' });
+  return steps;
+}
+
+// ── Hero con foto (pizza, calzone, papas): sin capas, solo muestra ──
+function ProductHero({ imageUrl, name, token, emoji, papas, dipCount, bounceKey }) {
+  return (
+    <div className="ph-stage">
+      <div className="lb-glow" />
+      <motion.div
+        key={bounceKey}
+        className="ph-photo-wrap"
+        initial={{ scale: 0.9, rotate: -4, opacity: 0 }}
+        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+      >
+        {imageUrl ? <img className="ph-photo" src={imageUrl} alt={name} /> : <span className="ph-fallback">{emoji}</span>}
+        <AnimatePresence mode="wait">
+          {token && (
+            <motion.span
+              key={token.label}
+              className="ph-pop"
+              initial={{ opacity: 0, scale: 0.3, y: 30, rotate: -25 }}
+              animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.4, y: -30 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 16 }}
+            >
+              <span className="ph-pop-emoji">{token.emoji}</span>
+              <span className="ph-pop-label">{token.label}</span>
+            </motion.span>
+          )}
+        </AnimatePresence>
+        {papas === 'sazonadas' && <span className="ph-tag ph-tag--hot">🧡 Sazonadas</span>}
+        {dipCount > 0 && <span className="ph-tag ph-tag--dip">🥣 x{dipCount}</span>}
+      </motion.div>
+    </div>
+  );
+}
 
 // ── Precio que "rueda" al cambiar ────────────────────────────
 function RollPrice({ value, className = '' }) {
@@ -108,7 +153,14 @@ export default function BurgerCustomizer({
   open, onClose, onConfirm, onChange,
   papasOptions, papasStyle, onPapasChange, resetKey = 0,
 }) {
-  const steps = papasOptions ? [...BASE_STEPS, PAPAS_STEP] : BASE_STEPS;
+  const isPhoto = config.visual === 'photo';
+  const kindText = KIND_TEXT[config.kind] || KIND_TEXT.burger;
+  const steps = useMemo(() => buildSteps(config, !!papasOptions), [config, papasOptions]);
+  const extrasList = useMemo(() => EXTRAS.filter((e) => config.extras.includes(e.id)), [config]);
+  const dipsList = config.dips ? DIPS : NO_DIPS;
+  const carne = config.carne;
+  const mainType = config.main;
+  // Sin proteína (p. ej. Tostato) no hay capa principal que contar
   const [step, setStep]           = useState(0);
   const [dir, setDir]             = useState(1);
   const [quitados, setQuitados]   = useState([]);
@@ -129,16 +181,18 @@ export default function BurgerCustomizer({
   const hlTimer   = useRef(null);
 
   // ── Capas actuales (para el recorrido) ────────────────────
+  const [heroPop, setHeroPop]   = useState(null);          // chip tocado (hero con foto)
   const layers = useMemo(
-    () => buildLayers({ ingredientes: config.ingredientes, quitados, medallones, extras }),
-    [config.ingredientes, quitados, medallones, extras],
+    () => (isPhoto ? [] : buildLayers({ ingredientes: config.ingredientes, quitados, medallones, extras, mainType })),
+    [isPhoto, config.ingredientes, quitados, medallones, extras, mainType],
   );
   const tourTokens = useMemo(() => {
+    if (isPhoto) return config.infoChips;
     const seen = [];
     layers.forEach((l) => { if (!seen.includes(l.type)) seen.push(l.type); });
     if (papasOptions) seen.push('fries');
     return seen;
-  }, [layers, papasOptions]);
+  }, [isPhoto, config.infoChips, layers, papasOptions]);
 
   const stopTour = useCallback(() => {
     if (tourTimer.current) { clearInterval(tourTimer.current); tourTimer.current = null; }
@@ -159,7 +213,13 @@ export default function BurgerCustomizer({
     stopTour();
     setChipHl(types); setFriesHl(fries);
     if (hlTimer.current) clearTimeout(hlTimer.current);
-    hlTimer.current = setTimeout(() => { setChipHl(null); setFriesHl(false); }, 1700);
+    hlTimer.current = setTimeout(() => { setChipHl(null); setFriesHl(false); setHeroPop(null); }, 1700);
+  }, [stopTour]);
+  const flashHero = useCallback((n) => {
+    stopTour();
+    setHeroPop(n);
+    if (hlTimer.current) clearTimeout(hlTimer.current);
+    hlTimer.current = setTimeout(() => setHeroPop(null), 1700);
   }, [stopTour]);
 
   const bump = useCallback(() => setBounceKey((k) => k + 1), []);
@@ -193,14 +253,14 @@ export default function BurgerCustomizer({
     if (delta > 0) spawnBurst(emoji);
     bump(); buzz(delta > 0 ? 14 : 8);
   };
-  const changeExtra = (id, d) => changeQty(setExtras, EXTRAS.find((e) => e.id === id)?.icon || '🍔')(id, d);
+  const changeExtra = (id, d) => changeQty(setExtras, EXTRAS.find((e) => e.id === id)?.icon || '➕')(id, d);
   const changeDip   = (id, d) => changeQty(setDips,   DIPS.find((e) => e.id === id)?.icon || '🥣')(id, d);
 
   const pickMedallones = (total) => {
     if (total === medallones) return;
     stopTour();
     setMedallones(total);
-    if (total > medallones) spawnBurst('🍔');
+    if (total > medallones) spawnBurst(carne?.icon || '🍔');
     bump(); buzz(18);
   };
   const pickPapas = (id) => {
@@ -213,22 +273,23 @@ export default function BurgerCustomizer({
 
   // ── Cálculo de precio y líneas para el pedido ─────────────
   const { extrasTotal, lines, medallonesExtra } = useMemo(() => {
-    const medExtra = Math.max(0, medallones - 1);
-    let total = medExtra * MEDALLON_EXTRA_PRECIO;
+    const medExtra = carne ? Math.max(0, medallones - 1) : 0;
+    let total = carne ? medExtra * carne.extraPrecio : 0;
     const out = [];
 
-    if (medallones > 1) out.push(`${medallones} medallones de carne (+${medExtra} extra)`);
+    if (carne && medallones > 1) out.push(carne.line(medallones));
     quitados.forEach((ing) => out.push(`Sin ${ing.toLowerCase()}`));
-    EXTRAS.forEach((e) => {
+    extrasList.forEach((e) => {
       const n = extras[e.id] || 0;
       if (n > 0) { total += n * e.precio; out.push(`${e.name} x${n}`); }
     });
-    DIPS.forEach((d) => {
+    dipsList.forEach((d) => {
       const n = dips[d.id] || 0;
       if (n > 0) { total += n * d.precio; out.push(`${d.name} x${n}`); }
     });
     return { extrasTotal: total, lines: out, medallonesExtra: medExtra };
-  }, [medallones, quitados, extras, dips]);
+  }, [medallones, quitados, extras, dips, carne, extrasList, dipsList]);
+  const carneLine = carne && medallones > 1 ? carne.line(medallones) : null;
 
   useEffect(() => { onChange({ extrasTotal, lines }); }, [extrasTotal, lines]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -237,7 +298,7 @@ export default function BurgerCustomizer({
   // ── Reset tras agregar al pedido ──────────────────────────
   useEffect(() => {
     setQuitados([]); setMedallones(1); setExtras({}); setDips({});
-    setStep(0); setDir(1); setExplodedManual(false); setPhotoZoom(false);
+    setStep(0); setDir(1); setExplodedManual(false); setPhotoZoom(false); setHeroPop(null);
   }, [resetKey]);
 
   // ── Abrir: arranca en la pestaña de info + recorrido de ingredientes ──
@@ -286,14 +347,18 @@ export default function BurgerCustomizer({
 
   // ── Resaltado que le llega a la hamburguesa ───────────────
   const tokenNow = tourOn && tourIdx >= 0 && tourIdx < tourTokens.length ? tourTokens[tourIdx] : null;
-  const highlight = tokenNow && tokenNow !== 'fries' ? [tokenNow] : (tourOn ? null : chipHl);
+  const highlight = !isPhoto && tokenNow && tokenNow !== 'fries' ? [tokenNow] : (tourOn ? null : chipHl);
   const friesHighlight = tokenNow === 'fries' || (!tourOn && friesHl);
   const exploded = tourOn || explodedManual;
+  const heroToken = isPhoto
+    ? (() => { const n = tourOn ? tokenNow : heroPop; return n ? { label: n, emoji: emojiOf(n) } : null; })()
+    : null;
+  const dipTotal = Object.values(dips).reduce((s, n) => s + n, 0);
 
   // Indicadores (punto) de pestañas con cambios
   const tabChanged = (key) => (
     key === 'receta' ? quitados.length > 0
-    : key === 'medallones' ? medallones > 1
+    : key === 'carne' ? medallones > 1
     : key === 'extras' ? Object.keys(extras).length > 0
     : key === 'dips' ? Object.keys(dips).length > 0
     : key === 'papas' ? papasStyle === 'sazonadas'
@@ -310,9 +375,12 @@ export default function BurgerCustomizer({
       <motion.div className="bw-recap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <div className="bw-recap-title">Tu pedido{qty > 1 ? ` · ${qty} unidades iguales` : ''}</div>
         <ul className="bw-recap-list">
-          <li>🍔 {name} · {medallones === 1 ? 'Simple' : medallones === 2 ? 'Doble' : 'Triple'}</li>
+          <li>
+            {kindText.emoji} {name}
+            {carne ? ` · ${carne.options.find((o) => o.total === medallones)?.name || ''}` : ''}
+          </li>
           <AnimatePresence initial={false}>
-            {lines.filter((l) => !/medallones de carne/.test(l)).map((l) => (
+            {lines.filter((l) => l !== carneLine).map((l) => (
               <motion.li
                 key={l}
                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
@@ -323,6 +391,7 @@ export default function BurgerCustomizer({
           </AnimatePresence>
           {papasOptions && <li>🍟 Papas {papasStyle === 'sazonadas' ? 'sazonadas 🧡' : 'clásicas'}</li>}
           {lines.length === 0 && !papasOptions && <li className="bw-recap-empty">Tal cual la receta original ✨</li>}
+          {config.sides.map((s) => <li key={s.label}>{s.emoji} {s.label} incluido</li>)}
         </ul>
       </motion.div>
       <label className="bw-note">
@@ -347,25 +416,31 @@ export default function BurgerCustomizer({
   // ── Contenido de cada pestaña ─────────────────────────────
   const renderStep = () => {
     if (stepKey === 'info') {
-      const chips = [
-        ...BASE_INGREDIENTES.map((n) => ({ n, base: true })),
-        ...config.ingredientes.map((n) => ({ n, base: false })),
-      ];
+      const chips = isPhoto
+        ? config.infoChips.map((n) => ({ n, base: false }))
+        : [
+          ...config.base.map((n) => ({ n, base: true })),
+          ...config.ingredientes.map((n) => ({ n, base: false })),
+        ];
+      const onChip = (n) => (isPhoto ? flashHero(n) : flashHighlight(typesForIngredient(n)));
       return (
         <>
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
           <p className="bw-info-desc">{desc}</p>
 
           <div className="bw-info-block">
-            <div className="bw-info-sub">Ingredientes <em>· tocá uno para verlo en la burger</em></div>
+            <div className="bw-info-sub">
+              Ingredientes <em>· tocá uno para {isPhoto ? 'destacarlo' : 'verlo en el plato'}</em>
+            </div>
             <div className="bw-ing-grid">
               {chips.map(({ n, base }, i) => {
                 const off = quitados.includes(n);
+                const live = isPhoto && (tourOn ? tokenNow : heroPop) === n;
                 return (
                   <motion.button
                     type="button" key={n}
-                    className={`bw-ing${off ? ' bw-ing--off' : ''}`}
-                    onClick={() => flashHighlight(typesForIngredient(n))}
+                    className={`bw-ing${off ? ' bw-ing--off' : ''}${live ? ' bw-ing--live' : ''}`}
+                    onClick={() => onChip(n)}
                     initial={{ opacity: 0, scale: 0.8, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: i * 0.04, type: 'spring', stiffness: 380, damping: 20 }}
                     whileTap={{ scale: 0.9 }}
@@ -377,7 +452,20 @@ export default function BurgerCustomizer({
                   </motion.button>
                 );
               })}
-              {papasOptions && (
+              {config.sides.map((s, i) => (
+                <motion.button
+                  type="button" key={s.label} className="bw-ing"
+                  onClick={() => flashHighlight(null)}
+                  initial={{ opacity: 0, scale: 0.8, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: (chips.length + i) * 0.04, type: 'spring', stiffness: 380, damping: 20 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <span className="bw-ing-emoji">{s.emoji}</span>
+                  <span className="bw-ing-name">{s.label}</span>
+                  <span className="bw-ing-tag bw-ing-tag--base">incl.</span>
+                </motion.button>
+              ))}
+              {papasOptions && config.kind !== 'papas' && (
                 <motion.button
                   type="button" className="bw-ing"
                   onClick={() => flashHighlight(null, true)}
@@ -394,18 +482,22 @@ export default function BurgerCustomizer({
           </div>
 
           <div className="bw-info-actions">
-            <motion.button type="button" className="bw-tour-btn" onClick={tourOn ? stopTour : startTour} whileTap={{ scale: 0.96 }}>
-              {tourOn ? '⏹ Detener recorrido' : '▶ Ver ingredientes uno por uno'}
-            </motion.button>
-            <button
-              type="button" className={`bw-tour-btn bw-tour-btn--ghost${explodedManual ? ' bw-tour-btn--on' : ''}`}
-              onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
-            >
-              🔍 {explodedManual ? 'Juntar capas' : 'Separar capas'}
-            </button>
+            {tourTokens.length > 0 && (
+              <motion.button type="button" className="bw-tour-btn" onClick={tourOn ? stopTour : startTour} whileTap={{ scale: 0.96 }}>
+                {tourOn ? '⏹ Detener recorrido' : '▶ Ver ingredientes uno por uno'}
+              </motion.button>
+            )}
+            {!isPhoto && (
+              <button
+                type="button" className={`bw-tour-btn bw-tour-btn--ghost${explodedManual ? ' bw-tour-btn--on' : ''}`}
+                onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
+              >
+                🔍 {explodedManual ? 'Juntar capas' : 'Separar capas'}
+              </button>
+            )}
           </div>
 
-          {imageUrl && (
+          {imageUrl && !isPhoto && (
             <motion.button
               type="button" className={`bw-photo${photoZoom ? ' bw-photo--zoom' : ''}`}
               onClick={() => setPhotoZoom((v) => !v)} layout
@@ -415,7 +507,7 @@ export default function BurgerCustomizer({
             </motion.button>
           )}
 
-          {nextInline}
+          {isLast ? recap : nextInline}
         </>
       );
     }
@@ -458,14 +550,14 @@ export default function BurgerCustomizer({
       );
     }
 
-    if (stepKey === 'medallones') {
+    if (stepKey === 'carne') {
       return (
         <>
-          <p className="bw-step-intro">Elegí cuántos medallones de carne querés. <b>Cada uno extra suma {formatARS(MEDALLON_EXTRA_PRECIO)}.</b></p>
+          <p className="bw-step-intro">{carne.intro} <b>Cada {carne.unit} extra suma {formatARS(carne.extraPrecio)}.</b></p>
           <div className="bw-meds">
-            {MEDALLON_OPCIONES.map((o, i) => {
+            {carne.options.map((o, i) => {
               const active = medallones === o.total;
-              const extra = (o.total - 1) * MEDALLON_EXTRA_PRECIO;
+              const extra = (o.total - 1) * carne.extraPrecio;
               return (
                 <motion.button
                   type="button" key={o.total}
@@ -495,7 +587,9 @@ export default function BurgerCustomizer({
     if (stepKey === 'papas') {
       return (
         <>
-          <p className="bw-step-intro">Tus papas fritas vienen incluidas. <b>¿Las querés sazonadas?</b> Es gratis 🧡</p>
+          {config.kind === 'papas'
+            ? <p className="bw-step-intro">Elegí el estilo de tus papas. <b>Sazonadas es gratis</b> 🧡</p>
+            : <p className="bw-step-intro">Tus papas fritas vienen incluidas. <b>¿Las querés sazonadas?</b> Es gratis 🧡</p>}
           <div className="bw-meds">
             {papasOptions.map((o, i) => {
               const active = papasStyle === o.id;
@@ -524,13 +618,13 @@ export default function BurgerCustomizer({
               );
             })}
           </div>
-          {recap}
+          {isLast ? recap : nextInline}
         </>
       );
     }
 
     // extras / dips
-    const list = stepKey === 'extras' ? EXTRAS : DIPS;
+    const list = stepKey === 'extras' ? extrasList : dipsList;
     const values = stepKey === 'extras' ? extras : dips;
     const change = stepKey === 'extras' ? changeExtra : changeDip;
     return (
@@ -586,7 +680,7 @@ export default function BurgerCustomizer({
             transition={{ duration: 0.22 }}
           >
             <motion.div
-              className="bw-shell" role="dialog" aria-modal="true" aria-label={`Armá tu ${name}`}
+              className={`bw-shell${steps.length === 1 ? ' bw-shell--single' : ''}`} role="dialog" aria-modal="true" aria-label={`${kindText.small} ${name}`}
               initial={{ y: 80, scale: 0.96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 80, scale: 0.97, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
@@ -594,7 +688,7 @@ export default function BurgerCustomizer({
               {/* Header */}
               <header className="bw-header">
                 <div className="bw-title">
-                  <span className="bw-title-small">Armá tu</span>
+                  <span className="bw-title-small">{kindText.small}</span>
                   <span className="bw-title-name">{name}</span>
                 </div>
                 <span className="bw-header-price">{formatARS(basePrice)}</span>
@@ -602,7 +696,7 @@ export default function BurgerCustomizer({
               </header>
 
               {/* Pestañas */}
-              <div className="bw-tabs" role="tablist">
+              <div className="bw-tabs" role="tablist" hidden={steps.length === 1}>
                 {steps.map((s, i) => (
                   <button
                     type="button" key={s.key} role="tab" aria-selected={i === step}
@@ -616,7 +710,7 @@ export default function BurgerCustomizer({
                   </button>
                 ))}
               </div>
-              <div className="bw-bar">
+              <div className="bw-bar" hidden={steps.length === 1}>
                 <motion.span
                   className="bw-bar-fill" initial={false}
                   animate={{ scaleX: (step + 1) / steps.length }}
@@ -627,24 +721,36 @@ export default function BurgerCustomizer({
               {/* Cuerpo: escenario + panel */}
               <div className="bw-body">
                 <div className="bw-stage-col">
-                  <LiveBurger
-                    ingredientes={config.ingredientes}
-                    quitados={quitados}
-                    medallones={medallones}
-                    extras={extras}
-                    dips={dips}
-                    papas={papasOptions ? papasStyle : null}
-                    bounceKey={bounceKey}
-                    highlight={highlight}
-                    exploded={exploded}
-                    friesHighlight={friesHighlight}
-                  />
-                  <button
-                    type="button" className={`bw-explode${exploded ? ' bw-explode--on' : ''}`}
-                    onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
-                  >
-                    🔍 {exploded ? 'Juntar capas' : 'Ver capas'}
-                  </button>
+                  {isPhoto ? (
+                    <ProductHero
+                      imageUrl={imageUrl} name={name} emoji={kindText.emoji}
+                      token={heroToken} bounceKey={bounceKey}
+                      papas={papasOptions ? papasStyle : null} dipCount={dipTotal}
+                    />
+                  ) : (
+                    <>
+                      <LiveBurger
+                        ingredientes={config.ingredientes}
+                        quitados={quitados}
+                        medallones={medallones}
+                        extras={extras}
+                        dips={dips}
+                        papas={papasOptions ? papasStyle : null}
+                        bounceKey={bounceKey}
+                        highlight={highlight}
+                        exploded={exploded}
+                        friesHighlight={friesHighlight}
+                        pan={config.pan}
+                        mainType={mainType}
+                      />
+                      <button
+                        type="button" className={`bw-explode${exploded ? ' bw-explode--on' : ''}`}
+                        onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
+                      >
+                        🔍 {exploded ? 'Juntar capas' : 'Ver capas'}
+                      </button>
+                    </>
+                  )}
                   <div className="bw-caption">
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.span
@@ -652,7 +758,7 @@ export default function BurgerCustomizer({
                         initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.15 }}
                       >
-                        {tourOn ? 'Mirá cada ingrediente de tu burger…' : desc}
+                        {tourOn ? 'Mirá cada ingrediente…' : desc}
                       </motion.span>
                     </AnimatePresence>
                   </div>
