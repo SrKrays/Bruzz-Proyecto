@@ -3052,8 +3052,3 @@ height: auto;
   .bw-footer-val { font-size: 22px; }
   .bw-card-emoji { width: 46px; height: 46px; font-size: 26px; }
 }
-
-/* Accesibilidad: sin movimiento si el usuario lo pide */
-@media (prefers-reduced-motion: reduce) {
-  .bl-btn, .bl-shine, .bl-emoji, .bw-btn-next, .bw-btn-shine, .lb-glow, .lb-embers span { animation: none !important; }
-}

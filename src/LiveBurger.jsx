@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { motion, AnimatePresence, useReducedMotion, useAnimationControls } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 
 // ════════════════════════════════════════════════════════════
 //  🍔 LiveBurger — la hamburguesa que se arma en vivo.
@@ -48,12 +48,11 @@ export function emojiOf(ingrediente) {
 }
 
 export default function LiveBurger({ ingredientes, quitados, medallones, extras, dips, bounceKey }) {
-  const reduce = useReducedMotion();
   const controls = useAnimationControls();
 
   // "Rebote" de toda la hamburguesa cada vez que el cliente cambia algo
   useEffect(() => {
-    if (!reduce && bounceKey > 0) {
+    if (bounceKey > 0) {
       controls.start({ y: [0, -16, 0, -6, 0], transition: { duration: 0.55, ease: 'easeOut' } });
     }
   }, [bounceKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -101,11 +100,11 @@ export default function LiveBurger({ ingredientes, quitados, medallones, extras,
             {layers.map((l, idx) => (
               <motion.div
                 key={l.id}
-                layout={!reduce}
+                layout
                 className={`lb-layer lb-${l.type}`}
-                initial={reduce ? false : { opacity: 0, y: -90, scale: 0.6, rotate: idx % 2 ? 14 : -14 }}
+                initial={{ opacity: 0, y: -90, scale: 0.6, rotate: idx % 2 ? 14 : -14 }}
                 animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-                exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.3, x: idx % 2 ? 120 : -120, rotate: idx % 2 ? 40 : -40, transition: { duration: 0.32 } }}
+                exit={{ opacity: 0, scale: 0.3, x: idx % 2 ? 120 : -120, rotate: idx % 2 ? 40 : -40, transition: { duration: 0.32 } }}
                 transition={{ type: 'spring', stiffness: 380, damping: 20 }}
               />
             ))}
@@ -120,7 +119,7 @@ export default function LiveBurger({ ingredientes, quitados, medallones, extras,
         {dipCount > 0 && (
           <motion.div
             className="lb-dip"
-            initial={reduce ? false : { opacity: 0, x: 60, scale: 0.4, rotate: 40 }}
+            initial={{ opacity: 0, x: 60, scale: 0.4, rotate: 40 }}
             animate={{ opacity: 1, x: 0, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, x: 60, scale: 0.4 }}
             transition={{ type: 'spring', stiffness: 300, damping: 16 }}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MEDALLON_EXTRA_PRECIO, MEDALLON_OPCIONES, EXTRAS, DIPS,
 } from './burgerConfig';
@@ -96,7 +96,6 @@ function MiniPatties({ n }) {
  *   onChange    → ({ extrasTotal, lines }) cada vez que cambia algo
  */
 export default function BurgerCustomizer({ name, basePrice, config, onChange }) {
-  const reduce = useReducedMotion();
   const [open, setOpen]           = useState(false);
   const [step, setStep]           = useState(0);
   const [dir, setDir]             = useState(1);
@@ -110,7 +109,6 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
   const bump = useCallback(() => setBounceKey((k) => k + 1), []);
 
   const spawnBurst = useCallback((emoji) => {
-    if (reduce) return;
     const id = Date.now() + Math.random();
     const parts = Array.from({ length: 7 }).map((_, i) => ({
       id: `${id}-${i}`, emoji,
@@ -121,7 +119,7 @@ export default function BurgerCustomizer({ name, basePrice, config, onChange }) 
     }));
     setBursts((b) => [...b, ...parts]);
     setTimeout(() => setBursts((b) => b.filter((p) => !parts.some((q) => q.id === p.id))), 1300);
-  }, [reduce]);
+  }, []);
 
   const toggleIngrediente = (ing) => {
     setQuitados((q) => (q.includes(ing) ? q.filter((x) => x !== ing) : [...q, ing]));
