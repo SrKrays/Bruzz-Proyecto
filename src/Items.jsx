@@ -5,24 +5,9 @@ import { emitFlyToCart } from './flyToCart';
 import RevealText from './RevealText';
 import { launchConfetti } from './confettiCheckout';
 import BurgerCustomizer from './BurgerCustomizer';
-import { getPanelConfig, PAPAS_ESTILOS } from './burgerConfig';
+import { getPanelConfig, PAPAS_ESTILOS, VARIEDADES_SINTACC, MEDALLONES, HIDDEN_ITEMS } from './burgerConfig';
 
 const WHATSAPP_NUMBER = 543543512248;
-
-// ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
-const VARIEDADES_SINTACC = [
-  { id: 'napolitana',   name: 'Napolitana',    desc: 'Salsa de tomate fresca, mozzarella, rodajas de tomate fresco, aceite de ajo y orégano.' },
-  { id: 'cuatroquesos', name: 'Cuatro Quesos', desc: 'Salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.' },
-  { id: 'muzzajamon',   name: 'Muzza y Jamón', desc: 'Salsa de tomate fresca, abundante mozzarella, jamón cocido y orégano.' },
-];
-
-// ── Medallones de la Veggie ───────────────────────────────
-const MEDALLONES = [
-  { id: 'remolacha', name: 'Tabule',          desc: 'Mijo, cebolla de verdeo, tomate deshidratado, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
-  { id: 'quinoa',    name: 'Burrito Mexicano', desc: 'Poroto negro, arroz blanco, cebolla, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
-  { id: 'garbanzo',  name: 'Curry India',      desc: 'Lentejas, coliflor, espinaca, tomate deshidratado, harina de garbanzos, fábula de mandioca y especias.' },
-  { id: 'lentejas',  name: 'Fabel India',      desc: 'Garbanzos, fábula de mandioca, aceite de girasol, harina de garbanzos, perejil, comino y pimienta blanca.' },
-];
 
 // ── Helpers ───────────────────────────────────────────────
 function parsePrice(priceStr) {
@@ -291,7 +276,7 @@ function PapasSelector({ selected, onChange }) {
 // ════════════════════════════════════════════════════════════
 
 function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) {
-  const isVeggie   = item.name === 'Veggie';
+  const isVeggie   = item.name === 'Veggie' || item.name === 'Combo Veggie';
   const isSinTacc  = item.sinTacc === true;
   // Panel de producto (null = tarjeta clásica). Memoizado: el panel depende de la identidad del objeto.
   const burgerCfg  = useMemo(
@@ -354,6 +339,23 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
     }
   }, [isExpanded]);
 
+  // Cambia la cantidad; en la Veggie recorta los medallones elegidos si sobran.
+  const changeQtyTo = (newQty) => {
+    setQty(newQty);
+    if (isVeggie) {
+      setMedallones((prev) => {
+        let rem = newQty;
+        const next = {};
+        for (const [id, n] of Object.entries(prev)) {
+          if (rem <= 0) break;
+          next[id] = Math.min(n, rem);
+          rem -= next[id];
+        }
+        return next;
+      });
+    }
+  };
+
   // Agrega realmente al carrito. `rect` = posición del botón para la animación de vuelo.
   const doAdd = (rect) => {
     if (isVeggie) {
@@ -383,6 +385,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
     // Las hamburguesas no se expanden en la lista: se limpia el panel a mano
     if (burgerCfg) {
       setQty(1); setNote(''); setPapasStyle('clasicas');
+      setMedallones({}); setSintaccVar('');
       setCustom({ extrasTotal: 0, lines: [] });
       setResetKey((k) => k + 1);
     }
@@ -503,19 +506,6 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
                 />
               )}
 
-              <div className="exp-obs-label">
-                <span>Observaciones</span>
-                <span className="exp-obs-count">{note.length} / {MAX_NOTE}</span>
-              </div>
-              <textarea
-                className="exp-textarea"
-                placeholder="Alguna aclaración para tu pedido…"
-                maxLength={MAX_NOTE}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={2}
-              />
-
               <div className="exp-footer">
                 <div className="exp-qty-row">
                   <button className="exp-qty-btn" onClick={() => {
@@ -555,9 +545,11 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
           basePrice={basePrice}
           config={burgerCfg}
           qty={qty}
-          onQtyChange={setQty}
-          note={note}
-          onNoteChange={setNote}
+          onQtyChange={changeQtyTo}
+          variantValue={isVeggie ? medallones : sintaccVar}
+          onVariantChange={isVeggie || burgerCfg.variants?.multi
+            ? (v) => { setMedallones(v); setMedallonError(''); }
+            : (v) => { setSintaccVar(v); setSintaccError(''); }}
           open={wizardOpen}
           onClose={() => setWizardOpen(false)}
           onConfirm={handleWizardConfirm}
@@ -793,7 +785,8 @@ export default function Items({
   const isPostres   = menuKey === 'postres';
   const isCafeteria = menuKey === 'cafeteria';
   const data        = (isPostres || isCafeteria) ? null      : MENU[menuKey];
-  const items       = isCafeteria ? CAFETERIA : isPostres ? POSTRES   : data?.items ?? [];
+  const items       = (isCafeteria ? CAFETERIA : isPostres ? POSTRES   : data?.items ?? [])
+    .filter((it) => !HIDDEN_ITEMS.includes(it.name));   // extras sueltos: ahora viven dentro del panel
   const title       = isCafeteria ? 'Cafetería' : isPostres ? 'Postres' : data?.title ?? '';
   const backScreen  = (isPostres || isCafeteria) ? 'home'    : (data?.back ?? 'home');
 

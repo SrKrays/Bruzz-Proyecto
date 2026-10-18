@@ -23,10 +23,11 @@ const KIND_TEXT = {
 };
 
 // Arma las pestañas según lo que el producto permite personalizar
-function buildSteps(config, hasPapas) {
+function buildSteps(config, hasPapas, ingList) {
   const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
   const steps = [{ key: 'info', label: k.tab, title: k.title, icon: '📖' }];
-  if (config.ingredientes.length) steps.push({ key: 'receta', label: 'Receta', title: 'Tu receta', icon: '🥬' });
+  if (config.variants) steps.push({ key: 'variante', label: config.variants.tab, title: config.variants.title, icon: config.variants.icon });
+  if (ingList.length || config.variants?.byId) steps.push({ key: 'receta', label: 'Receta', title: 'Tu receta', icon: '🥬' });
   if (config.carne) steps.push({ key: 'carne', label: config.carne.tab, title: config.carne.title, icon: config.carne.icon });
   if (config.extras.length) steps.push({ key: 'extras', label: 'Extras', title: 'Extras', icon: '➕' });
   if (config.dips) steps.push({ key: 'dips', label: 'Dips', title: 'Salsas y dips', icon: '🥣' });
@@ -35,7 +36,7 @@ function buildSteps(config, hasPapas) {
 }
 
 // ── Hero con foto (pizza, calzone, papas): sin capas, solo muestra ──
-function ProductHero({ imageUrl, name, token, emoji, papas, dipCount, bounceKey }) {
+function ProductHero({ imageUrl, name, token, emoji, papas, dipCount, muzza, bounceKey }) {
   return (
     <div className="ph-stage">
       <div className="lb-glow" />
@@ -64,6 +65,7 @@ function ProductHero({ imageUrl, name, token, emoji, papas, dipCount, bounceKey 
         </AnimatePresence>
         {papas === 'sazonadas' && <span className="ph-tag ph-tag--hot">🧡 Sazonadas</span>}
         {dipCount > 0 && <span className="ph-tag ph-tag--dip">🥣 x{dipCount}</span>}
+        {muzza > 0 && <span className="ph-tag ph-tag--muzza">🧀 Muzza extra x{muzza}</span>}
       </motion.div>
     </div>
   );
@@ -152,10 +154,19 @@ export default function BurgerCustomizer({
   qty = 1, onQtyChange, note = '', onNoteChange,
   open, onClose, onConfirm, onChange,
   papasOptions, papasStyle, onPapasChange, resetKey = 0,
+  variantValue, onVariantChange,
 }) {
   const isPhoto = config.visual === 'photo';
   const kindText = KIND_TEXT[config.kind] || KIND_TEXT.burger;
-  const steps = useMemo(() => buildSteps(config, !!papasOptions), [config, papasOptions]);
+  const vcfg = config.variants;
+  // Ingredientes quitables: en Sin T.A.C.C. dependen de la variedad elegida
+  const ingList = useMemo(
+    () => (vcfg?.byId ? (vcfg.byId[variantValue] || NO_DIPS) : config.ingredientes),
+    [vcfg, variantValue, config.ingredientes],
+  );
+  const infoChips = vcfg?.byId && vcfg.byId[variantValue] ? vcfg.byId[variantValue] : config.infoChips;
+  const steps = useMemo(() => buildSteps(config, !!papasOptions, ingList), [config, papasOptions, ingList]);
+  const [variantErr, setVariantErr] = useState('');
   const extrasList = useMemo(() => EXTRAS.filter((e) => config.extras.includes(e.id)), [config]);
   const dipsList = config.dips ? DIPS : NO_DIPS;
   const carne = config.carne;
@@ -183,16 +194,16 @@ export default function BurgerCustomizer({
   // ── Capas actuales (para el recorrido) ────────────────────
   const [heroPop, setHeroPop]   = useState(null);          // chip tocado (hero con foto)
   const layers = useMemo(
-    () => (isPhoto ? [] : buildLayers({ ingredientes: config.ingredientes, quitados, medallones, extras, mainType })),
-    [isPhoto, config.ingredientes, quitados, medallones, extras, mainType],
+    () => (isPhoto ? [] : buildLayers({ ingredientes: ingList, quitados, medallones, extras, mainType })),
+    [isPhoto, ingList, quitados, medallones, extras, mainType],
   );
   const tourTokens = useMemo(() => {
-    if (isPhoto) return config.infoChips;
+    if (isPhoto) return infoChips;
     const seen = [];
     layers.forEach((l) => { if (!seen.includes(l.type)) seen.push(l.type); });
     if (papasOptions) seen.push('fries');
     return seen;
-  }, [isPhoto, config.infoChips, layers, papasOptions]);
+  }, [isPhoto, infoChips, layers, papasOptions]);
 
   const stopTour = useCallback(() => {
     if (tourTimer.current) { clearInterval(tourTimer.current); tourTimer.current = null; }
@@ -223,6 +234,7 @@ export default function BurgerCustomizer({
   }, [stopTour]);
 
   const bump = useCallback(() => setBounceKey((k) => k + 1), []);
+  useEffect(() => { if (vcfg?.byId) setQuitados([]); }, [variantValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const spawnBurst = useCallback((emoji) => {
     const id = Date.now() + Math.random();
@@ -325,6 +337,14 @@ export default function BurgerCustomizer({
   };
   const confirm = () => {
     stopTour();
+    if (vcfg) {
+      const need = vcfg.multi ? qty : 1;
+      if (variantCount < need) {
+        setVariantErr(vcfg.multi ? `Seleccioná ${need} medallón${need > 1 ? 'es' : ''} para continuar` : 'Elegí una variedad para continuar');
+        setDir(1); setStep(steps.findIndex((x) => x.key === 'variante')); buzz(30);
+        return;
+      }
+    }
     launchConfetti(); buzz(35);
     onConfirm && onConfirm();
   };
@@ -353,12 +373,16 @@ export default function BurgerCustomizer({
   const heroToken = isPhoto
     ? (() => { const n = tourOn ? tokenNow : heroPop; return n ? { label: n, emoji: emojiOf(n) } : null; })()
     : null;
+  const variantCount = vcfg?.multi
+    ? Object.values(variantValue || {}).reduce((s, n) => s + n, 0)
+    : (variantValue ? 1 : 0);
   const dipTotal = Object.values(dips).reduce((s, n) => s + n, 0);
 
   // Indicadores (punto) de pestañas con cambios
   const tabChanged = (key) => (
     key === 'receta' ? quitados.length > 0
     : key === 'carne' ? medallones > 1
+    : key === 'variante' ? variantCount > 0
     : key === 'extras' ? Object.keys(extras).length > 0
     : key === 'dips' ? Object.keys(dips).length > 0
     : key === 'papas' ? papasStyle === 'sazonadas'
@@ -379,6 +403,14 @@ export default function BurgerCustomizer({
             {kindText.emoji} {name}
             {carne ? ` · ${carne.options.find((o) => o.total === medallones)?.name || ''}` : ''}
           </li>
+          {vcfg && variantCount > 0 && (
+            <li>
+              {vcfg.icon}{' '}
+              {vcfg.multi
+                ? Object.entries(variantValue).map(([id, n]) => `${n > 1 ? `${n}x ` : ''}${vcfg.options.find((o) => o.id === id)?.name}`).join(', ')
+                : vcfg.options.find((o) => o.id === variantValue)?.name}
+            </li>
+          )}
           <AnimatePresence initial={false}>
             {lines.filter((l) => l !== carneLine).map((l) => (
               <motion.li
@@ -394,14 +426,6 @@ export default function BurgerCustomizer({
           {config.sides.map((s) => <li key={s.label}>{s.emoji} {s.label} incluido</li>)}
         </ul>
       </motion.div>
-      <label className="bw-note">
-        <span className="bw-note-label">Observaciones <em>{note.length} / 150</em></span>
-        <textarea
-          className="exp-textarea" rows={2} maxLength={150} value={note}
-          placeholder="Alguna aclaración para tu pedido…"
-          onChange={(e) => onNoteChange && onNoteChange(e.target.value)}
-        />
-      </label>
     </>
   );
 
@@ -417,10 +441,10 @@ export default function BurgerCustomizer({
   const renderStep = () => {
     if (stepKey === 'info') {
       const chips = isPhoto
-        ? config.infoChips.map((n) => ({ n, base: false }))
+        ? infoChips.map((n) => ({ n, base: false }))
         : [
           ...config.base.map((n) => ({ n, base: true })),
-          ...config.ingredientes.map((n) => ({ n, base: false })),
+          ...ingList.map((n) => ({ n, base: false })),
         ];
       const onChip = (n) => (isPhoto ? flashHero(n) : flashHighlight(typesForIngredient(n)));
       return (
@@ -512,12 +536,60 @@ export default function BurgerCustomizer({
       );
     }
 
+    if (stepKey === 'variante') {
+      const need = vcfg.multi ? qty : 1;
+      const setSingle = (id) => { stopTour(); onVariantChange(id); setVariantErr(''); bump(); buzz(14); };
+      const setMulti = (id, d) => {
+        stopTour();
+        const cur = variantValue || {};
+        if (d > 0 && variantCount >= need) return;
+        const next = { ...cur, [id]: Math.max(0, (cur[id] || 0) + d) };
+        if (!next[id]) delete next[id];
+        onVariantChange(next); setVariantErr(''); bump(); buzz(12);
+      };
+      return (
+        <>
+          <p className="bw-step-intro">
+            {vcfg.intro}{vcfg.multi && <> <b>{variantCount}/{need} seleccionado{need !== 1 ? 's' : ''}.</b></>}
+          </p>
+          {variantErr && <p className="medallon-error">⚠ {variantErr}</p>}
+          <div className="bw-cards">
+            {vcfg.options.map((o, i) => {
+              const n = vcfg.multi ? ((variantValue || {})[o.id] || 0) : (variantValue === o.id ? 1 : 0);
+              return (
+                <motion.div
+                  key={o.id} className={`bw-card${n ? ' bw-card--active' : ''}`}
+                  initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.07, type: 'spring', stiffness: 360, damping: 24 }}
+                  onClick={vcfg.multi ? undefined : () => setSingle(o.id)}
+                  style={vcfg.multi ? undefined : { cursor: 'pointer' }}
+                >
+                  <span className="bw-card-emoji">{vcfg.icon}</span>
+                  <span className="bw-card-text">
+                    <span className="bw-card-name">{o.name}</span>
+                    <span className="bw-card-desc">{o.desc}</span>
+                  </span>
+                  {vcfg.multi ? (
+                    <Stepper value={n} label={o.name} onMinus={() => setMulti(o.id, -1)} onPlus={() => setMulti(o.id, 1)} />
+                  ) : (
+                    <span className={`sintacc-radio${n ? ' sintacc-radio--on' : ''}`}>{n ? <span className="sintacc-radio-dot" /> : null}</span>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+          {isLast ? recap : nextInline}
+        </>
+      );
+    }
+
     if (stepKey === 'receta') {
       return (
         <>
           <p className="bw-step-intro">Estos ingredientes vienen incluidos. <b>Tocá los que no querés</b> y salen de tu hamburguesa.</p>
+          {ingList.length === 0 && <p className="bw-hint">Primero elegí la variedad y después podés sacar ingredientes.</p>}
           <div className="bw-tiles">
-            {config.ingredientes.map((ing, i) => {
+            {ingList.map((ing, i) => {
               const off = quitados.includes(ing);
               return (
                 <motion.button
@@ -725,12 +797,12 @@ export default function BurgerCustomizer({
                     <ProductHero
                       imageUrl={imageUrl} name={name} emoji={kindText.emoji}
                       token={heroToken} bounceKey={bounceKey}
-                      papas={papasOptions ? papasStyle : null} dipCount={dipTotal}
+                      papas={papasOptions ? papasStyle : null} dipCount={dipTotal} muzza={extras.muzza || 0}
                     />
                   ) : (
                     <>
                       <LiveBurger
-                        ingredientes={config.ingredientes}
+                        ingredientes={ingList}
                         quitados={quitados}
                         medallones={medallones}
                         extras={extras}

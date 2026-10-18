@@ -22,11 +22,15 @@ export const BIFE_OPCIONES = [
   { total: 3, name: 'Doble bife extra', desc: '+200g de lomo' },
 ];
 
+export const MUZZA_EXTRA_PRECIO = 2500;
+
 // Extras con cantidad. Las verduras NO se ofrecen como extras pagos.
 export const EXTRAS = [
   { id: 'cheddar', name: 'Cheddar extra', desc: 'Sumá más queso',  icon: '🧀', precio: 1500 },
   { id: 'panceta', name: 'Panceta extra', desc: 'Más crocante',    icon: '🥓', precio: 1500 },
   { id: 'huevo',   name: 'Huevo',         desc: 'Aunque no venga en la receta', icon: '🍳', precio: 1200 },
+  // Pizzas y calzones. ⚠ Precio a confirmar con el local.
+  { id: 'muzza',   name: 'Muzza extra',   desc: 'Más mozzarella derretida', icon: '🧀', precio: MUZZA_EXTRA_PRECIO },
 ];
 
 // Salsas y dips (opcionales, cada uno con su precio).
@@ -76,8 +80,24 @@ const PAPAS_INFO = {
   'Papas con Cheddar': ['Papas fritas', 'Cheddar', 'Bacon', 'Cebolla de verdeo'],
 };
 
-// Productos sueltos del menú que son agregados (no abren el panel)
-const ADD_ONS = ['Medallón extra', 'Bife extra (100g)'];
+// Ítems sueltos que ya no se muestran en la carta: ahora son extras dentro del panel
+export const HIDDEN_ITEMS = ['Medallón extra', 'Bife extra (100g)'];
+const ADD_ONS = HIDDEN_ITEMS;
+
+// ── Variedades de Pizza Sin T.A.C.C. ─────────────────────
+export const VARIEDADES_SINTACC = [
+  { id: 'napolitana',   name: 'Napolitana',    desc: 'Salsa de tomate fresca, mozzarella, rodajas de tomate fresco, aceite de ajo y orégano.' },
+  { id: 'cuatroquesos', name: 'Cuatro Quesos', desc: 'Salsa de tomate fresca, mozzarella, parmesano, sardo, roquefort, orégano.' },
+  { id: 'muzzajamon',   name: 'Muzza y Jamón', desc: 'Salsa de tomate fresca, abundante mozzarella, jamón cocido y orégano.' },
+];
+
+// ── Medallones de la Veggie ───────────────────────────────
+export const MEDALLONES = [
+  { id: 'remolacha', name: 'Tabule',          desc: 'Mijo, cebolla de verdeo, tomate deshidratado, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
+  { id: 'quinoa',    name: 'Burrito Mexicano', desc: 'Poroto negro, arroz blanco, cebolla, harina de garbanzos, fábula de mandioca, aceite de girasol, jugo y ralladura de limón y especias.' },
+  { id: 'garbanzo',  name: 'Curry India',      desc: 'Lentejas, coliflor, espinaca, tomate deshidratado, harina de garbanzos, fábula de mandioca y especias.' },
+  { id: 'lentejas',  name: 'Fabel India',      desc: 'Garbanzos, fábula de mandioca, aceite de girasol, harina de garbanzos, perejil, comino y pimienta blanca.' },
+];
 
 // Separa la descripción en ingredientes (para pizzas y calzones)
 export function parseIngredientes(desc = '') {
@@ -103,6 +123,18 @@ const CARNE_LOMO = {
   line: (total) => (total === 2 ? '1 bife extra (100g)' : `${total - 1} bifes extra (100g)`),
 };
 
+const VARIANTS_VEGGIE = {
+  tab: 'Medallón', title: 'Elegí tu medallón', icon: '🌿', multi: true,
+  intro: 'Elegí el medallón Veggie de tu hamburguesa.',
+  options: MEDALLONES,
+};
+const VARIANTS_SINTACC = {
+  tab: 'Variedad', title: 'Tu variedad Sin T.A.C.C.', icon: '🌾', multi: false,
+  intro: 'Elegí la variedad de tu pizza con masa libre de gluten.',
+  options: VARIEDADES_SINTACC,
+  byId: Object.fromEntries(VARIEDADES_SINTACC.map((v) => [v.id, parseIngredientes(v.desc)])),
+};
+
 /**
  * Devuelve la configuración del panel para un producto, o null si el producto
  * no usa panel (agregados sueltos, bebidas, postres, etc.).
@@ -110,8 +142,6 @@ const CARNE_LOMO = {
  */
 export function getPanelConfig(menuKey, item) {
   if (!item || item.sep || ADD_ONS.includes(item.name)) return null;
-  // Flujos especiales que siguen con su selector propio dentro de la tarjeta
-  if (item.sinTacc === true || item.name === 'Veggie') return null;
   const name = item.name;
 
   if (menuKey === 'hamburgesas') {
@@ -122,6 +152,7 @@ export function getPanelConfig(menuKey, item) {
     const isBambino = name === 'Hamburgesa Bambino';
     const isVeggie = baseName === 'Veggie';
     return {
+      variants: isVeggie ? VARIANTS_VEGGIE : null,
       kind: 'burger', visual: 'stack', pan: 'papa', main: isVeggie ? 'veggie' : 'patty',
       base: isVeggie ? ['Pan de papa Americano', 'Medallón Veggie'] : BASE_INGREDIENTES,
       ingredientes,
@@ -143,7 +174,7 @@ export function getPanelConfig(menuKey, item) {
       ingredientes,
       carne: CARNE_LOMO,
       extras: ['cheddar', 'panceta', 'huevo'],
-      dips: true, sides: [],
+      dips: true, sides: [], variants: null,
     };
   }
 
@@ -155,24 +186,33 @@ export function getPanelConfig(menuKey, item) {
       base: c.base, ingredientes: c.ingredientes,
       carne: null,
       extras: name === 'Vegetariano' ? ['cheddar', 'huevo'] : ['cheddar', 'panceta', 'huevo'],
-      dips: true, sides: [],
+      dips: true, sides: [], variants: null,
     };
   }
 
   if (menuKey === 'papas') {
+    const chips = PAPAS_INFO[name] || parseIngredientes(item.desc);
     return {
       kind: 'papas', visual: 'photo', pan: null, main: null,
-      base: [], ingredientes: [], infoChips: PAPAS_INFO[name] || parseIngredientes(item.desc),
-      carne: null, extras: [], dips: true, sides: [],
+      base: [], ingredientes: chips.slice(1), infoChips: chips,
+      carne: null, extras: [], dips: true, sides: [], variants: null,
     };
   }
 
   if (menuKey === 'pizza' || menuKey === 'calzone') {
+    const sinTacc = item.sinTacc === true;
+    const bambino = name === 'Mini Pizza Bambino';
+    const chips = bambino ? ['Salsa de tomate', 'Muzzarella'] : parseIngredientes(item.desc);
     return {
       kind: 'pizza', visual: 'photo', pan: null, main: null,
-      base: [], ingredientes: [],
-      infoChips: parseIngredientes(item.desc),
-      carne: null, extras: [], dips: false, sides: [],
+      base: [],
+      ingredientes: sinTacc ? [] : chips,
+      infoChips: sinTacc ? ['Masa artesanal sin TACC'] : chips,
+      carne: null, extras: ['muzza'], dips: false,
+      sides: bambino
+        ? [{ emoji: '🥤', label: 'Bebida' }, { emoji: '🍦', label: 'Helado' }, { emoji: '🧸', label: 'Juguete' }]
+        : [],
+      variants: sinTacc ? VARIANTS_SINTACC : null,
     };
   }
 
