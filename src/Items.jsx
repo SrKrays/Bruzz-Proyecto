@@ -553,6 +553,7 @@ function ExpandableItemCard({ item, isExpanded, onToggle, onCartAdd, menuKey }) 
           open={wizardOpen}
           onClose={() => setWizardOpen(false)}
           onConfirm={handleWizardConfirm}
+          onAddAnother={() => doAdd(addRectRef.current)}
           onChange={setCustom}
           papasOptions={tienePapas ? PAPAS_ESTILOS : null}
           papasStyle={papasStyle}

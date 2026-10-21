@@ -189,7 +189,7 @@ export default function BurgerCustomizer({
   qty = 1, onQtyChange, note = '', onNoteChange,
   open, onClose, onConfirm, onChange,
   papasOptions, papasStyle, onPapasChange, resetKey = 0,
-  variantValue, onVariantChange,
+  variantValue, onVariantChange, onAddAnother,
 }) {
   const isPhoto = config.visual === 'photo';
   const kindText = KIND_TEXT[config.kind] || KIND_TEXT.burger;
@@ -202,6 +202,7 @@ export default function BurgerCustomizer({
   const infoChips = vcfg?.byId && vcfg.byId[variantValue] ? vcfg.byId[variantValue] : config.infoChips;
   const steps = useMemo(() => buildSteps(config, !!papasOptions, ingList), [config, papasOptions, ingList]);
   const [variantErr, setVariantErr] = useState('');
+  const [addedCount, setAddedCount] = useState(0);   // cuántos armados ya sumó en esta visita
   const extrasList = useMemo(() => EXTRAS.filter((e) => config.extras.includes(e.id)), [config]);
   const dipsList = config.dips ? DIPS : NO_DIPS;
   const carne = config.carne;
@@ -351,7 +352,7 @@ export default function BurgerCustomizer({
   // ── Abrir: arranca en la pestaña de info + recorrido de ingredientes ──
   useEffect(() => {
     if (!open) {
-      stopTour(); setChipHl(null); setFriesHl(false);
+      stopTour(); setChipHl(null); setFriesHl(false); setAddedCount(0);
       return undefined;
     }
     setStep(0); setDir(1); buzz(15);
@@ -382,6 +383,15 @@ export default function BurgerCustomizer({
   const goNext = () => {
     if (stepKey === 'variante' && variantMissing()) { failVariant(); return; }
     goTo(step + 1);
+  };
+  // Guarda este armado en el pedido y arranca uno nuevo (para otra persona)
+  const addAnother = () => {
+    stopTour();
+    if (variantMissing()) { failVariant(); return; }
+    buzz(30);
+    onAddAnother && onAddAnother();
+    setAddedCount((c) => c + 1);
+    setDir(-1);
   };
   const confirm = () => {
     stopTour();
@@ -432,7 +442,7 @@ export default function BurgerCustomizer({
 
   // Texto del botón principal: claro sobre qué pasa si no se toca nada
   const nextLabel = (() => {
-    if (isLast) return `✅ Agregar al pedido · ${formatARS(totalUnidad * qty)}`;
+    if (isLast) return `✅ ${addedCount > 0 ? 'Agregar y terminar' : 'Agregar al pedido'} · ${formatARS(totalUnidad * qty)}`;
     const touched = (
       stepKey === 'sacar' ? quitados.length > 0
       : stepKey === 'carne' ? medallones > 1
@@ -476,13 +486,22 @@ export default function BurgerCustomizer({
       </motion.div>
 
       <div className="bw-qty-row">
-        <span className="bw-qty-label">¿Cuántos querés?</span>
+        <span className="bw-qty-label">¿Cuántos así querés?</span>
         <div className="bw-qty">
           <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
           <motion.span key={qty} className="bw-qty-val" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{qty}</motion.span>
           <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(qty + 1)} aria-label="Más">+</button>
         </div>
       </div>
+
+      {onAddAnother && (
+        <div className="bw-another-box">
+          <p className="bw-another-text">¿Es para más de una persona y <b>cada uno lo quiere distinto</b>?</p>
+          <motion.button type="button" className="bw-another" onClick={addAnother} whileTap={{ scale: 0.96 }}>
+            👥 Guardar este y armar otro distinto
+          </motion.button>
+        </div>
+      )}
     </>
   );
 
@@ -864,6 +883,16 @@ export default function BurgerCustomizer({
 
               {/* Footer fijo: precio + atrás + botón principal grande */}
               <footer className="bw-footer bw-footer--guided">
+                <AnimatePresence>
+                  {addedCount > 0 && (
+                    <motion.div
+                      className="bw-added" key={addedCount}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }}
+                    >
+                      ✅ Ya guardaste {addedCount} {addedCount === 1 ? 'armado' : 'armados'} en tu pedido. Armá el siguiente.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div className="bw-footer-price">
                   <span className="bw-footer-label">Total</span>
                   <RollPrice value={totalUnidad * qty} className="bw-footer-val" />
