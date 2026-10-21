@@ -3856,3 +3856,10 @@ height: auto;
     overflow: visible; pointer-events: none; z-index: 2;
   }
 }
+
+/* ═══ MÓVIL · la burger no pisa el título ni el progreso ═══ */
+@media (max-width: 899px) {
+  .bw-header, .bw-progress { position: relative; z-index: 3; }
+  .bw-stage-col { margin-top: 6px; }
+  .pb-host { top: -20px; }
+}
