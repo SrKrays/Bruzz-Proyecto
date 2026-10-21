@@ -29,6 +29,8 @@ export const PHOTO_BURGERS = {
       cebolla:   { f: 'onion.png',   at: [0.6, 0.56] },
       bacon:     { f: 'bacon.png',   at: [0.5, 0.44] },
     },
+    // extracción REAL: sprite con los píxeles de la foto base del ingrediente (sale de su lugar de verdad)
+    extract: { cheddar: { f: 'ext-cheddar.webp', pivot: [0.48, 0.714] } },
     steam: { x: 0.5, y: 0.49, w: 0.5 },
     // zonas que reciben el brillo (fracciones de la foto): pan y cheddar
     glints: [{ x: 0.1, y: 0.02, w: 0.8, h: 0.36 }, { x: 0.08, y: 0.63, w: 0.84, h: 0.15 }],
@@ -468,9 +470,14 @@ async function go(st, cfg, want) {
       await new Promise((r) => setTimeout(r, 800));
       return;
     }
-    const { removed, added } = diffKeys(res.name === want ? st.shown : st.shown, want);
     const prevShown = st.shown;
     const dk = diffKeys(prevShown, want);
+    // ¿un solo ingrediente con sprite real? → extracción física (sin saltar toda la burger)
+    if (dk.removed.length + dk.added.length === 1) {
+      const key = dk.removed[0] || dk.added[0]; const removing = dk.removed.length === 1;
+      const ok = cfg.extract?.[key] && res.name === want && (removing ? prevShown === 'base' : want === 'base');
+      if (ok && await extractMove(st, cfg, key, removing, res)) return;
+    }
     const apexDone = new Promise((resolve) => {
       const tl = gsap.timeline({ onComplete: resolve });
       tl.to(st.sq, { x: 1.05, y: 0.9, duration: 0.11, ease: 'power2.out' })
@@ -493,6 +500,53 @@ async function go(st, cfg, want) {
     st.busy = false;
     if (st.queued && st.queued !== st.shown) { const q = st.queued; st.queued = null; go(st, cfg, q); } else st.queued = null;
   }
+}
+
+
+// ════════ extracción física de un ingrediente ════════
+async function extractMove(st, cfg, key, removing, res) {
+  const def = cfg.extract[key];
+  let tex = st.ok.get(`ext:${key}`);
+  if (!tex) { try { tex = await loadTex(baseUrl() + cfg.dir + def.f); st.ok.set(`ext:${key}`, tex); } catch { return false; } }
+  if (!st.ready) return true;
+  const W = st.photoW; const H = st.photoH;
+  const P = { x: (def.pivot[0] - 0.5) * W, y: -(1 - def.pivot[1]) * H };
+  const ec = new Container(); ec.position.set(P.x, P.y);
+  const sp = new Sprite(tex); sp.anchor.set(0.5, 1); sp.width = W; sp.height = H; sp.position.set(-P.x, -P.y);
+  ec.addChild(sp); st.wrap.addChild(ec);
+  const rx = DW / 2 + P.x; const ry = BASE_Y + P.y;
+  const baseTex = st.ok.get('base');
+  const fin = () => { try { ec.destroy({ children: true }); } catch { /* noop */ } };
+  await new Promise((resolve) => {
+    if (removing) {
+      // la foto "sin ingrediente" queda debajo; el sprite real se despega y se va
+      setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0;
+      const tl = gsap.timeline({ onComplete: () => { fin(); resolve(); } });
+      tl.to(ec.scale, { x: 0.99, y: 1.1, duration: 0.14, ease: 'power2.out' }, 0)          // se estira antes de soltarse
+        .to(ec, { y: P.y - 8, duration: 0.14, ease: 'power2.out' }, 0)
+        .to(ec, { y: P.y - 50, rotation: -0.06, duration: 0.55, ease: 'power3.out' }, 0.12)  // sube en arco
+        .to(ec.scale, { x: 1.05, y: 0.92, duration: 0.4, ease: 'power1.out' }, 0.2)
+        .to(ec, { alpha: 0, duration: 0.3, ease: 'power1.in' }, 0.36)                         // se desvanece
+        .add(() => magicBurst(st, rx, ry - 30, 0.55), 0.38)
+        .to(st.sq, { x: 1.014, y: 0.986, duration: 0.12, ease: 'power2.out' }, 0.2)           // la burger se acomoda
+        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.5)' }, 0.32);
+    } else {
+      // volver a poner: el sprite cae desde arriba a su lugar exacto
+      ec.alpha = 0; ec.y = P.y - 50; ec.rotation = -0.06; ec.scale.set(1.05, 0.92);
+      const tl = gsap.timeline({ onComplete: () => {
+        if (baseTex) { setPhoto(st, st.spA, baseTex); st.spA.alpha = 1; st.spB.alpha = 0; }
+        fin(); resolve();
+      } });
+      tl.to(ec, { alpha: 1, duration: 0.18 }, 0)
+        .to(ec, { y: P.y, rotation: 0, duration: 0.42, ease: 'power2.in' }, 0)
+        .to(ec.scale, { x: 1, y: 1, duration: 0.4, ease: 'power1.in' }, 0)
+        .add(() => magicBurst(st, rx, ry - 20, 0.55), 0.4)
+        .to(st.sq, { x: 1.03, y: 0.97, duration: 0.1, ease: 'power2.out' }, 0.4)
+        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' }, 0.5);
+    }
+  });
+  st.shown = res.name;
+  return true;
 }
 
 function jumpOnly(st, cfg, dk) {
