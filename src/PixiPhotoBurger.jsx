@@ -131,10 +131,17 @@ out vec4 finalColor;
 uniform sampler2D uTexture;
 uniform sampler2D uDepth;
 uniform vec2 uOffset;
+uniform vec2 uGlint;
 void main(void){
   float d = texture(uDepth, vTextureCoord).r;
   vec2 uv = vTextureCoord + uOffset * (d - 0.5);
-  finalColor = texture(uTexture, clamp(uv, 0.001, 0.999));
+  vec4 c = texture(uTexture, clamp(uv, 0.001, 0.999));
+  // brillo que recorre la burger: solo ilumina lo claro/brillante y respeta la silueta (sin rectángulos)
+  float s = uv.x + uv.y * 0.35;
+  float band = smoothstep(0.11, 0.0, abs(s - uGlint.x));
+  float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+  c.rgb += band * uGlint.y * c.a * (0.1 + lum * lum * 1.1) * vec3(1.0, 0.92, 0.78);
+  finalColor = c;
 }`;
 
 export default function PixiPhotoBurger({
@@ -176,13 +183,13 @@ export default function PixiPhotoBurger({
         build(st, app, cfg, isLite, host, cleanups);
         st.ready = true; fit(st, host);
         // primera foto (con respaldo a la más parecida)
+        prefetch(st, cfg);
         const first = await resolveTex(st, cfg, st.want || wantName);
         if (dead) return;
         if (!first) { onError?.(new Error('no-photo')); return; }
         st.shown = first.name; setPhoto(st, st.spA, first.tex);
         st.spA.alpha = 0;
         entrance(st);
-        prefetch(st, cfg);
         if (st.want && st.want !== first.name) go(st, cfg, st.want, { removed: [], added: [] });
       } catch (e) { if (!dead) onError?.(e); }
     })();
@@ -287,7 +294,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
         glProgram: GlProgram.from({ vertex: defaultFilterVert, fragment: FRAG, name: 'photo-parallax' }),
         resources: {
           uDepth: st.depth.source,
-          parallaxUniforms: { uOffset: { value: new Float32Array([0, 0]), type: 'vec2<f32>' } },
+          parallaxUniforms: { uOffset: { value: new Float32Array([0, 0]), type: 'vec2<f32>' }, uGlint: { value: new Float32Array([-1, 0]), type: 'vec2<f32>' } },
         },
         padding: 0,
       });
@@ -296,21 +303,21 @@ function build(st, app, cfg, isLite, host, cleanups) {
   }
 
   // brillo que recorre pan y cheddar
-  const glintMask = new Graphics(); st.glintMask = glintMask; root.addChild(glintMask);
+  const glintMask = new Graphics(); st.glintMask = glintMask;   // (sin dibujar: el brillo ahora va en el shader)
   const band = new Graphics().rect(0, 0, 60, 10).fill(new FillGradient({
     type: 'linear', start: { x: 0, y: 0 }, end: { x: 1, y: 0 },
     colorStops: [{ offset: 0, color: 'rgba(255,255,255,0)' }, { offset: 0.5, color: 'rgba(255,248,220,0.55)' }, { offset: 1, color: 'rgba(255,255,255,0)' }],
   }));
-  const glint = new Sprite(app.renderer.generateTexture(band)); glint.blendMode = 'add'; glint.width = 70; glint.rotation = 0; glint.skew.x = -0.35;
-  glint.alpha = 0; glint.mask = glintMask; root.addChild(glint); st.glint = glint;
+  const glint = new Sprite(Texture.EMPTY); glint.visible = false; st.glint = glint;
+  st.gl = { x: -0.6, k: 0 };
   const sweep = () => {
     if (!st.ready) return;
-    glint.x = DW / 2 - st.photoW / 2 - 80; glint.alpha = 0.9;
-    gsap.to(glint, { x: DW / 2 + st.photoW / 2 + 10, duration: 1.3, ease: 'power1.inOut' });
-    gsap.to(glint, { alpha: 0, duration: 0.3, delay: 1.1 });
+    st.gl.x = -0.35; st.gl.k = 0;
+    gsap.to(st.gl, { x: 1.45, duration: 1.5, ease: 'power1.inOut' });
+    gsap.timeline().to(st.gl, { k: 1, duration: 0.45 }).to(st.gl, { k: 0, duration: 0.6 }, 0.95);
   };
   const sweepTimer = GLINT_ON ? setInterval(sweep, 4200) : 0; if (GLINT_ON) setTimeout(sweep, 1200);
-  cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(glint); });
+  cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(st.gl); });
 
   // vapor
   const steamTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 22).fill(radial([[0, 'rgba(255,255,255,0.5)'], [1, 'rgba(255,255,255,0)']])));
@@ -393,6 +400,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
     if (st.filter) {
       const u = st.filter.resources.parallaxUniforms.uniforms.uOffset;
       u[0] = -st.parallax.x * 0.014; u[1] = -st.parallax.y * 0.01;
+      const g = st.filter.resources.parallaxUniforms.uniforms.uGlint; g[0] = st.gl.x; g[1] = st.gl.k * (0.9 + st.flare * 0.5);
       st.filter.resources.parallaxUniforms.update?.();
     } else {
       wrap.x = DW / 2 + st.parallax.x * 3;
@@ -544,7 +552,7 @@ function steamPuff(st, n = 4) {
 function makePiece(st, cfg, k) {
   const def = cfg.sticker[k]; const tex = st.ok.get(`sticker:${k}`);
   if (!def || !tex) return null;
-  const w = 74; const sc = w / tex.width;
+  const w = 118; const sc = w / tex.width;
   const c = new Container();
   const sh = new Sprite(tex); sh.anchor.set(0.5); sh.scale.set(sc); sh.tint = 0x000000; sh.alpha = 0.35; sh.position.set(4, 7);
   const sp = new Sprite(tex); sp.anchor.set(0.5); sp.scale.set(sc);
@@ -565,10 +573,10 @@ function flySwap(st, cfg, res, { removed, added }) {
     const tl = gsap.timeline({ onComplete: done });
     if (out) {
       // 1) anticipación (compresión)  2) salto y vuelo de la pieza  3) crossfade arriba  4) caída + rebote + vapor
-      tl.to(st.sq, { x: 1.045, y: 0.94, duration: 0.11, ease: 'power2.out' }, 0)
+      tl.to(st.sq, { x: 1.05, y: 0.93, duration: 0.11, ease: 'power2.out' }, 0)
         .to(st.wrapState, { jy: 2, duration: 0.11, ease: 'power2.out' }, 0)
         .to(st.sq, { x: 0.965, y: 1.05, duration: 0.16, ease: 'power2.out' }, 0.11)
-        .to(st.wrapState, { jy: -22, duration: 0.2, ease: 'power2.out' }, 0.11)
+        .to(st.wrapState, { jy: -30, duration: 0.2, ease: 'power2.out' }, 0.11)
         .to(st.spB, { alpha: 1, duration: 0.13, ease: 'sine.inOut' }, 0.24)
         .to(st.wrapState, { jy: 0, duration: 0.2, ease: 'power2.in' }, 0.34)
         .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.34)
@@ -579,7 +587,7 @@ function flySwap(st, cfg, res, { removed, added }) {
         .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.71)
         .call(() => steamPuff(st, st.lite ? 3 : 5), null, 0.54);
       pieces.forEach((p, i) => {
-        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (62 + i * 14); const oy = p.py - 70 - i * 10;
+        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (78 + i * 16); const oy = p.py - 96 - i * 12;
         p.c.position.set(p.px, p.py); p.c.scale.set(0.5); p.c.alpha = 0;
         tl.to(p.c, { alpha: 1, duration: 0.08 }, 0.11)
           .to(p.c.scale, { x: 1, y: 1, duration: 0.2, ease: 'back.out(1.6)' }, 0.11)

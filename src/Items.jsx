@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MENU, POSTRES, CAFETERIA } from './menuData';
 import { emitFlyToCart } from './flyToCart';
@@ -55,18 +56,33 @@ function AnimatedPrice({ value }) {
 //  🛒 CART FAB — con ALTA 3: spring bounce en el número
 // ════════════════════════════════════════════════════════════
 
+// Busca el hueco "cart-slot" de la fila "← Inicio · Título" de la pantalla actual (si no hay, queda en el header)
+function useCartSlot() {
+  const [slot, setSlot] = useState(null);
+  useEffect(() => {
+    let raf = 0;
+    const find = () => { raf = 0; const all = document.querySelectorAll('.cart-slot'); setSlot(all.length ? all[all.length - 1] : null); };
+    const sched = () => { if (!raf) raf = requestAnimationFrame(find); };
+    find();
+    const mo = new MutationObserver(sched); mo.observe(document.body, { childList: true, subtree: true });
+    return () => { mo.disconnect(); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+  return slot;
+}
+
 export function CartChip({ cart, onOpen }) {
   const totalItems = cart.reduce((s, i) => s + i.qty, 0);
   const isEmpty    = totalItems === 0;
+  const slot = useCartSlot();
 
-  return (
+  const chip = (
     <button
-      className={`cart-fab-header cart-pill${isEmpty ? ' cart-pill--empty' : ' cart-pill--active'}`}
+      className={`cart-fab-header cart-pill${isEmpty ? ' cart-pill--empty' : ' cart-pill--active'}${slot ? ' cart-pill--inline' : ''}`}
       onClick={onOpen}
       aria-label={`Ver mi pedido (${totalItems} productos)`}
     >
       <span className="cart-pill-icon">🛒</span>
-      <span className="cart-pill-text">MI PEDIDO</span>
+      <span className="cart-pill-text">PEDIDO</span>
       {/* key cambia con totalItems → re-dispara la animación spring */}
       <motion.span
         key={totalItems}
@@ -79,6 +95,7 @@ export function CartChip({ cart, onOpen }) {
       </motion.span>
     </button>
   );
+  return slot ? createPortal(chip, slot) : chip;
 }
 
 // Barra fija inferior: siempre visible cuando hay productos
@@ -867,6 +884,7 @@ export default function Items({
         <span className="screen-title">
           <RevealText as="span">{title}</RevealText>
         </span>
+        <span className="cart-slot" />
       </div>
 
       <div className="items-list">

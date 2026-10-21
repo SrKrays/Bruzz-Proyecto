@@ -44,6 +44,7 @@ export default function Subcategorias({ seccion, onNavigate, onShowItems }) {
         <span className="screen-title">
           <RevealText as="span">{meta.label}</RevealText>
         </span>
+        <span className="cart-slot" />
       </div>
 
       <motion.div
