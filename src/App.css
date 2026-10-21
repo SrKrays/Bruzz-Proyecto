@@ -3744,3 +3744,9 @@ height: auto;
 .bw-footer--last .bw-back, .bw-another--footer { height: 56px; font-size: 18px; }
 .bw-added { font-size: 16px; }
 .bw-footer-hint { font-size: 15px; }
+
+/* ── PixiBurger (WebGL) ── */
+.pb-host { position: relative; width: 100%; height: 100%; min-height: 240px; overflow: visible; }
+.pb-host canvas { touch-action: auto; }
+.pb-loading { display:flex; align-items:center; justify-content:center; width:100%; height:100%; min-height:240px; font-size:64px; animation: pbpulse 1s ease-in-out infinite; }
+@keyframes pbpulse { 50% { transform: scale(1.15); } }

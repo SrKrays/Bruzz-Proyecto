@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EXTRAS, DIPS } from './burgerConfig';
-import LiveBurger, { emojiOf, typesForIngredient, buildLayers } from './LiveBurger';
+import { emojiOf, typesForIngredient, buildLayers } from './LiveBurger';
+import BurgerStage from './BurgerStage';
 import { launchConfetti } from './confettiCheckout';
 
 function formatARS(n) {
@@ -822,7 +823,7 @@ export default function BurgerCustomizer({
                     />
                   ) : (
                     <>
-                      <LiveBurger
+                      <BurgerStage
                         ingredientes={ingList}
                         quitados={quitados}
                         medallones={medallones}

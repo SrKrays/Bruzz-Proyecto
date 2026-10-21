@@ -10,7 +10,7 @@ import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 // ════════════════════════════════════════════════════════════
 
 // Altura aproximada de cada capa (px) → para escalar la pila y que siempre entre
-const H = {
+export const H = {
   bunTop: 58, leaf: 18, arugula: 14, tomato: 13, onion: 9, onionRed: 9, pickles: 11,
   mayo: 9, ketchup: 9, bruzz: 9, bbq: 9, chimi: 9, grill: 12, egg: 20, ham: 11, prosciutto: 11,
   cheese: 9, bacon: 12, cheddar: 12, patty: 28, lomo: 24, veggie: 26, ternera: 26, bunBottom: 26,
