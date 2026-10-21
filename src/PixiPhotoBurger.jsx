@@ -383,12 +383,13 @@ function build(st, app, cfg, isLite, host, cleanups) {
       } else if (D) window.addEventListener('deviceorientation', onOri);
     } catch { /* noop */ }
   };
-  host.addEventListener('pointermove', onMove); host.addEventListener('pointerleave', onLeave);
-  host.addEventListener('pointerdown', askGyro, { once: true });
+  const ev = host.parentElement || host;   // el host puede ser transparente a los toques: escuchamos en el escenario
+  ev.addEventListener('pointermove', onMove); ev.addEventListener('pointerleave', onLeave);
+  ev.addEventListener('pointerdown', askGyro, { once: true });
   if (!(window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function')) askGyro();
   cleanups.push(() => {
-    host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
-    host.removeEventListener('pointerdown', askGyro); window.removeEventListener('deviceorientation', onOri);
+    ev.removeEventListener('pointermove', onMove); ev.removeEventListener('pointerleave', onLeave);
+    ev.removeEventListener('pointerdown', askGyro); window.removeEventListener('deviceorientation', onOri);
   });
 
   app.ticker.add((tk) => {

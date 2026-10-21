@@ -3843,3 +3843,16 @@ height: auto;
   .bw-panel-col { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
   .bw-step-intro { font-size: 15px; line-height: 1.35; }
 }
+
+/* ═══ MÓVIL · burger de tamaño FIJO en todos los pasos (nada de bandas ni saltos de tamaño) ═══ */
+@media (max-width: 899px) {
+  .bw-stage-col,
+  .bw-shell[data-step] .bw-stage-col {
+    height: clamp(205px, 27vh, 245px); height: clamp(205px, 27dvh, 245px); transition: none;
+  }
+  /* el lienzo se extiende 44px sobre el escenario: el salto y la pieza que vuela no se cortan arriba */
+  .pb-host {
+    position: absolute; left: 0; right: 0; bottom: 0; top: -44px; width: auto; height: auto; min-height: 0;
+    overflow: visible; pointer-events: none; z-index: 2;
+  }
+}
