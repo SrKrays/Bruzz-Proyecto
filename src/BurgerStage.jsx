@@ -5,6 +5,7 @@ import { lazy, Suspense, useState, useEffect } from 'react';
 import LiveBurger from './LiveBurger';
 
 const PixiBurger = lazy(() => import('./PixiBurger'));
+const PixiPhotoBurger = lazy(() => import('./PixiPhotoBurger'));
 
 function hasWebGL() {
   try {
@@ -15,11 +16,20 @@ function hasWebGL() {
 
 export default function BurgerStage(props) {
   const [failed, setFailed] = useState(() => (typeof document === 'undefined' ? true : !hasWebGL()));
+  // foto viva → burger por capas → burger CSS
+  const [photoFailed, setPhotoFailed] = useState(false);
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('css') === '1') setFailed(true);
   }, []);
 
   if (failed) return <LiveBurger {...props} />;
+  if (props.photoLive && !photoFailed) {
+    return (
+      <Suspense fallback={<div className="pb-loading" aria-hidden="true">🍔</div>}>
+        <PixiPhotoBurger {...props} onError={() => setPhotoFailed(true)} />
+      </Suspense>
+    );
+  }
   return (
     <Suspense fallback={<div className="pb-loading" aria-hidden="true">🍔</div>}>
       <PixiBurger {...props} onError={() => setFailed(true)} />
