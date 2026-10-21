@@ -15,7 +15,7 @@ import { drawLayer, drawFries, drawDip, LAYER_H } from './pixiBurgerArt';
 //                     top: true → el borde superior de la foto queda al ras de la capa (para goteos) }
 export const PHOTO_SETS = {
   dilusso: {
-    dir: 'fotos-burger/dilusso/',
+    dir: 'fotos-burger/dilusso-capas/',
     bunTop:    { f: 'bunTop.png',    w: 214, sy: 0.56, lh: 58 },
     bunBottom: { f: 'bunBottom.png', w: 208, sy: 0.30, lh: 24 },
     patty:     { f: 'patty.png',     w: 214, sy: 0.32, lh: 26 },

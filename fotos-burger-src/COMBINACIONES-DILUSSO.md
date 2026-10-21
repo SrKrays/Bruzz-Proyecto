@@ -11,15 +11,15 @@ Prioridad: 1) base, 2) las 5 de 'sin 1 ingrediente', 3) las de 2, y así. Si fal
 
 ## Completa (base) (1)
 
-- [ ] `base.webp` — burger completa
+- [x] `base.webp` — burger completa
 
 ## Sin 1 ingrediente (5)
 
 - [ ] `sin-bacon.webp` — sin bacon
-- [ ] `sin-cebolla.webp` — sin cebolla
-- [ ] `sin-cheddar.webp` — sin cheddar
-- [ ] `sin-ketchup.webp` — sin ketchup
-- [ ] `sin-lactonesa.webp` — sin lactonesa
+- [x] `sin-cebolla.webp` — sin cebolla
+- [x] `sin-cheddar.webp` — sin cheddar
+- [x] `sin-ketchup.webp` — sin ketchup
+- [x] `sin-lactonesa.webp` — sin lactonesa
 
 ## Sin 2 ingredientes (10)
 

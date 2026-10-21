@@ -17,21 +17,24 @@ import { layerTypeOf } from './LiveBurger';
 export const PHOTO_BURGERS = {
   dilusso: {
     dir: 'fotos-burger/dilusso/',
+    stickerDir: 'fotos-burger/dilusso-capas/',
     // Orden CANÓNICO de los ingredientes que se pueden sacar (define el nombre de archivo)
     order: ['cheddar', 'lactonesa', 'ketchup', 'cebolla', 'bacon'],
     typeToKey: { cheddar: 'cheddar', mayo: 'lactonesa', ketchup: 'ketchup', onion: 'cebolla', bacon: 'bacon' },
     // sticker: archivo (PNG recortado) y desde dónde "sale" (fracción del ancho/alto de la foto)
     sticker: {
-      cheddar:   { f: 'cheddar.png', at: [0.5, 0.74] },
-      lactonesa: { f: 'mayo.png',    at: [0.42, 0.62] },
-      ketchup:   { f: 'ketchup.png', at: [0.58, 0.6] },
-      cebolla:   { f: 'onion.png',   at: [0.62, 0.52] },
-      bacon:     { f: 'bacon.png',   at: [0.5, 0.5] },
+      cheddar:   { f: 'cheddar.png', at: [0.5, 0.7] },
+      lactonesa: { f: 'mayo.png',    at: [0.4, 0.42] },
+      ketchup:   { f: 'ketchup.png', at: [0.7, 0.5] },
+      cebolla:   { f: 'onion.png',   at: [0.6, 0.56] },
+      bacon:     { f: 'bacon.png',   at: [0.5, 0.46] },
     },
     steam: { x: 0.5, y: 0.5, w: 0.5 },
     // zonas que reciben el brillo (fracciones de la foto): pan y cheddar
-    glints: [{ x: 0.14, y: 0.06, w: 0.72, h: 0.34 }, { x: 0.1, y: 0.62, w: 0.8, h: 0.16 }],
-    width: 292,
+    glints: [{ x: 0.1, y: 0.1, w: 0.8, h: 0.32 }, { x: 0.08, y: 0.62, w: 0.84, h: 0.16 }],
+    // destellos fijos sobre el pan (donde brilla la foto)
+    stars: [[0.3, 0.2], [0.62, 0.17], [0.78, 0.28], [0.18, 0.3]],
+    width: 298,
   },
 };
 
@@ -144,6 +147,8 @@ export default function PixiPhotoBurger({
         if (dead) { app.destroy(true, { children: true, texture: true }); return; }
         app.canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
         host.appendChild(app.canvas);
+        try { st.depthFile = await loadTex(baseUrl() + cfg.dir + 'depth.png'); } catch { st.depthFile = null; }
+        if (dead) return;
         build(st, app, cfg, isLite, host, cleanups);
         st.ready = true; fit(st, host);
         // primera foto (con respaldo a la más parecida)
@@ -153,6 +158,8 @@ export default function PixiPhotoBurger({
         st.shown = first.name; setPhoto(st, st.spA, first.tex);
         st.spA.alpha = 0;
         gsap.fromTo(st.wrapState, { jy: -26 }, { jy: 0, duration: 0.7, ease: 'bounce.out' });
+        gsap.fromTo(st.sq, { x: 0.9, y: 0.9 }, { x: 1, y: 1, duration: 0.9, ease: 'elastic.out(1,0.5)' });
+        st.flare = 1.4;
         gsap.to(st.spA, { alpha: 1, duration: 0.35 });
         prefetch(st, cfg);
         if (st.want && st.want !== first.name) go(st, cfg, st.want);
@@ -209,6 +216,7 @@ function layoutFx(st) {
   st.cfg.glints.forEach((g) => {
     st.glintMask.roundRect(DW / 2 - W / 2 + g.x * W, BASE_Y - H + g.y * H, g.w * W, g.h * H, 18).fill('#fff');
   });
+  if (st.spotMask) { st.spotMask.clear(); st.spotMask.roundRect(DW / 2 - W / 2, BASE_Y - H, W, H, 14).fill('#fff'); }
   st.glint.position.y = BASE_Y - H;
   st.glint.height = H;
 }
@@ -230,7 +238,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   wrap.addChild(spA, spB); st.spA = spA; st.spB = spB;
   const feather = new Sprite(makeFeatherTexture()); feather.anchor.set(0.5, 1); wrap.addChild(feather); wrap.mask = feather; st.feather = feather;
 
-  st.depth = makeDepthTexture();
+  st.depth = st.depthFile || makeDepthTexture();
   st.parallax = { x: 0, y: 0, tx: 0, ty: 0 };
   if (!isLite) {
     try {
@@ -280,6 +288,29 @@ function build(st, app, cfg, isLite, host, cleanups) {
     st.embers.push({ s, t: Math.random(), sp: 0.1 + Math.random() * 0.12, x0: DW / 2 + (Math.random() - 0.5) * 230, sz: 0.4 + Math.random() * 0.6, ph: Math.random() * 6 });
   }
   st.stickers = new Container(); root.addChild(st.stickers);
+
+
+  // ✨ MAGIA: polvo dorado, destellos en el pan y luz que sigue al dedo/mouse
+  const starTex = app.renderer.generateTexture(new Graphics()
+    .circle(0, 0, 14).fill(radial([[0, 'rgba(255,240,190,0.9)'], [1, 'rgba(255,200,90,0)']]))
+    .poly([0, -14, 1.8, -1.8, 14, 0, 1.8, 1.8, 0, 14, -1.8, 1.8, -14, 0, -1.8, -1.8]).fill('#fff6d8'));
+  const dotTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 4).fill(radial([[0, 'rgba(255,225,150,1)'], [1, 'rgba(255,190,70,0)']])));
+  const fxTop = new Container(); root.addChild(fxTop); st.fxTop = fxTop;
+  st.dust = [];
+  const DN = isLite ? 10 : 22;
+  for (let i = 0; i < DN; i++) {
+    const sp = new Sprite(dotTex); sp.anchor.set(0.5); sp.blendMode = 'add'; sp.alpha = 0; fxTop.addChild(sp);
+    st.dust.push({ sp, x: Math.random(), y: Math.random(), vx: (Math.random() - 0.5) * 0.02, vy: -0.01 - Math.random() * 0.03, ph: Math.random() * 6, sz: 0.35 + Math.random() * 0.8 });
+  }
+  st.twinkles = (cfg.stars || []).map(([fx, fy], i) => {
+    const sp = new Sprite(starTex); sp.anchor.set(0.5); sp.blendMode = 'add'; sp.alpha = 0; fxTop.addChild(sp);
+    return { sp, fx, fy, ph: i * 1.7 };
+  });
+  // luz que sigue al dedo / mouse (solo sobre la burger)
+  const spotTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 90).fill(radial([[0, 'rgba(255,236,190,0.55)'], [0.5, 'rgba(255,200,110,0.16)'], [1, 'rgba(255,180,80,0)']])));
+  const spot = new Sprite(spotTex); spot.anchor.set(0.5); spot.blendMode = 'add'; spot.alpha = 0.55; st.spot = spot;
+  const spotMask = new Graphics(); st.spotMask = spotMask; root.addChild(spotMask); spot.mask = spotMask; root.addChild(spot);
+  st.starTex = starTex;
 
   // estado animado por GSAP
   st.wrapState = { jy: 0 }; st.sq = { x: 1, y: 1 }; st.flare = 0; st.time = 0;
@@ -331,6 +362,23 @@ function build(st, app, cfg, isLite, host, cleanups) {
     shadow.scale.set(1 - Math.abs(Math.min(0, st.wrapState.jy)) / 120, 1);
     shadow.alpha = 0.9 - Math.abs(Math.min(0, st.wrapState.jy)) / 90;
 
+
+    // ✨ polvo dorado + destellos + luz que sigue al dedo
+    {
+      const W = st.photoW; const H = st.photoH; const left = DW / 2 - W / 2; const top = BASE_Y - H;
+      st.dust.forEach((d) => {
+        d.x += d.vx * dt; d.y += d.vy * dt; d.ph += dt;
+        if (d.y < -0.05 || d.x < -0.05 || d.x > 1.05) { d.y = 1.02; d.x = Math.random(); }
+        d.sp.x = left + d.x * W + Math.sin(d.ph * 1.3) * 5; d.sp.y = top + d.y * H;
+        d.sp.alpha = Math.max(0, Math.sin(d.ph * 2.2)) * 0.8 * Math.min(1, d.y * 4) ; d.sp.scale.set(d.sz);
+      });
+      st.twinkles.forEach((q) => {
+        const k = Math.max(0, Math.sin(t * 1.15 + q.ph)); const v = k * k * k;
+        q.sp.x = left + q.fx * W; q.sp.y = top + q.fy * H; q.sp.alpha = v; q.sp.scale.set(0.35 + v * 0.9); q.sp.rotation = Math.sin(t * 0.7 + q.ph) * 0.3;
+      });
+      st.spot.x = DW / 2 + st.parallax.x * W * 0.42; st.spot.y = top + H * (0.45 + st.parallax.y * 0.35);
+      st.spot.alpha = 0.4 + st.flare * 0.5;
+    }
     st.flare = Math.max(0, st.flare - dt * 1.5);
     glow.alpha = 0.75 + Math.sin(t * 1.6) * 0.1 + st.flare * 0.35;
     const sb = st.steamBase || { x: DW / 2, y: 140, w: 120 };
@@ -435,17 +483,37 @@ function jumpOnly(st, cfg, dk) {
   flySticker(st, cfg, dk);
 }
 
+
+function magicBurst(st, x, y, big = 1) {
+  if (!st.ready) return;
+  const ring = new Graphics().circle(0, 0, 30).stroke({ width: 3, color: '#ffd98a', alpha: 0.95 });
+  ring.position.set(x, y); ring.scale.set(0.2); ring.blendMode = 'add'; st.fxTop.addChild(ring);
+  gsap.to(ring.scale, { x: 1.7 * big, y: 1.7 * big, duration: 0.7, ease: 'power2.out' });
+  gsap.to(ring, { alpha: 0, duration: 0.7, ease: 'power1.in', onComplete: () => ring.destroy() });
+  const n = st.lite ? 7 : 14;
+  for (let i = 0; i < n; i++) {
+    const sp = new Sprite(st.starTex); sp.anchor.set(0.5); sp.blendMode = 'add'; sp.position.set(x, y); sp.scale.set(0.1);
+    st.fxTop.addChild(sp);
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.5; const r = (40 + Math.random() * 50) * big; const sc = 0.4 + Math.random() * 0.7;
+    gsap.to(sp, { x: x + Math.cos(a) * r, y: y + Math.sin(a) * r - 12, duration: 0.8, ease: 'power2.out' });
+    gsap.to(sp.scale, { x: sc, y: sc, duration: 0.25, ease: 'back.out(2)' });
+    gsap.to(sp, { alpha: 0, rotation: 2, duration: 0.45, delay: 0.4, onComplete: () => sp.destroy() });
+  }
+  st.flare = Math.max(st.flare, 1);
+}
+
 async function flySticker(st, cfg, { removed, added }) {
   const items = [...removed.map((k) => ({ k, out: true })), ...added.map((k) => ({ k, out: false }))];
   for (let i = 0; i < items.length; i++) {
     const { k, out } = items[i]; const def = cfg.sticker[k]; if (!def) continue;
     let tex = st.ok.get(`sticker:${k}`);
-    if (!tex) { try { tex = await loadTex(baseUrl() + cfg.dir + def.f); st.ok.set(`sticker:${k}`, tex); } catch { continue; } }
+    if (!tex) { try { tex = await loadTex(baseUrl() + cfg.stickerDir + def.f); st.ok.set(`sticker:${k}`, tex); } catch { continue; } }
     if (!st.ready) return;
     const sp = new Sprite(tex); sp.anchor.set(0.5);
     const w = 64; sp.scale.set(w / tex.width); const s0 = sp.scale.x;
     const H = st.photoH; const W = st.photoW;
     const px = DW / 2 - W / 2 + def.at[0] * W; const py = BASE_Y - H + def.at[1] * H;
+    magicBurst(st, px, py, 1);
     const side = (i % 2 ? 1 : -1) * (out ? 1 : -1);
     const ox = px + side * (110 + Math.random() * 30); const oy = py - 70 - Math.random() * 30;
     st.stickers.addChild(sp);
