@@ -750,7 +750,13 @@ export default function BurgerCustomizer({
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
           {!(ingList.length > 0 || vcfg?.byId) && <p className="bw-info-desc">{desc}</p>}
           {(ingList.length > 0 || vcfg?.byId) && (
-            <p className="bw-step-intro">Tocá los ingredientes que <b>NO querés</b>. Sacarlos es gratis.</p>
+            <>
+              <p className="bw-step-intro">👆 Tocá lo que <b>NO querés</b>. Sacarlo es gratis.</p>
+              <div className="ing-legend">
+                <span className="ing-legend-item ing-legend-item--on"><i>✓</i> Lo lleva</span>
+                <span className="ing-legend-item ing-legend-item--off"><i>✕</i> Se saca</span>
+              </div>
+            </>
           )}
           {sectionIngredientes()}
         </>
@@ -758,7 +764,7 @@ export default function BurgerCustomizer({
     }
     if (stepKey === 'variante') return sectionVariant();
     if (stepKey === 'carne') return sectionCarne();
-    if (stepKey === 'extras') return sectionCards('Sumá lo que quieras con el botón +.', extrasList, extras, changeExtra);
+    if (stepKey === 'extras') return sectionCards('👆 Tocá el botón + para sumar. Si no querés nada, seguí.', extrasList, extras, changeExtra);
     if (stepKey === 'acomp') return sectionAcomp();
     return recap;
   };

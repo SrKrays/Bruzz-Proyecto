@@ -3662,3 +3662,85 @@ height: auto;
   .bw-left .bw-stage-col { flex: 1; min-height: 220px; }
   .bw-infobox { margin: 8px 0 0; }
 }
+
+/* ═══ Letra grande y alto contraste: "hasta que un bebé sepa usarlo" ═══ */
+.bw-title-small { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; }
+.bw-title-name { font-size: 30px; }
+.bw-header-price { font-size: 20px; font-weight: 900; padding: 8px 16px; }
+.bw-close { width: 48px; height: 48px; font-size: 20px; }
+.bw-progress-text { font-size: 17px; font-weight: 800; }
+.bw-segs { height: 10px; }
+.bw-seg { height: 7px; border-radius: 4px; }
+
+.bw-step-heading { font-size: clamp(26px, 5.4vw, 34px); line-height: 1.15; }
+.bw-step-intro { font-size: 19px; line-height: 1.45; color: #f3eedd; font-weight: 500; }
+.bw-step-intro b { font-size: 19px; }
+.bw-info-desc { font-size: 18px; line-height: 1.5; color: #f3eedd; }
+.bw-hint { font-size: 17px; color: #f3eedd; }
+
+/* ingredientes */
+.ing-legend { display: flex; gap: 10px; flex-wrap: wrap; }
+.ing-legend-item { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; font-size: 16px; font-weight: 800; }
+.ing-legend-item i { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 15px; font-weight: 900; }
+.ing-legend-item--on { background: rgba(47,168,102,0.2); color: #9be8ba; }
+.ing-legend-item--on i { background: #2fa866; color: #fff; }
+.ing-legend-item--off { background: rgba(255,255,255,0.1); color: #e8e8e8; }
+.ing-legend-item--off i { background: #5a5a5a; color: #fff; }
+.ing-list { gap: 12px; }
+.ing-row { min-height: 84px; padding: 12px 16px 12px 12px; gap: 14px; border-width: 2px; border-radius: 20px; }
+.ing-row .ing-art { width: 56px; height: 56px; }
+.ing-row .ing-emoji { font-size: 34px; }
+.ing-name { font-size: 21px; font-weight: 800; }
+.ing-chip { font-size: 13.5px; padding: 4px 11px; }
+.ing-switch { width: 76px; height: 42px; border-radius: 21px; }
+.ing-thumb { top: 4px; left: 4px; width: 34px; height: 34px; font-size: 20px; }
+.ing-note { font-size: 16px; color: #d9d3c0; }
+
+/* caja "lleva" */
+.bw-infobox-title { font-size: 18px; }
+.bw-infobox-list li { font-size: 16px; }
+.bw-infobox-emoji { font-size: 22px; }
+.bw-infobox-note { font-size: 14.5px; color: #d9d3c0; }
+.bw-infobox-sin { font-size: 12px; }
+@media (max-width: 899px) { .bw-infobox-list li { font-size: 15px; } }
+
+/* elecciones: medallones, extras, papas, dips, variantes */
+.bw-med { min-height: 96px; padding: 18px; border-width: 2px; }
+.bw-med-name { font-size: 24px; }
+.bw-med-desc { font-size: 16px; color: #e0dac6; }
+.bw-med-price { font-size: 19px; }
+.bw-card { min-height: 96px; border-width: 2px; padding: 16px; }
+.bw-card-emoji { font-size: 40px; }
+.bw-card-name { font-size: 20px; font-weight: 800; }
+.bw-card-desc { font-size: 15.5px; color: #e0dac6; }
+.bw-card-price { font-size: 17px; }
+.bw-step-btn, .bw-qty-btn { min-width: 56px; min-height: 56px; font-size: 28px; }
+.bw-step-val { font-size: 24px; }
+.bw-papa-tile { padding: 18px 10px 16px; border-width: 3px; }
+.bw-papa-tile-emoji { font-size: 38px; }
+.bw-papa-tile-name { font-size: 21px; }
+.bw-papa-tile-desc { font-size: 15px; color: #e0dac6; }
+.bw-papa-tile-tag { font-size: 16px; }
+.bw-dip-block { padding: 16px; border-width: 2px; }
+.bw-dip-title { font-size: 18px; }
+.bw-dip-emoji { font-size: 38px; }
+.bw-dip-name { font-size: 20px; font-weight: 800; }
+.bw-dip-price { font-size: 17px; }
+.medallon-error { font-size: 18px; font-weight: 800; }
+
+/* resumen */
+.bw-recap { padding: 20px; border-width: 2px; }
+.bw-recap-title { font-size: 26px; }
+.bw-recap-list { font-size: 20px; gap: 12px; }
+.bw-another-hint { font-size: 17px; }
+.bw-qty-val { font-size: 30px; min-width: 44px; }
+
+/* pie: botones grandes */
+.bw-footer--guided .bw-footer-label { font-size: 17px; font-weight: 700; }
+.bw-footer--guided .bw-footer-val { font-size: 34px; }
+.bw-btn-next.bw-btn-next--big { height: 66px; font-size: 21px; border-radius: 18px; }
+.bw-back { height: 66px; padding: 0 20px; font-size: 18px; border-radius: 18px; border-width: 2px; }
+.bw-footer--last .bw-btn-next--big { height: 64px; }
+.bw-footer--last .bw-back, .bw-another--footer { height: 56px; font-size: 18px; }
+.bw-added { font-size: 16px; }
+.bw-footer-hint { font-size: 15px; }
