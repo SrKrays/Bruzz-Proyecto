@@ -10,10 +10,10 @@ H,W=base.shape[:2]
 hsv=cv2.cvtColor(base,cv2.COLOR_BGR2HSV)
 Hh,Ss,Vv=hsv[...,0].astype(int),hsv[...,1].astype(int),hsv[...,2].astype(int)
 yy=np.arange(H)[:,None]*np.ones((1,W))
-def run(key,variant,colormask,y0,y1,minarea,grow,use_diff=True):
+def run(key,variant,colormask,y0,y1,minarea,grow,use_diff=True,dthr=26):
     v=cv2.imread(O+variant+'.webp').astype(np.float32)
     d=cv2.GaussianBlur(np.abs(basef-v).max(axis=2),(0,0),1.0)
-    m=((d>26) if use_diff else True)&colormask&(yy>H*y0)&(yy<H*y1)
+    m=((d>dthr) if use_diff else True)&colormask&(yy>H*y0)&(yy<H*y1)
     m=m.astype(np.uint8)
     n,lab,st,_=cv2.connectedComponentsWithStats(m)
     keep=np.zeros_like(m)
@@ -31,9 +31,12 @@ def run(key,variant,colormask,y0,y1,minarea,grow,use_diff=True):
 # cheddar: naranja-amarillo saturado
 cheddar=((Hh>=8)&(Hh<=32)&(Ss>=150)&(Vv>=150))
 run('cheddar','sin-cheddar',cheddar,0.50,0.92,400,9)
-# cebolla: blanca/crema en la base y que YA NO está blanca en la variante (la mayonesa se queda en las dos)
-v2=cv2.cvtColor(cv2.imread(O+'sin-cebolla.webp'),cv2.COLOR_BGR2HSV)
-white_v=((v2[...,1]<120)&(v2[...,2]>=135)).astype(np.uint8)
-white_v=cv2.dilate(white_v,np.ones((5,5),np.uint8))
-cebolla=((Ss<120)&(Vv>=135)&(white_v==0))
-run('cebolla','sin-cebolla',cebolla|False,0.28,0.86,40,5,use_diff=False)
+# cebolla: crema/blanca (no roja, no naranja fuerte) y que cambia al sacarla
+cebolla=((Ss<150)&(Vv>=115)&~((Hh<8)|(Hh>165))&~((Ss>=150)&(Hh<=32)))
+run('cebolla','sin-cebolla',cebolla,0.33,0.87,60,7,dthr=14)
+# lactonesa: crema clara brillante
+lacto=((Ss<110)&(Vv>=170))
+run('lactonesa','sin-lactonesa',lacto,0.28,0.62,80,7,dthr=20)
+# ketchup: rojo vivo brillante
+ketch=(((Hh<=8)|(Hh>=165))&(Ss>=150)&(Vv>=120))
+run('ketchup','sin-ketchup',ketch,0.28,0.62,60,7,dthr=20)

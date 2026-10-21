@@ -30,7 +30,13 @@ export const PHOTO_BURGERS = {
       bacon:     { f: 'bacon.png',   at: [0.5, 0.44] },
     },
     // extracción REAL: sprite con los píxeles de la foto base del ingrediente (sale de su lugar de verdad)
-    extract: { cheddar: { f: 'ext-cheddar.webp', pivot: [0.48, 0.714] } },
+    // kind: elastic (queso: se estira y se despega) · light (cebolla: liviana, flota) · sauce (salsa: se retrae)
+    extract: {
+      cheddar:   { f: 'ext-cheddar.webp',   pivot: [0.48, 0.714],  kind: 'elastic' },
+      cebolla:   { f: 'ext-cebolla.webp',   pivot: [0.508, 0.606], kind: 'light' },
+      lactonesa: { f: 'ext-lactonesa.webp', pivot: [0.459, 0.469], kind: 'sauce' },
+      ketchup:   { f: 'ext-ketchup.webp',   pivot: [0.468, 0.492], kind: 'sauce' },
+    },
     steam: { x: 0.5, y: 0.49, w: 0.5 },
     // zonas que reciben el brillo (fracciones de la foto): pan y cheddar
     glints: [{ x: 0.1, y: 0.02, w: 0.8, h: 0.36 }, { x: 0.08, y: 0.63, w: 0.84, h: 0.15 }],
@@ -60,7 +66,10 @@ const removedOf = (cfg, quitados) => {
   return s;
 };
 
-const DW = 300; const DH = 340; const BASE_Y = 282;
+const DW = 300; const DH = 276; const BASE_Y = 250;
+// Partículas y reflejos ambientales (bokeh, polvo, destellos, vapor, brasas, luz que sigue al dedo).
+// Apagados: la burger es la protagonista. Cambiar a true para reactivarlos.
+const AMBIENT = false;
 
 const radial = (stops) => new FillGradient({
   type: 'radial', center: { x: 0.5, y: 0.5 }, innerRadius: 0, outerCenter: { x: 0.5, y: 0.5 }, outerRadius: 0.5,
@@ -229,7 +238,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   const root = new Container(); app.stage.addChild(root); st.root = root;
 
   const glow = new Graphics().circle(0, 0, 150).fill(radial([[0, 'rgba(255,170,60,0.5)'], [0.6, 'rgba(255,120,30,0.14)'], [1, 'rgba(255,100,20,0)']]));
-  glow.position.set(DW / 2, 190); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
+  glow.position.set(DW / 2, 140); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
 
   // plato oscuro con brillo en el borde (la burger apoya sobre él)
   const plate = new Graphics();
@@ -242,7 +251,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   // bokeh que flota detrás (reemplaza al fondo de la foto)
   const bokehTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 20).fill(radial([[0, 'rgba(255,214,140,0.85)'], [0.7, 'rgba(255,170,70,0.35)'], [1, 'rgba(255,150,50,0)']])));
   st.bokeh = [];
-  const BN = isLite ? 7 : 14;
+  const BN = AMBIENT ? (isLite ? 7 : 14) : 0;
   for (let i = 0; i < BN; i++) {
     const sp = new Sprite(bokehTex); sp.anchor.set(0.5); sp.blendMode = 'add'; root.addChildAt(sp, 1);
     st.bokeh.push({ sp, x: Math.random() * DW, y: 20 + Math.random() * 230, z: 0.4 + Math.random() * 1.0, ph: Math.random() * 6, sz: 0.5 + Math.random() * 1.2 });
@@ -288,13 +297,13 @@ function build(st, app, cfg, isLite, host, cleanups) {
     gsap.to(glint, { x: DW / 2 + st.photoW / 2 + 10, duration: 1.3, ease: 'power1.inOut' });
     gsap.to(glint, { alpha: 0, duration: 0.3, delay: 1.1 });
   };
-  const sweepTimer = setInterval(sweep, 5200); setTimeout(sweep, 1400);
+  const sweepTimer = AMBIENT ? setInterval(sweep, 5200) : 0; if (AMBIENT) setTimeout(sweep, 1400);
   cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(glint); });
 
   // vapor
   const steamTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 22).fill(radial([[0, 'rgba(255,255,255,0.5)'], [1, 'rgba(255,255,255,0)']])));
   const steam = new Container(); root.addChild(steam); st.steam = [];
-  const N = isLite ? 4 : 8;
+  const N = AMBIENT ? (isLite ? 4 : 8) : 0;
   for (let i = 0; i < N; i++) {
     const s = new Sprite(steamTex); s.anchor.set(0.5); s.alpha = 0; steam.addChild(s);
     st.steam.push({ s, t: i / N, sp: 0.1 + Math.random() * 0.05, dx: (Math.random() - 0.5), ph: Math.random() * 6 });
@@ -302,7 +311,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   // brasas
   const emTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 5).fill(radial([[0, 'rgba(255,230,150,1)'], [0.4, 'rgba(255,150,40,0.7)'], [1, 'rgba(255,90,10,0)']])));
   const em = new Container(); root.addChild(em); st.embers = [];
-  const M = isLite ? 5 : 10;
+  const M = AMBIENT ? (isLite ? 5 : 10) : 0;
   for (let i = 0; i < M; i++) {
     const s = new Sprite(emTex); s.anchor.set(0.5); s.blendMode = 'add'; s.alpha = 0; em.addChild(s);
     st.embers.push({ s, t: Math.random(), sp: 0.1 + Math.random() * 0.12, x0: DW / 2 + (Math.random() - 0.5) * 230, sz: 0.4 + Math.random() * 0.6, ph: Math.random() * 6 });
@@ -317,12 +326,12 @@ function build(st, app, cfg, isLite, host, cleanups) {
   const dotTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 4).fill(radial([[0, 'rgba(255,225,150,1)'], [1, 'rgba(255,190,70,0)']])));
   const fxTop = new Container(); root.addChild(fxTop); st.fxTop = fxTop;
   st.dust = [];
-  const DN = isLite ? 10 : 22;
+  const DN = AMBIENT ? (isLite ? 10 : 22) : 0;
   for (let i = 0; i < DN; i++) {
     const sp = new Sprite(dotTex); sp.anchor.set(0.5); sp.blendMode = 'add'; sp.alpha = 0; fxTop.addChild(sp);
     st.dust.push({ sp, x: Math.random(), y: Math.random(), vx: (Math.random() - 0.5) * 0.02, vy: -0.01 - Math.random() * 0.03, ph: Math.random() * 6, sz: 0.35 + Math.random() * 0.8 });
   }
-  st.twinkles = (cfg.stars || []).map(([fx, fy], i) => {
+  st.twinkles = (AMBIENT ? (cfg.stars || []) : []).map(([fx, fy], i) => {
     const sp = new Sprite(starTex); sp.anchor.set(0.5); sp.blendMode = 'add'; sp.alpha = 0; fxTop.addChild(sp);
     return { sp, fx, fy, ph: i * 1.7 };
   });
@@ -397,14 +406,14 @@ function build(st, app, cfg, isLite, host, cleanups) {
         q.sp.x = left + q.fx * W; q.sp.y = top + q.fy * H; q.sp.alpha = v; q.sp.scale.set(0.35 + v * 0.9); q.sp.rotation = Math.sin(t * 0.7 + q.ph) * 0.3;
       });
       st.spot.x = DW / 2 + st.parallax.x * W * 0.42; st.spot.y = top + H * (0.45 + st.parallax.y * 0.35);
-      st.spot.alpha = 0.4 + st.flare * 0.5;
+      st.spot.alpha = AMBIENT ? 0.4 + st.flare * 0.5 : 0;
     }
     st.bokeh.forEach((b) => {
       b.sp.x = b.x + Math.sin(t * 0.25 + b.ph) * 10 - st.parallax.x * 10 * b.z; b.sp.y = b.y + Math.cos(t * 0.2 + b.ph) * 6 - st.parallax.y * 6 * b.z;
       b.sp.scale.set(b.sz * (1 + Math.sin(t * 0.8 + b.ph) * 0.08)); b.sp.alpha = (0.28 + 0.2 * Math.sin(t * 0.6 + b.ph)) * (0.6 + st.flare * 0.5);
     });
     st.flare = Math.max(0, st.flare - dt * 1.5);
-    glow.alpha = 0.75 + Math.sin(t * 1.6) * 0.1 + st.flare * 0.35;
+    glow.alpha = (AMBIENT ? 0.75 : 0.42) + Math.sin(t * 1.6) * 0.06 + st.flare * 0.25;
     const sb = st.steamBase || { x: DW / 2, y: 140, w: 120 };
     st.steam.forEach((p) => {
       p.t += dt * p.sp * 3; if (p.t > 1) { p.t = 0; p.dx = Math.random() - 0.5; }
@@ -511,38 +520,68 @@ async function extractMove(st, cfg, key, removing, res) {
   if (!st.ready) return true;
   const W = st.photoW; const H = st.photoH;
   const P = { x: (def.pivot[0] - 0.5) * W, y: -(1 - def.pivot[1]) * H };
-  const ec = new Container(); ec.position.set(P.x, P.y);
-  const sp = new Sprite(tex); sp.anchor.set(0.5, 1); sp.width = W; sp.height = H; sp.position.set(-P.x, -P.y);
-  ec.addChild(sp); st.wrap.addChild(ec);
+  const mk = () => {
+    const c = new Container(); c.position.set(P.x, P.y);
+    const sp = new Sprite(tex); sp.anchor.set(0.5, 1); sp.width = W; sp.height = H; sp.position.set(-P.x, -P.y);
+    c.addChild(sp); return { c, sp };
+  };
+  const { c: ec } = mk(); st.wrap.addChild(ec);
+  // 1) selección: contorno dorado que "enciende" el ingrediente
+  const hl = mk(); hl.sp.tint = 0xffd27a; hl.c.blendMode = 'add'; hl.c.alpha = 0; st.wrap.addChild(hl.c);
   const rx = DW / 2 + P.x; const ry = BASE_Y + P.y;
   const baseTex = st.ok.get('base');
-  const fin = () => { try { ec.destroy({ children: true }); } catch { /* noop */ } };
+  const fin = () => { try { ec.destroy({ children: true }); hl.c.destroy({ children: true }); } catch { /* noop */ } };
+  const kind = def.kind || 'elastic';
   await new Promise((resolve) => {
     if (removing) {
-      // la foto "sin ingrediente" queda debajo; el sprite real se despega y se va
+      // la foto "sin ingrediente" queda debajo; el sprite real se despega
       setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0;
       const tl = gsap.timeline({ onComplete: () => { fin(); resolve(); } });
-      tl.to(ec.scale, { x: 0.99, y: 1.1, duration: 0.14, ease: 'power2.out' }, 0)          // se estira antes de soltarse
-        .to(ec, { y: P.y - 8, duration: 0.14, ease: 'power2.out' }, 0)
-        .to(ec, { y: P.y - 50, rotation: -0.06, duration: 0.55, ease: 'power3.out' }, 0.12)  // sube en arco
-        .to(ec.scale, { x: 1.05, y: 0.92, duration: 0.4, ease: 'power1.out' }, 0.2)
-        .to(ec, { alpha: 0, duration: 0.3, ease: 'power1.in' }, 0.36)                         // se desvanece
-        .add(() => magicBurst(st, rx, ry - 30, 0.55), 0.38)
-        .to(st.sq, { x: 1.014, y: 0.986, duration: 0.12, ease: 'power2.out' }, 0.2)           // la burger se acomoda
-        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.5)' }, 0.32);
+      tl.to(hl.c, { alpha: 0.85, duration: 0.09, ease: 'power1.out' }, 0)
+        .to(hl.c.scale, { x: 1.012, y: 1.012, duration: 0.2 }, 0)
+        .to(hl.c, { alpha: 0, duration: 0.22, ease: 'power1.in' }, 0.09);
+      if (kind === 'elastic') {
+        tl.to(ec.scale, { x: 0.99, y: 1.11, duration: 0.15, ease: 'power2.out' }, 0.06)       // se estira antes de soltarse
+          .to(ec, { y: P.y - 7, duration: 0.15, ease: 'power2.out' }, 0.06)
+          .to(ec, { y: P.y - 54, rotation: -0.06, duration: 0.6, ease: 'power3.out' }, 0.2)
+          .to(ec.scale, { x: 1.06, y: 0.9, duration: 0.42, ease: 'power1.out' }, 0.26)
+          .to(ec, { alpha: 0, duration: 0.32, ease: 'power1.in' }, 0.44);
+      } else if (kind === 'light') {
+        tl.to(ec, { y: P.y - 5, duration: 0.12, ease: 'power2.out' }, 0.06)
+          .to(ec, { y: P.y - 40, x: P.x + 14, duration: 0.7, ease: 'power2.out' }, 0.16)
+          .to(ec, { rotation: 0.1, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0.16)   // aletea
+          .to(ec.scale, { x: 1.05, y: 1.05, duration: 0.6 }, 0.16)
+          .to(ec, { alpha: 0, duration: 0.36, ease: 'power1.in' }, 0.42);
+      } else { // sauce: la salsa se retrae sobre sí misma
+        tl.to(ec.scale, { x: 1.04, y: 1.18, duration: 0.1, ease: 'power2.out' }, 0.06)
+          .to(ec.scale, { x: 0.55, y: 0.3, duration: 0.4, ease: 'power3.in' }, 0.16)
+          .to(ec, { y: P.y + 5, alpha: 0, duration: 0.34, ease: 'power1.in' }, 0.24);
+      }
+      tl.add(() => magicBurst(st, rx, ry - (kind === 'sauce' ? 6 : 28), 0.5), 0.4)
+        .to(st.sq, { x: 1.014, y: 0.986, duration: 0.12, ease: 'power2.out' }, 0.22)          // la burger se acomoda
+        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.5)' }, 0.34);
     } else {
-      // volver a poner: el sprite cae desde arriba a su lugar exacto
-      ec.alpha = 0; ec.y = P.y - 50; ec.rotation = -0.06; ec.scale.set(1.05, 0.92);
+      // volver a poner: el sprite vuelve a su lugar exacto
+      ec.alpha = 0;
       const tl = gsap.timeline({ onComplete: () => {
         if (baseTex) { setPhoto(st, st.spA, baseTex); st.spA.alpha = 1; st.spB.alpha = 0; }
         fin(); resolve();
       } });
-      tl.to(ec, { alpha: 1, duration: 0.18 }, 0)
-        .to(ec, { y: P.y, rotation: 0, duration: 0.42, ease: 'power2.in' }, 0)
-        .to(ec.scale, { x: 1, y: 1, duration: 0.4, ease: 'power1.in' }, 0)
-        .add(() => magicBurst(st, rx, ry - 20, 0.55), 0.4)
+      if (kind === 'sauce') {
+        ec.scale.set(0.55, 0.3);
+        tl.to(ec, { alpha: 1, duration: 0.14 }, 0)
+          .to(ec.scale, { x: 1.06, y: 1.1, duration: 0.3, ease: 'power2.out' }, 0)
+          .to(ec.scale, { x: 1, y: 1, duration: 0.25, ease: 'elastic.out(1,0.5)' }, 0.3);
+      } else {
+        ec.y = P.y - (kind === 'light' ? 40 : 54); ec.rotation = kind === 'light' ? 0.1 : -0.06; ec.scale.set(1.05, 0.92);
+        tl.to(ec, { alpha: 1, duration: 0.18 }, 0)
+          .to(ec, { y: P.y, rotation: 0, duration: kind === 'light' ? 0.5 : 0.42, ease: kind === 'light' ? 'power2.out' : 'power2.in' }, 0)
+          .to(ec.scale, { x: 1, y: 1, duration: 0.4, ease: 'power1.in' }, 0);
+      }
+      tl.add(() => magicBurst(st, rx, ry - 10, 0.5), 0.4)
         .to(st.sq, { x: 1.03, y: 0.97, duration: 0.1, ease: 'power2.out' }, 0.4)
-        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' }, 0.5);
+        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' }, 0.5)
+        .to(hl.c, { alpha: 0.5, duration: 0.08 }, 0.42).to(hl.c, { alpha: 0, duration: 0.25 }, 0.5);
     }
   });
   st.shown = res.name;
