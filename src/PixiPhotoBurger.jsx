@@ -36,6 +36,7 @@ export const PHOTO_BURGERS = {
       cebolla:   { f: 'ext-cebolla.webp',   pivot: [0.508, 0.606], kind: 'light' },
       lactonesa: { f: 'ext-lactonesa.webp', pivot: [0.459, 0.469], kind: 'sauce' },
       ketchup:   { f: 'ext-ketchup.webp',   pivot: [0.468, 0.492], kind: 'sauce' },
+      bacon:     { f: 'ext-bacon.webp',     pivot: [0.472, 0.51],  kind: 'light' },
     },
     steam: { x: 0.5, y: 0.49, w: 0.5 },
     // zonas que reciben el brillo (fracciones de la foto): pan y cheddar

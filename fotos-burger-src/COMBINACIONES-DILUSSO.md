@@ -15,7 +15,7 @@ Prioridad: 1) base, 2) las 5 de 'sin 1 ingrediente', 3) las de 2, y así. Si fal
 
 ## Sin 1 ingrediente (5)
 
-- [ ] `sin-bacon.webp` — sin bacon
+- [x] `sin-bacon.webp` — sin bacon
 - [x] `sin-cebolla.webp` — sin cebolla
 - [x] `sin-cheddar.webp` — sin cheddar
 - [x] `sin-ketchup.webp` — sin ketchup

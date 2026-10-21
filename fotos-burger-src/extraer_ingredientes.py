@@ -40,3 +40,6 @@ run('lactonesa','sin-lactonesa',lacto,0.28,0.62,80,7,dthr=20)
 # ketchup: rojo vivo brillante
 ketch=(((Hh<=8)|(Hh>=165))&(Ss>=150)&(Vv>=120))
 run('ketchup','sin-ketchup',ketch,0.28,0.62,60,7,dthr=20)
+# bacon: rojo/rosado intenso que cambia al sacarlo (el ketchup y la lactonesa se quedan en las dos fotos)
+bacon=((((Hh<=14)|(Hh>=160))&(Ss>=70)&(Vv>=60))|((Hh<=22)&(Ss>=120)&(Vv>=150)))
+run('bacon','sin-bacon',bacon,0.34,0.64,250,9,dthr=24)
