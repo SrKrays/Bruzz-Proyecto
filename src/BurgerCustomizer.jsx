@@ -824,6 +824,7 @@ export default function BurgerCustomizer({
                   ) : (
                     <>
                       <BurgerStage
+                        photoSet={/di lusso/i.test(name || '') ? 'dilusso' : null}
                         ingredientes={ingList}
                         quitados={quitados}
                         medallones={medallones}

@@ -11,7 +11,40 @@ import { drawLayer, drawFries, drawDip, LAYER_H } from './pixiBurgerArt';
 
 // Fase 2: { cheddar: '/capas/cheddar.png', ... }  (PNG con fondo transparente, ancho ~1000px)
 // Si hay foto: { url, width } → se escala a `width` px de diseño; alto proporcional.
-export const LAYER_PHOTOS = {};
+// Cada set: tipo → { f: archivo, w: ancho de diseño, sy: aplastado vertical, lh: alto que ocupa en la pila,
+//                     top: true → el borde superior de la foto queda al ras de la capa (para goteos) }
+export const PHOTO_SETS = {
+  dilusso: {
+    dir: 'fotos-burger/dilusso/',
+    bunTop:    { f: 'bunTop.png',    w: 214, sy: 0.56, lh: 58 },
+    bunBottom: { f: 'bunBottom.png', w: 208, sy: 0.30, lh: 24 },
+    patty:     { f: 'patty.png',     w: 214, sy: 0.32, lh: 26 },
+    cheddar:   { f: 'cheddar.png',   w: 218, sy: 0.32, lh: 13, top: true },
+    bacon:     { f: 'bacon.png',     w: 226, sy: 0.36, lh: 13 },
+    onion:     { f: 'onion.png',     w: 220, sy: 0.32, lh: 12 },
+    mayo:      { f: 'mayo.png',      w: 196, sy: 0.22, lh: 8 },
+    ketchup:   { f: 'ketchup.png',   w: 196, sy: 0.22, lh: 8 },
+  },
+};
+async function loadImageTexture(url) {
+  const img = new Image();
+  img.decoding = 'async'; img.crossOrigin = 'anonymous';
+  await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+  const t = Texture.from(img);
+  t.source.autoGenerateMipmaps = true; t.source.scaleMode = 'linear';
+  return t;
+}
+async function loadPhotoSet(name) {
+  const set = PHOTO_SETS[name]; const out = {};
+  if (!set) return out;
+  const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/';
+  const work = Promise.all(Object.keys(set).filter((k) => k !== 'dir').map(async (k) => {
+    try { out[k] = { texture: await loadImageTexture(base + set.dir + set[k].f), ...set[k] }; } catch { /* sin foto → dibujo */ }
+  }));
+  // nunca bloquear la burger más de 5 s por las fotos
+  await Promise.race([work, new Promise((r) => setTimeout(r, 5000))]);
+  return out;
+}
 
 const DW = 300; const DH = 340;       // lienzo de diseño
 const STACK_BASE_Y = 262;             // donde apoya la pila
@@ -31,7 +64,7 @@ const radial = (stops) => new FillGradient({
 
 export default function PixiBurger({
   ingredientes, quitados, medallones, extras, dips, papas, bounceKey,
-  pan = 'papa', mainType = 'patty', onError, lite = false,
+  pan = 'papa', mainType = 'patty', onError, lite = false, photoSet = null,
 }) {
   const hostRef = useRef(null);
   const S = useRef({ ready: false, pending: null, layers: new Map(), texCache: new Map() });
@@ -63,6 +96,8 @@ export default function PixiBurger({
         if (dead) { app.destroy(true, { children: true, texture: true }); return; }
         app.canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
         host.appendChild(app.canvas);
+        st.photos = photoSet ? await loadPhotoSet(photoSet) : {};
+        if (dead) { app.destroy(true, { children: true, texture: true }); return; }
         buildScene(st, app, isLite);
         st.ready = true;
         fit(st, host);
@@ -218,6 +253,16 @@ function layerTexture(st, type, pan) {
 }
 
 function makeLayerSprite(st, l, pan) {
+  const ph = st.photos?.[l.type];
+  if (ph && (l.type !== 'bunTop' && l.type !== 'bunBottom' ? true : pan === 'papa')) {
+    const sp = new Sprite(ph.texture);
+    const k = ph.w / ph.texture.width;
+    sp.width = ph.w; sp.height = ph.texture.height * k * ph.sy;
+    sp.anchor.set(0.5, ph.top ? 0 : 0.5);
+    sp.y = ph.top ? -2 : ph.lh / 2;
+    const c = new Container(); c.addChild(sp);
+    return { c, lh: ph.lh, sp, type: l.type, photo: true };
+  }
   const t = layerTexture(st, l.type, pan);
   const sp = new Sprite(t.texture);
   sp.anchor.set(t.ax, t.ay);
@@ -274,7 +319,7 @@ function sync(st, layers, pan, papas, dipCount, first) {
     o.idx = i;
     const top = -acc; // y de la parte superior de esta capa
     acc -= o.lh;
-    o.c.zIndex = i;
+    o.c.zIndex = layers.length - i;
     if (o.isNew) {
       o.isNew = false;
       o.c.position.set(0, top - 110); o.c.alpha = 0; o.c.rotation = (i % 2 ? 0.25 : -0.25); o.c.scale.set(0.7);
@@ -282,7 +327,7 @@ function sync(st, layers, pan, papas, dipCount, first) {
       gsap.to(o.c, { y: top, alpha: 1, rotation: 0, duration: 0.55, delay, ease: 'back.out(1.5)' });
       gsap.to(o.c.scale, { x: 1, y: 1, duration: 0.55, delay, ease: 'back.out(2)' });
       // aplastar un poco al caer
-      gsap.fromTo(o.sp.scale, { y: 1.12, x: 0.94 }, { y: 1, x: 1, duration: 0.5, delay: delay + 0.28, ease: 'elastic.out(1,0.4)' });
+      if (!o.photo) gsap.fromTo(o.sp.scale, { y: 1.12, x: 0.94 }, { y: 1, x: 1, duration: 0.5, delay: delay + 0.28, ease: 'elastic.out(1,0.4)' });
     } else if (!o.leaving) {
       gsap.to(o.c, { y: top, duration: 0.45, ease: 'back.out(1.6)', overwrite: 'auto' });
     }
