@@ -553,20 +553,9 @@ export default function BurgerCustomizer({
       spawnBurst(wasOff ? '✨' : '💨');
       if (isPhoto) flashHero(ing);   // en la burger NO se atenúa nada: solo entra/sale la capa
     };
-    const fijos = [
-      ...config.base.map((b) => ({ k: b, e: emojiOf(b), l: b })),
-      ...config.sides.map((sd) => ({ k: sd.label, e: sd.emoji, l: sd.label })),
-      ...(papasOptions && config.kind !== 'papas' ? [{ k: 'papas', e: '🍟', l: 'Papas fritas' }] : []),
-    ];
     return (
       <>
         {vcfg?.byId && ingList.length === 0 && <p className="bw-hint">Primero elegí la variedad.</p>}
-        {fijos.length > 0 && (
-          <div className="ing-fijos">
-            <span className="ing-fijos-title">Siempre incluido</span>
-            {fijos.map((f) => <span key={f.k} className="ing-fijo">{f.e} {f.l}</span>)}
-          </div>
-        )}
         <div className="ing-list">
           {list.map((ing, i) => {
             const off = quitados.includes(ing);
@@ -728,6 +717,32 @@ export default function BurgerCustomizer({
     </div>
   );
 
+  // Caja fija bajo la burger: todo lo que lleva, en vivo (lo que sacás se tacha)
+  const boxItems = [
+    ...config.base.map((n) => ({ k: n, e: emojiOf(n), l: n, fixed: true })),
+    ...(isPhoto ? infoChips.filter((n) => ingList.includes(n)) : ingList).map((n) => ({ k: n, e: emojiOf(n), l: n })),
+    ...config.sides.map((sd) => ({ k: sd.label, e: sd.emoji, l: sd.label, fixed: true })),
+    ...(papasOptions && config.kind !== 'papas' ? [{ k: 'papas', e: '🍟', l: papasStyle === 'sazonadas' ? 'Papas sazonadas' : 'Papas fritas', fixed: true }] : []),
+  ];
+  const infoBox = boxItems.length > 0 && (
+    <div className={`bw-infobox${stepKey === 'info' ? '' : ' bw-infobox--hide-mobile'}`}>
+      <div className="bw-infobox-title">📋 {name} lleva</div>
+      <ul className="bw-infobox-list">
+        {boxItems.map((it) => {
+          const off = quitados.includes(it.k);
+          return (
+            <li key={it.k} className={off ? 'bw-infobox-off' : ''}>
+              <span className="bw-infobox-emoji">{it.e}</span>
+              <span className="bw-infobox-name">{it.l}</span>
+              {off && <span className="bw-infobox-sin">SIN</span>}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="bw-infobox-note">ⓘ Podés sacar los ingredientes que no quieras.</p>
+    </div>
+  );
+
   const renderStep = () => {
     if (stepKey === 'info') {
       return (
@@ -790,6 +805,7 @@ export default function BurgerCustomizer({
 
               {/* Cuerpo: escenario + panel */}
               <div className="bw-body">
+                <div className="bw-left">
                 <div className="bw-stage-col">
                   {isPhoto ? (
                     <ProductHero
@@ -818,19 +834,8 @@ export default function BurgerCustomizer({
                       />
                     </>
                   )}
-                  <div className="bw-livesum" aria-live="polite">
-                    <AnimatePresence>
-                      {quitados.map((q) => (
-                        <motion.span
-                          key={q} className="bw-livechip"
-                          initial={{ opacity: 0, scale: 0.4, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.4 }}
-                          transition={{ type: 'spring', stiffness: 420, damping: 18 }}
-                        >
-                          ✕ Sin {q.toLowerCase()}
-                        </motion.span>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+                </div>
+                {infoBox}
                 </div>
 
                 <div className="bw-panel-col">

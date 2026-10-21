@@ -3638,3 +3638,27 @@ height: auto;
 }
 .ing-switch--off .ing-thumb { color: #444; }
 .ing-note { margin: 10px 2px 0; font-size: 13.5px; color: var(--muted); }
+
+/* ═══ Caja "lleva" bajo la burger (sin tocar la animación) ═══ */
+.bw-left { display: flex; flex-direction: column; flex-shrink: 0; min-width: 0; }
+.bw-infobox { margin: 6px 14px 10px; padding: 12px 14px; border-radius: 16px; background: rgba(0,0,0,0.38); border: 1px solid rgba(245,200,66,0.4); }
+.bw-infobox-title { font-size: 15px; font-weight: 800; color: var(--gold); margin-bottom: 8px; }
+.bw-infobox-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+.bw-infobox-list li { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.2; color: var(--cream); min-width: 0; }
+.bw-infobox-emoji { flex-shrink: 0; font-size: 18px; }
+.bw-infobox-name { min-width: 0; }
+.bw-infobox-off .bw-infobox-name { text-decoration: line-through; color: #ff9a9a; }
+.bw-infobox-off .bw-infobox-emoji { filter: grayscale(0.8); opacity: 0.6; }
+.bw-infobox-sin { margin-left: auto; font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: rgba(240,80,80,0.28); color: #ffb0b0; }
+.bw-infobox-note { margin: 10px 0 0; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: var(--muted); }
+@media (max-width: 899px) {
+  .bw-infobox { margin: 0 12px 8px; padding: 10px 12px; }
+  .bw-infobox-list { gap: 4px 10px; }
+  .bw-infobox-list li { font-size: 13px; }
+  .bw-infobox--hide-mobile { display: none; }
+}
+@media (min-width: 900px) {
+  .bw-left { flex: 1; min-height: 0; }
+  .bw-left .bw-stage-col { flex: 1; min-height: 220px; }
+  .bw-infobox { margin: 8px 0 0; }
+}
