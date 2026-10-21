@@ -18,28 +18,28 @@ const buzz = (ms = 12) => {
 
 const NO_DIPS = [];
 const KIND_TEXT = {
-  burger:   { tab: 'La burger',  title: 'Así viene tu hamburguesa', small: 'Armá tu',    emoji: '🍔' },
-  lomo:     { tab: 'El lomito',  title: 'Así viene tu lomito',      small: 'Armá tu',    emoji: '🥩' },
-  sandwich: { tab: 'El sanguche', title: 'Así viene tu sándwich',   small: 'Armá tu',    emoji: '🥪' },
-  papas:    { tab: 'Las papas',  title: 'Así vienen tus papas',      small: 'Elegí tus',  emoji: '🍟' },
-  pizza:    { tab: 'El plato',   title: 'Así viene tu plato',       small: 'Mirá tu',    emoji: '🍕' },
+  burger:   { tab: 'La burger',  title: 'Así viene tu hamburguesa', small: 'Personalizá tu hamburguesa', emoji: '🍔' },
+  lomo:     { tab: 'El lomito',  title: 'Así viene tu lomito',      small: 'Personalizá tu lomito', emoji: '🥩' },
+  sandwich: { tab: 'El sanguche', title: 'Así viene tu sándwich',   small: 'Personalizá tu sándwich', emoji: '🥪' },
+  papas:    { tab: 'Las papas',  title: 'Así vienen tus papas',      small: 'Elegí tus papas', emoji: '🍟' },
+  pizza:    { tab: 'El plato',   title: 'Así viene tu plato',       small: 'Personalizá tu plato', emoji: '🍕' },
 };
 
 // Arma las pestañas según lo que el producto permite personalizar
 function buildSteps(config, hasPapas, ingList) {
   const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
   const hasIng = ingList.length > 0 || !!config.variants?.byId;
-  const info = { key: 'info', title: hasIng ? '¿Querés sacar algún ingrediente?' : k.title };
+  const info = { key: 'info', label: 'Ingredientes', title: hasIng ? '¿Qué ingredientes querés sacar?' : k.title };
   const steps = [];
-  const variante = config.variants ? { key: 'variante', title: config.variants.question } : null;
+  const variante = config.variants ? { key: 'variante', label: config.variants.tab, title: config.variants.question } : null;
   // Sin T.A.C.C.: la variedad define los ingredientes, así que va primero
   if (variante && config.variants.byId) steps.push(variante, info); else { steps.push(info); if (variante) steps.push(variante); }
-  if (config.carne) steps.push({ key: 'carne', title: config.carne.question });
-  if (config.extras.length) steps.push({ key: 'extras', title: '¿Querés agregarle algo más?' });
+  if (config.carne) steps.push({ key: 'carne', label: config.carne.tab, title: config.carne.question });
+  if (config.extras.length) steps.push({ key: 'extras', label: 'Extras', title: '¿Querés agregarle algo más?' });
   if (hasPapas || config.dips) {
-    steps.push({ key: 'acomp', title: hasPapas && config.dips ? 'Papas y salsa' : hasPapas ? '¿Cómo querés las papas?' : '¿Querés una salsa aparte?' });
+    steps.push({ key: 'acomp', label: hasPapas ? 'Papas y salsa' : 'Salsa', title: hasPapas && config.dips ? 'Papas y salsa' : hasPapas ? '¿Cómo querés las papas?' : '¿Querés una salsa aparte?' });
   }
-  steps.push({ key: 'resumen', title: 'Revisá tu pedido' });
+  steps.push({ key: 'resumen', label: 'Resumen', title: 'Revisá tu pedido' });
   return steps;
 }
 
@@ -544,66 +544,65 @@ export default function BurgerCustomizer({
     );
   };
 
-  // Pantalla de ingredientes: se ve qué lleva y se saca tocando (todo en uno)
+  // Pantalla de ingredientes: tarjetas anchas; tocar = sacar / volver a poner
   const sectionIngredientes = () => {
-    const base = isPhoto ? config.base : config.base;
     const list = isPhoto ? infoChips.filter((n) => ingList.includes(n)) : ingList;
     const onTap = (ing) => {
+      const wasOff = quitados.includes(ing);
       toggleIngrediente(ing);
+      spawnBurst(wasOff ? '✨' : '💨');
       if (isPhoto) flashHero(ing); else flashHighlight(typesForIngredient(ing));
     };
+    const baseCard = (key, emojiStr, label, tag, i) => (
+      <motion.div
+        key={key} className="ing-card ing-card--base" aria-hidden="true"
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+      >
+        <span className="ing-art"><span className="ing-emoji">{emojiStr}</span></span>
+        <span className="ing-info"><span className="ing-name">{label}</span><span className="ing-chip ing-chip--base">{tag}</span></span>
+      </motion.div>
+    );
+    let n = 0;
     return (
       <>
         {vcfg?.byId && ingList.length === 0 && <p className="bw-hint">Primero elegí la variedad.</p>}
-        <div className="bw-tiles bw-tiles--compact">
-          {base.map((n) => (
-            <div key={n} className="bw-tile bw-tile--base" aria-hidden="true">
-              <span className="bw-tile-emoji">{emojiOf(n)}</span>
-              <span className="bw-tile-name">{n}</span>
-              <span className="bw-tile-state">BASE</span>
-            </div>
-          ))}
-          {list.map((ing, i) => {
+        <div className="ing-grid">
+          {config.base.map((b) => baseCard(b, emojiOf(b), b, 'INCLUIDO', n++))}
+          {list.map((ing) => {
             const off = quitados.includes(ing);
+            const idx = n++;
             return (
               <motion.button
                 type="button" key={ing}
-                className={`bw-tile${off ? ' bw-tile--off' : ''}`}
+                className={`ing-card${off ? ' ing-card--off' : ''}`}
                 onClick={() => onTap(ing)}
                 aria-pressed={!off}
-                initial={{ opacity: 0, y: 14, scale: 0.92 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: i * 0.035, type: 'spring', stiffness: 380, damping: 24 }}
-                whileTap={{ scale: 0.92 }}
+                initial={{ opacity: 0, y: 16, scale: 0.94 }}
+                animate={off ? { opacity: 1, y: 0, scale: 1, x: [0, -7, 7, -4, 0] } : { opacity: 1, y: 0, scale: 1, x: 0 }}
+                transition={{ delay: off ? 0 : idx * 0.035, type: 'spring', stiffness: 380, damping: 22, x: { duration: 0.35 } }}
+                whileTap={{ scale: 0.96 }}
               >
-                <span className="bw-tile-emoji">{emojiOf(ing)}</span>
-                <span className="bw-tile-name">{ing}</span>
-                <span className="bw-tile-state">{off ? 'SIN' : 'LLEVA'}</span>
-                <motion.span
-                  className="bw-tile-badge"
-                  key={off ? 'off' : 'on'}
-                  initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-                >
-                  {off ? '✕' : '✓'}
-                </motion.span>
+                <span className="ing-art">
+                  <motion.span
+                    className="ing-emoji" key={off ? 'off' : 'on'}
+                    initial={{ scale: 0.3, rotate: off ? 0 : -180 }}
+                    animate={off ? { scale: 0.8, rotate: 0 } : { scale: 1, rotate: 0, y: [0, -3, 0] }}
+                    transition={off ? { type: 'spring', stiffness: 300, damping: 14 } : { type: 'spring', stiffness: 360, damping: 12, y: { duration: 2.6, repeat: Infinity, delay: idx * 0.2 } }}
+                  >
+                    {emojiOf(ing)}
+                  </motion.span>
+                  {off && <motion.span className="ing-x" initial={{ scale: 0, rotate: -60 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>✕</motion.span>}
+                </span>
+                <span className="ing-info">
+                  <span className="ing-name">{ing}</span>
+                  <span className={`ing-chip ${off ? 'ing-chip--off' : 'ing-chip--on'}`}>{off ? 'SIN' : '✓ LLEVA'}</span>
+                </span>
+                <span className={`ing-action${off ? ' ing-action--back' : ''}`}>{off ? '↩ Poner' : '✕ Sacar'}</span>
               </motion.button>
             );
           })}
-          {config.sides.map((sd) => (
-            <div key={sd.label} className="bw-tile bw-tile--base" aria-hidden="true">
-              <span className="bw-tile-emoji">{sd.emoji}</span>
-              <span className="bw-tile-name">{sd.label}</span>
-              <span className="bw-tile-state">INCLUIDO</span>
-            </div>
-          ))}
-          {papasOptions && config.kind !== 'papas' && (
-            <div className="bw-tile bw-tile--base" aria-hidden="true">
-              <span className="bw-tile-emoji">🍟</span>
-              <span className="bw-tile-name">Papas fritas</span>
-              <span className="bw-tile-state">INCLUIDO</span>
-            </div>
-          )}
+          {config.sides.map((sd) => baseCard(sd.label, sd.emoji, sd.label, 'INCLUIDO', n++))}
+          {papasOptions && config.kind !== 'papas' && baseCard('papas', '🍟', 'Papas fritas', 'INCLUIDO', n++)}
         </div>
       </>
     );
@@ -730,9 +729,9 @@ export default function BurgerCustomizer({
       return (
         <>
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
-          <p className="bw-info-desc">{desc}</p>
+          {!(ingList.length > 0 || vcfg?.byId) && <p className="bw-info-desc">{desc}</p>}
           {(ingList.length > 0 || vcfg?.byId) && (
-            <p className="bw-step-intro">Tocá lo que <b>NO querés</b>. Es gratis.</p>
+            <p className="bw-step-intro">Tocá los ingredientes que <b>NO querés</b>. Sacarlos es gratis.</p>
           )}
           {sectionIngredientes()}
         </>
@@ -772,13 +771,16 @@ export default function BurgerCustomizer({
 
               {/* Progreso */}
               <div className="bw-progress">
-                <span className="bw-progress-text">Paso {step + 1} de {steps.length}</span>
-                <div className="bw-bar">
-                  <motion.span
-                    className="bw-bar-fill" initial={false}
-                    animate={{ scaleX: (step + 1) / steps.length }}
-                    transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-                  />
+                <span className="bw-progress-text">Paso {step + 1} de {steps.length} · {steps[step].label}</span>
+                <div className="bw-segs">
+                  {steps.map((st, i) => (
+                    <motion.span
+                      key={st.key} className="bw-seg"
+                      initial={false}
+                      animate={{ backgroundColor: i <= step ? '#f5c842' : 'rgba(255,255,255,0.18)', scaleY: i === step ? 1.5 : 1 }}
+                      transition={{ duration: 0.25 }}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -812,6 +814,19 @@ export default function BurgerCustomizer({
                       />
                     </>
                   )}
+                  <div className="bw-livesum" aria-live="polite">
+                    <AnimatePresence>
+                      {quitados.map((q) => (
+                        <motion.span
+                          key={q} className="bw-livechip"
+                          initial={{ opacity: 0, scale: 0.4, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.4 }}
+                          transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+                        >
+                          ✕ Sin {q.toLowerCase()}
+                        </motion.span>
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 <div className="bw-panel-col">
@@ -846,6 +861,7 @@ export default function BurgerCustomizer({
                     <span className="bw-footer-label">Total</span>
                     <RollPrice value={totalUnidad * qty} className="bw-footer-val" />
                   </div>
+                  {!isLast && <span className="bw-footer-hint">↩ Podés volver atrás y cambiarlo</span>}
                   {isLast && (
                     <div className="bw-qty">
                       <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
