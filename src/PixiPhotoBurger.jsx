@@ -23,18 +23,19 @@ export const PHOTO_BURGERS = {
     typeToKey: { cheddar: 'cheddar', mayo: 'lactonesa', ketchup: 'ketchup', onion: 'cebolla', bacon: 'bacon' },
     // sticker: archivo (PNG recortado) y desde dónde "sale" (fracción del ancho/alto de la foto)
     sticker: {
-      cheddar:   { f: 'cheddar.png', at: [0.5, 0.7] },
-      lactonesa: { f: 'mayo.png',    at: [0.4, 0.42] },
-      ketchup:   { f: 'ketchup.png', at: [0.7, 0.5] },
+      cheddar:   { f: 'cheddar.png', at: [0.5, 0.73] },
+      lactonesa: { f: 'mayo.png',    at: [0.4, 0.39] },
+      ketchup:   { f: 'ketchup.png', at: [0.7, 0.49] },
       cebolla:   { f: 'onion.png',   at: [0.6, 0.56] },
-      bacon:     { f: 'bacon.png',   at: [0.5, 0.46] },
+      bacon:     { f: 'bacon.png',   at: [0.5, 0.44] },
     },
-    steam: { x: 0.5, y: 0.5, w: 0.5 },
+    steam: { x: 0.5, y: 0.49, w: 0.5 },
     // zonas que reciben el brillo (fracciones de la foto): pan y cheddar
-    glints: [{ x: 0.1, y: 0.1, w: 0.8, h: 0.32 }, { x: 0.08, y: 0.62, w: 0.84, h: 0.16 }],
+    glints: [{ x: 0.1, y: 0.02, w: 0.8, h: 0.36 }, { x: 0.08, y: 0.63, w: 0.84, h: 0.15 }],
     // destellos fijos sobre el pan (donde brilla la foto)
-    stars: [[0.3, 0.2], [0.62, 0.17], [0.78, 0.28], [0.18, 0.3]],
-    width: 298,
+    stars: [[0.3, 0.13], [0.62, 0.1], [0.78, 0.23], [0.18, 0.25]],
+    feather: false,   // las fotos ya vienen recortadas (fondo transparente)
+    width: 300,
   },
 };
 
@@ -57,7 +58,7 @@ const removedOf = (cfg, quitados) => {
   return s;
 };
 
-const DW = 300; const DH = 340; const BASE_Y = 292;
+const DW = 300; const DH = 340; const BASE_Y = 282;
 
 const radial = (stops) => new FillGradient({
   type: 'radial', center: { x: 0.5, y: 0.5 }, innerRadius: 0, outerCenter: { x: 0.5, y: 0.5 }, outerRadius: 0.5,
@@ -228,6 +229,23 @@ function build(st, app, cfg, isLite, host, cleanups) {
   const glow = new Graphics().circle(0, 0, 150).fill(radial([[0, 'rgba(255,170,60,0.5)'], [0.6, 'rgba(255,120,30,0.14)'], [1, 'rgba(255,100,20,0)']]));
   glow.position.set(DW / 2, 190); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
 
+  // plato oscuro con brillo en el borde (la burger apoya sobre él)
+  const plate = new Graphics();
+  plate.ellipse(0, 7, 156, 26).fill({ color: '#000', alpha: 0.5 });
+  plate.ellipse(0, 0, 150, 24).fill(new FillGradient({ type: 'linear', start: { x: 0, y: 0 }, end: { x: 0, y: 1 }, colorStops: [{ offset: 0, color: '#4a3a2c' }, { offset: 1, color: '#1d1511' }] }));
+  plate.ellipse(0, -1, 128, 18).fill(new FillGradient({ type: 'linear', start: { x: 0, y: 0 }, end: { x: 0, y: 1 }, colorStops: [{ offset: 0, color: '#2a2019' }, { offset: 1, color: '#3b2d22' }] }));
+  plate.ellipse(0, -2, 148, 22).stroke({ width: 1.5, color: '#ffcf8a', alpha: 0.35 });
+  plate.position.set(DW / 2, BASE_Y - 9); root.addChild(plate); st.plate = plate;
+
+  // bokeh que flota detrás (reemplaza al fondo de la foto)
+  const bokehTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 20).fill(radial([[0, 'rgba(255,214,140,0.85)'], [0.7, 'rgba(255,170,70,0.35)'], [1, 'rgba(255,150,50,0)']])));
+  st.bokeh = [];
+  const BN = isLite ? 7 : 14;
+  for (let i = 0; i < BN; i++) {
+    const sp = new Sprite(bokehTex); sp.anchor.set(0.5); sp.blendMode = 'add'; root.addChildAt(sp, 1);
+    st.bokeh.push({ sp, x: Math.random() * DW, y: 20 + Math.random() * 230, z: 0.4 + Math.random() * 1.0, ph: Math.random() * 6, sz: 0.5 + Math.random() * 1.2 });
+  }
+
   const shadow = new Graphics().ellipse(0, 0, 118, 12).fill(radial([[0, 'rgba(0,0,0,0.6)'], [1, 'rgba(0,0,0,0)']]));
   shadow.position.set(DW / 2, BASE_Y + 3); root.addChild(shadow); st.shadow = shadow;
 
@@ -236,7 +254,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   const spA = new Sprite(Texture.EMPTY); spA.anchor.set(0.5, 1);
   const spB = new Sprite(Texture.EMPTY); spB.anchor.set(0.5, 1); spB.alpha = 0;
   wrap.addChild(spA, spB); st.spA = spA; st.spB = spB;
-  const feather = new Sprite(makeFeatherTexture()); feather.anchor.set(0.5, 1); wrap.addChild(feather); wrap.mask = feather; st.feather = feather;
+  if (cfg.feather) { const feather = new Sprite(makeFeatherTexture()); feather.anchor.set(0.5, 1); wrap.addChild(feather); wrap.mask = feather; st.feather = feather; }
 
   st.depth = st.depthFile || makeDepthTexture();
   st.parallax = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -379,6 +397,10 @@ function build(st, app, cfg, isLite, host, cleanups) {
       st.spot.x = DW / 2 + st.parallax.x * W * 0.42; st.spot.y = top + H * (0.45 + st.parallax.y * 0.35);
       st.spot.alpha = 0.4 + st.flare * 0.5;
     }
+    st.bokeh.forEach((b) => {
+      b.sp.x = b.x + Math.sin(t * 0.25 + b.ph) * 10 - st.parallax.x * 10 * b.z; b.sp.y = b.y + Math.cos(t * 0.2 + b.ph) * 6 - st.parallax.y * 6 * b.z;
+      b.sp.scale.set(b.sz * (1 + Math.sin(t * 0.8 + b.ph) * 0.08)); b.sp.alpha = (0.28 + 0.2 * Math.sin(t * 0.6 + b.ph)) * (0.6 + st.flare * 0.5);
+    });
     st.flare = Math.max(0, st.flare - dt * 1.5);
     glow.alpha = 0.75 + Math.sin(t * 1.6) * 0.1 + st.flare * 0.35;
     const sb = st.steamBase || { x: DW / 2, y: 140, w: 120 };
