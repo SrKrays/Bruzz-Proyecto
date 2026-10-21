@@ -66,7 +66,7 @@ const removedOf = (cfg, quitados) => {
   return s;
 };
 
-const DW = 300; const DH = 276; const BASE_Y = 250;
+const DW = 300; const DH = 240; const BASE_Y = 212;
 // Partículas y reflejos ambientales (bokeh, polvo, destellos, vapor, brasas, luz que sigue al dedo).
 // Apagados: la burger es la protagonista. Cambiar a true para reactivarlos.
 const AMBIENT = false;
@@ -169,9 +169,8 @@ export default function PixiPhotoBurger({
         if (!first) { onError?.(new Error('no-photo')); return; }
         st.shown = first.name; setPhoto(st, st.spA, first.tex);
         st.spA.alpha = 0;
-        gsap.fromTo(st.wrapState, { jy: -26 }, { jy: 0, duration: 0.7, ease: 'bounce.out' });
-        gsap.fromTo(st.sq, { x: 0.9, y: 0.9 }, { x: 1, y: 1, duration: 0.9, ease: 'elastic.out(1,0.5)' });
-        st.flare = 1.4;
+        gsap.fromTo(st.wrapState, { jy: -8 }, { jy: 0, duration: 0.7, ease: 'power3.out' });
+        gsap.fromTo(st.sq, { x: 0.97, y: 0.97 }, { x: 1, y: 1, duration: 0.9, ease: 'power3.out' });
         gsap.to(st.spA, { alpha: 1, duration: 0.35 });
         prefetch(st, cfg);
         if (st.want && st.want !== first.name) go(st, cfg, st.want);
@@ -238,7 +237,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   const root = new Container(); app.stage.addChild(root); st.root = root;
 
   const glow = new Graphics().circle(0, 0, 150).fill(radial([[0, 'rgba(255,170,60,0.5)'], [0.6, 'rgba(255,120,30,0.14)'], [1, 'rgba(255,100,20,0)']]));
-  glow.position.set(DW / 2, 140); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
+  glow.position.set(DW / 2, 110); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
 
   // plato oscuro con brillo en el borde (la burger apoya sobre él)
   const plate = new Graphics();
@@ -475,7 +474,7 @@ async function go(st, cfg, want) {
     const res = await resolveTex(st, cfg, want);
     if (!res || res.name === st.shown) {
       // no hay foto distinta: solo el salto + sticker
-      jumpOnly(st, cfg, diffKeys(st.shown, want));
+      jumpOnly(st);
       await new Promise((r) => setTimeout(r, 800));
       return;
     }
@@ -487,23 +486,15 @@ async function go(st, cfg, want) {
       const ok = cfg.extract?.[key] && res.name === want && (removing ? prevShown === 'base' : want === 'base');
       if (ok && await extractMove(st, cfg, key, removing, res)) return;
     }
+    // combinación sin extracción real: fundido suave entre las dos fotos + asentamiento mínimo (sin saltos ni stickers)
     const apexDone = new Promise((resolve) => {
-      const tl = gsap.timeline({ onComplete: resolve });
-      tl.to(st.sq, { x: 1.05, y: 0.9, duration: 0.11, ease: 'power2.out' })
-        .to(st.sq, { x: 0.96, y: 1.07, duration: 0.2, ease: 'power2.out' })
-        .to(st.wrapState, { jy: -42, duration: 0.2, ease: 'power2.out' }, '<')
-        .add(() => {
-          // en lo más alto: crossfade a la foto nueva
-          setPhoto(st, st.spB, res.tex); st.spB.alpha = 0;
-          gsap.to(st.spB, { alpha: 1, duration: 0.18, onComplete: () => { setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0; } });
-          st.flare = 1;
-        })
-        .to(st.wrapState, { jy: 0, duration: 0.55, ease: 'bounce.out' })
-        .to(st.sq, { x: 1.06, y: 0.88, duration: 0.1, ease: 'power2.in' }, '-=0.46')
-        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' });
+      setPhoto(st, st.spB, res.tex); st.spB.alpha = 0;
+      const tl = gsap.timeline({ onComplete: () => { setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0; resolve(); } });
+      tl.to(st.spB, { alpha: 1, duration: 0.38, ease: 'sine.inOut' }, 0)
+        .to(st.sq, { x: 1.006, y: 0.994, duration: 0.15, ease: 'sine.out' }, 0.1)
+        .to(st.sq, { x: 1, y: 1, duration: 0.45, ease: 'sine.inOut' }, 0.25);
     });
     st.shown = res.name;
-    flySticker(st, cfg, dk);
     await apexDone;
   } finally {
     st.busy = false;
@@ -520,84 +511,54 @@ async function extractMove(st, cfg, key, removing, res) {
   if (!st.ready) return true;
   const W = st.photoW; const H = st.photoH;
   const P = { x: (def.pivot[0] - 0.5) * W, y: -(1 - def.pivot[1]) * H };
-  const mk = () => {
-    const c = new Container(); c.position.set(P.x, P.y);
-    const sp = new Sprite(tex); sp.anchor.set(0.5, 1); sp.width = W; sp.height = H; sp.position.set(-P.x, -P.y);
-    c.addChild(sp); return { c, sp };
-  };
-  const { c: ec } = mk(); st.wrap.addChild(ec);
-  // 1) selección: contorno dorado que "enciende" el ingrediente
-  const hl = mk(); hl.sp.tint = 0xffd27a; hl.c.blendMode = 'add'; hl.c.alpha = 0; st.wrap.addChild(hl.c);
-  const rx = DW / 2 + P.x; const ry = BASE_Y + P.y;
+  const ec = new Container(); ec.position.set(P.x, P.y);
+  const sp = new Sprite(tex); sp.anchor.set(0.5, 1); sp.width = W; sp.height = H; sp.position.set(-P.x, -P.y);
+  ec.addChild(sp); st.wrap.addChild(ec);
   const baseTex = st.ok.get('base');
-  const fin = () => { try { ec.destroy({ children: true }); hl.c.destroy({ children: true }); } catch { /* noop */ } };
   const kind = def.kind || 'elastic';
+  const fin = () => { try { ec.destroy({ children: true }); } catch { /* noop */ } };
+  // Disolución prolija en el lugar: el ingrediente se afina y se aclara mientras las fotos se funden.
+  // Casi no se mueve (unos px), para que se sienta como un cambio de la propia burger y no como un efecto.
+  const lift = kind === 'light' ? 3 : kind === 'sauce' ? 0 : 2;
+  const sY = kind === 'elastic' ? 1.025 : kind === 'sauce' ? 0.94 : 1.01;
   await new Promise((resolve) => {
     if (removing) {
-      // la foto "sin ingrediente" queda debajo; el sprite real se despega
-      setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0;
-      const tl = gsap.timeline({ onComplete: () => { fin(); resolve(); } });
-      tl.to(hl.c, { alpha: 0.85, duration: 0.09, ease: 'power1.out' }, 0)
-        .to(hl.c.scale, { x: 1.012, y: 1.012, duration: 0.2 }, 0)
-        .to(hl.c, { alpha: 0, duration: 0.22, ease: 'power1.in' }, 0.09);
-      if (kind === 'elastic') {
-        tl.to(ec.scale, { x: 0.99, y: 1.11, duration: 0.15, ease: 'power2.out' }, 0.06)       // se estira antes de soltarse
-          .to(ec, { y: P.y - 7, duration: 0.15, ease: 'power2.out' }, 0.06)
-          .to(ec, { y: P.y - 54, rotation: -0.06, duration: 0.6, ease: 'power3.out' }, 0.2)
-          .to(ec.scale, { x: 1.06, y: 0.9, duration: 0.42, ease: 'power1.out' }, 0.26)
-          .to(ec, { alpha: 0, duration: 0.32, ease: 'power1.in' }, 0.44);
-      } else if (kind === 'light') {
-        tl.to(ec, { y: P.y - 5, duration: 0.12, ease: 'power2.out' }, 0.06)
-          .to(ec, { y: P.y - 40, x: P.x + 14, duration: 0.7, ease: 'power2.out' }, 0.16)
-          .to(ec, { rotation: 0.1, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 0.16)   // aletea
-          .to(ec.scale, { x: 1.05, y: 1.05, duration: 0.6 }, 0.16)
-          .to(ec, { alpha: 0, duration: 0.36, ease: 'power1.in' }, 0.42);
-      } else { // sauce: la salsa se retrae sobre sí misma
-        tl.to(ec.scale, { x: 1.04, y: 1.18, duration: 0.1, ease: 'power2.out' }, 0.06)
-          .to(ec.scale, { x: 0.55, y: 0.3, duration: 0.4, ease: 'power3.in' }, 0.16)
-          .to(ec, { y: P.y + 5, alpha: 0, duration: 0.34, ease: 'power1.in' }, 0.24);
-      }
-      tl.add(() => magicBurst(st, rx, ry - (kind === 'sauce' ? 6 : 28), 0.5), 0.4)
-        .to(st.sq, { x: 1.014, y: 0.986, duration: 0.12, ease: 'power2.out' }, 0.22)          // la burger se acomoda
-        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.5)' }, 0.34);
+      setPhoto(st, st.spB, res.tex); st.spB.alpha = 0;                          // la foto "sin ingrediente" entra suave
+      const tl = gsap.timeline({ onComplete: () => {
+        setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0; fin(); resolve();
+      } });
+      tl.to(st.spB, { alpha: 1, duration: 0.34, ease: 'sine.inOut' }, 0.02)
+        .to(ec, { alpha: 0, duration: 0.4, ease: 'sine.inOut' }, 0)
+        .to(ec, { y: P.y - lift, duration: 0.4, ease: 'sine.out' }, 0)
+        .to(ec.scale, { x: 1, y: sY, duration: 0.4, ease: 'sine.out' }, 0)
+        .to(st.sq, { x: 1.006, y: 0.994, duration: 0.14, ease: 'sine.out' }, 0.12)          // la burger se asienta apenas
+        .to(st.sq, { x: 1, y: 1, duration: 0.45, ease: 'sine.inOut' }, 0.26);
     } else {
-      // volver a poner: el sprite vuelve a su lugar exacto
-      ec.alpha = 0;
+      // volver a poner: la burger completa se funde y el ingrediente se asienta en su lugar
+      ec.alpha = 0; ec.y = P.y - lift; ec.scale.set(1, sY);
+      setPhoto(st, st.spB, baseTex || res.tex); st.spB.alpha = 0;
       const tl = gsap.timeline({ onComplete: () => {
         if (baseTex) { setPhoto(st, st.spA, baseTex); st.spA.alpha = 1; st.spB.alpha = 0; }
         fin(); resolve();
       } });
-      if (kind === 'sauce') {
-        ec.scale.set(0.55, 0.3);
-        tl.to(ec, { alpha: 1, duration: 0.14 }, 0)
-          .to(ec.scale, { x: 1.06, y: 1.1, duration: 0.3, ease: 'power2.out' }, 0)
-          .to(ec.scale, { x: 1, y: 1, duration: 0.25, ease: 'elastic.out(1,0.5)' }, 0.3);
-      } else {
-        ec.y = P.y - (kind === 'light' ? 40 : 54); ec.rotation = kind === 'light' ? 0.1 : -0.06; ec.scale.set(1.05, 0.92);
-        tl.to(ec, { alpha: 1, duration: 0.18 }, 0)
-          .to(ec, { y: P.y, rotation: 0, duration: kind === 'light' ? 0.5 : 0.42, ease: kind === 'light' ? 'power2.out' : 'power2.in' }, 0)
-          .to(ec.scale, { x: 1, y: 1, duration: 0.4, ease: 'power1.in' }, 0);
-      }
-      tl.add(() => magicBurst(st, rx, ry - 10, 0.5), 0.4)
-        .to(st.sq, { x: 1.03, y: 0.97, duration: 0.1, ease: 'power2.out' }, 0.4)
-        .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' }, 0.5)
-        .to(hl.c, { alpha: 0.5, duration: 0.08 }, 0.42).to(hl.c, { alpha: 0, duration: 0.25 }, 0.5);
+      tl.to(ec, { alpha: 1, duration: 0.3, ease: 'sine.inOut' }, 0)
+        .to(ec, { y: P.y, duration: 0.4, ease: 'sine.out' }, 0)
+        .to(ec.scale, { x: 1, y: 1, duration: 0.4, ease: 'sine.out' }, 0)
+        .to(st.spB, { alpha: 1, duration: 0.3, ease: 'sine.inOut' }, 0.1)
+        .to(st.sq, { x: 1.006, y: 0.994, duration: 0.14, ease: 'sine.out' }, 0.2)
+        .to(st.sq, { x: 1, y: 1, duration: 0.45, ease: 'sine.inOut' }, 0.34);
     }
   });
   st.shown = res.name;
   return true;
 }
 
-function jumpOnly(st, cfg, dk) {
+function jumpOnly(st) {
+  // sin foto distinta: solo un asentamiento mínimo (nada vuela)
   gsap.timeline()
-    .to(st.sq, { x: 1.05, y: 0.9, duration: 0.11 })
-    .to(st.sq, { x: 0.97, y: 1.06, duration: 0.18 })
-    .to(st.wrapState, { jy: -34, duration: 0.18 }, '<')
-    .to(st.wrapState, { jy: 0, duration: 0.5, ease: 'bounce.out' })
-    .to(st.sq, { x: 1, y: 1, duration: 0.5, ease: 'elastic.out(1,0.45)' }, '-=0.4');
-  flySticker(st, cfg, dk);
+    .to(st.sq, { x: 1.006, y: 0.994, duration: 0.14, ease: 'sine.out' })
+    .to(st.sq, { x: 1, y: 1, duration: 0.45, ease: 'sine.inOut' });
 }
-
 
 function magicBurst(st, x, y, big = 1) {
   if (!st.ready) return;
