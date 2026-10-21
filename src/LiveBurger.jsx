@@ -114,7 +114,12 @@ export function buildLayers({ ingredientes, quitados, medallones, extras, mainTy
   const L = (id, type, label) => ({ id, type, label: label || nameOf[type] || LAYER_LABELS[type] });
   const out = [L('bun-top', 'bunTop', 'pan:top')];
 
-  VEG_ORDER.forEach((t) => { if (types.has(t)) out.push(L(t, t)); });
+  VEG_ORDER.forEach((t) => {
+    if (t === 'pickles') {
+      const n = (types.has('pickles') ? 1 : 0) + (extras.pepino || 0);
+      for (let i = 0; i < n; i++) out.push(L(`pickles-${i}`, 'pickles', i === 0 && types.has('pickles') ? nameOf.pickles : 'Pepinos extra'));
+    } else if (types.has(t)) out.push(L(t, t));
+  });
 
   const eggs = (types.has('egg') ? 1 : 0) + (extras.huevo || 0);
   for (let i = 0; i < eggs; i++) out.push(L(`egg-${i}`, 'egg', i === 0 && types.has('egg') ? nameOf.egg : EXTRA_LABEL.egg));
@@ -181,7 +186,7 @@ export default function LiveBurger({
           style={{ transformOrigin: '50% 100%' }}
         >
           <div className="lb-stack" style={{ gap: GAP }}>
-            <AnimatePresence mode="popLayout" initial={false}>
+            <AnimatePresence mode="popLayout">
               {layers.map((l, idx) => {
                 const isHl = hl && hl.includes(l.type);
                 const isDim = hl && !isHl;

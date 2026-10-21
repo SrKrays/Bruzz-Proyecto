@@ -23,12 +23,14 @@ export const BIFE_OPCIONES = [
 ];
 
 export const MUZZA_EXTRA_PRECIO = 2500;
+export const PEPINO_EXTRA_PRECIO = 800;   // ⚠ a confirmar con el local
 
 // Extras con cantidad. Las verduras NO se ofrecen como extras pagos.
 export const EXTRAS = [
   { id: 'cheddar', name: 'Cheddar extra', desc: 'Sumá más queso',  icon: '🧀', precio: 1500 },
   { id: 'panceta', name: 'Panceta extra', desc: 'Más crocante',    icon: '🥓', precio: 1500 },
   { id: 'huevo',   name: 'Huevo',         desc: 'Aunque no venga en la receta', icon: '🍳', precio: 1200 },
+  { id: 'pepino',  name: 'Pepinos extra', desc: 'Más crocantes y ácidos', icon: '🥒', precio: PEPINO_EXTRA_PRECIO },
   // Pizzas y calzones. ⚠ Precio a confirmar con el local.
   { id: 'muzza',   name: 'Muzza extra',   desc: 'Más mozzarella derretida', icon: '🧀', precio: MUZZA_EXTRA_PRECIO },
 ];
@@ -41,8 +43,8 @@ export const DIPS = [
 // Estilos de papas fritas (gratis). Se usa en el panel de producto
 // y en el selector de papas del resto de los productos.
 export const PAPAS_ESTILOS = [
-  { id: 'clasicas',  name: 'Clásicas',      desc: 'Con la sal de siempre.' },
-  { id: 'sazonadas', name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.' },
+  { id: 'clasicas',  name: 'Clásicas',      desc: 'Con la sal de siempre.', short: 'Con la sal de siempre' },
+  { id: 'sazonadas', name: 'Sazonadas 🧡', badge: 'Nuevo', desc: 'Un condimento bien intenso, anaranjado y adictivo — como si te comieras una bolsa entera de Doritos®, pero en papa.', short: 'Sabor intenso y anaranjado' },
 ];
 
 // Ingredientes base de toda hamburguesa (no se pueden quitar). Se muestran en
@@ -157,7 +159,8 @@ export function getPanelConfig(menuKey, item) {
       base: isVeggie ? ['Pan de papa Americano', 'Medallón Veggie'] : BASE_INGREDIENTES,
       ingredientes,
       carne: isVeggie ? null : CARNE_BURGER,
-      extras: isVeggie ? ['cheddar', 'huevo'] : ['cheddar', 'panceta', 'huevo'],
+      // Solo la Simple (y su combo) permite sumar panceta o pepinos; el resto no lleva extras
+      extras: (name === 'Simple' || name === 'Combo Simple') ? ['panceta', 'pepino'] : [],
       dips: true,
       sides: isBambino
         ? [{ emoji: '🥤', label: 'Gaseosa' }, { emoji: '🍦', label: 'Helado' }, { emoji: '🧸', label: 'Juguete' }]

@@ -3,7 +3,7 @@ import './App.css';
 import logo from './assets/logo.png';
 import CategoriasPrincipales from './CategoriasPrincipales';
 import Subcategorias         from './Subcategorias';
-import Items, { CartChip, CartPanel }  from './Items';
+import Items, { CartChip, CartPanel, CartBar, CartToast }  from './Items';
 import { Routes, Route } from 'react-router-dom';
 import AdminPanel from './AdminPanel';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +38,8 @@ export default function App() {
   const [cart, setCart]                 = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cartOpen, setCartOpen]         = useState(false);
+  const [toast, setToast]               = useState(null);   // aviso '¡Agregado a tu pedido!'
+  const toastTimer = useRef(null);
   const [navDirection, setNavDirection] = useState('forward');  // NEW
   const [headerShrunk, setHeaderShrunk] = useState(false);      // NEW
   const [logoWiggle, setLogoWiggle]     = useState(0);          // NEW: key for re-trigger
@@ -157,8 +159,14 @@ export default function App() {
           c._key === key ? { ...c, qty: c.qty + qty } : c
         );
       }
-      return [...prev, { _key: key, name: item.name, price: item.price, note, medallon, sintaccVariedad, papasStyle, mods, sinTacc: item.sinTacc ?? false, qty }];
+      return [...prev, { _key: key, name: item.name, price: item.price, imageUrl: item.imageUrl, note, medallon, sintaccVariedad, papasStyle, mods, sinTacc: item.sinTacc ?? false, qty }];
     });
+    // Aviso visible (salvo cuando se suma desde el propio panel del pedido)
+    if (!item._silent) {
+      setToast({ id: Date.now(), name: item.name });
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(null), 3200);
+    }
   }, []);
 
   const handleCartRemove = useCallback((key) => {
@@ -220,7 +228,7 @@ export default function App() {
     <Routes>
       <Route path="/admin/*" element={<AdminPanel />} />
       <Route path="/*" element={
-        <div className="bruzz-app">
+        <div className={`bruzz-app${cart.length > 0 && !showCheckout ? ' has-cartbar' : ''}`}>
           {showSplash && <SplashScreen onDone={handleSplashDone} />}
           <EmberParticles />
           <FlyToCartLayer />
@@ -271,6 +279,18 @@ export default function App() {
               {renderScreen()}
             </motion.div>
           </AnimatePresence>
+
+          {/* Barra fija inferior + aviso al agregar */}
+          <AnimatePresence>
+            {cart.length > 0 && !cartOpen && !showCheckout && (
+              <CartBar cart={cart} onOpen={() => { setToast(null); setCartOpen(true); }} />
+            )}
+          </AnimatePresence>
+          <CartToast
+            toast={cartOpen ? null : toast}
+            onOpen={() => { setToast(null); setCartOpen(true); }}
+            onClose={() => setToast(null)}
+          />
 
           {/* MEDIA 8: CartPanel con spring lateral — manejado en el componente */}
           <AnimatePresence>

@@ -28,13 +28,17 @@ const KIND_TEXT = {
 // Arma las pestañas según lo que el producto permite personalizar
 function buildSteps(config, hasPapas, ingList) {
   const k = KIND_TEXT[config.kind] || KIND_TEXT.burger;
-  const steps = [{ key: 'info', title: k.title }];
-  if (config.variants) steps.push({ key: 'variante', title: config.variants.question });
-  if (ingList.length || config.variants?.byId) steps.push({ key: 'sacar', title: '¿Querés sacar algún ingrediente?' });
+  const hasIng = ingList.length > 0 || !!config.variants?.byId;
+  const info = { key: 'info', title: hasIng ? '¿Querés sacar algún ingrediente?' : k.title };
+  const steps = [];
+  const variante = config.variants ? { key: 'variante', title: config.variants.question } : null;
+  // Sin T.A.C.C.: la variedad define los ingredientes, así que va primero
+  if (variante && config.variants.byId) steps.push(variante, info); else { steps.push(info); if (variante) steps.push(variante); }
   if (config.carne) steps.push({ key: 'carne', title: config.carne.question });
   if (config.extras.length) steps.push({ key: 'extras', title: '¿Querés agregarle algo más?' });
-  if (config.dips) steps.push({ key: 'dips', title: '¿Querés una salsa aparte?' });
-  if (hasPapas) steps.push({ key: 'papas', title: '¿Cómo querés las papas?' });
+  if (hasPapas || config.dips) {
+    steps.push({ key: 'acomp', title: hasPapas && config.dips ? 'Papas y salsa' : hasPapas ? '¿Cómo querés las papas?' : '¿Querés una salsa aparte?' });
+  }
   steps.push({ key: 'resumen', title: 'Revisá tu pedido' });
   return steps;
 }
@@ -356,8 +360,7 @@ export default function BurgerCustomizer({
       return undefined;
     }
     setStep(0); setDir(1); buzz(15);
-    const t = setTimeout(startTour, 650);
-    return () => clearTimeout(t);
+    return undefined;
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => () => {
@@ -420,7 +423,7 @@ export default function BurgerCustomizer({
   const tokenNow = tourOn && tourIdx >= 0 && tourIdx < tourTokens.length ? tourTokens[tourIdx] : null;
   const highlight = !isPhoto && tokenNow && tokenNow !== 'fries' ? [tokenNow] : (tourOn ? null : chipHl);
   const friesHighlight = tokenNow === 'fries' || (!tourOn && friesHl);
-  const exploded = tourOn || explodedManual;
+  const exploded = false;   // sin vista de capas separadas
   const heroToken = isPhoto
     ? (() => { const n = tourOn ? tokenNow : heroPop; return n ? { label: n, emoji: emojiOf(n) } : null; })()
     : null;
@@ -444,14 +447,15 @@ export default function BurgerCustomizer({
   const nextLabel = (() => {
     if (isLast) return `✅ ${addedCount > 0 ? 'Agregar y terminar' : 'Agregar al pedido'} · ${formatARS(totalUnidad * qty)}`;
     const touched = (
-      stepKey === 'sacar' ? quitados.length > 0
+      stepKey === 'info' ? (quitados.length > 0 || steps.length === 0)
       : stepKey === 'carne' ? medallones > 1
       : stepKey === 'extras' ? Object.keys(extras).length > 0
-      : stepKey === 'dips' ? Object.keys(dips).length > 0
+      : stepKey === 'acomp' ? (papasStyle === 'sazonadas' || Object.keys(dips).length > 0)
       : true
     );
     if (touched) return 'Siguiente →';
-    return stepKey === 'sacar' ? 'Dejarlo así →' : stepKey === 'carne' ? 'Así está bien →' : 'No, gracias →';
+    if (stepKey === 'info') return ingList.length || vcfg?.byId ? 'Dejarlo así →' : 'Siguiente →';
+    return stepKey === 'carne' ? 'Así está bien →' : stepKey === 'acomp' ? 'Dejarlo así →' : 'No, gracias →';
   })();
 
   // ── Resumen final ────────────────────────────────────────
@@ -485,22 +489,8 @@ export default function BurgerCustomizer({
         </ul>
       </motion.div>
 
-      <div className="bw-qty-row">
-        <span className="bw-qty-label">¿Cuántos así querés?</span>
-        <div className="bw-qty">
-          <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
-          <motion.span key={qty} className="bw-qty-val" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{qty}</motion.span>
-          <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(qty + 1)} aria-label="Más">+</button>
-        </div>
-      </div>
-
       {onAddAnother && (
-        <div className="bw-another-box">
-          <p className="bw-another-text">¿Es para más de una persona y <b>cada uno lo quiere distinto</b>?</p>
-          <motion.button type="button" className="bw-another" onClick={addAnother} whileTap={{ scale: 0.96 }}>
-            👥 Guardar este y armar otro distinto
-          </motion.button>
-        </div>
+        <p className="bw-another-hint">¿Es para otra persona y lo quiere distinto? Tocá <b>«Armar otra distinta»</b> abajo.</p>
       )}
     </>
   );
@@ -554,84 +544,70 @@ export default function BurgerCustomizer({
     );
   };
 
-  // Pantalla 1: solo mirar (qué lleva), sin botones que confundan
-  const sectionLleva = () => {
-    const chips = isPhoto
-      ? [...config.base.map((n) => ({ n, base: true })), ...infoChips.map((n) => ({ n, base: false }))]
-      : [...config.base.map((n) => ({ n, base: true })), ...ingList.map((n) => ({ n, base: false }))];
-    const onChip = (n) => (isPhoto ? flashHero(n) : flashHighlight(typesForIngredient(n)));
-    const sideChip = (key, emojiStr, label, i, onClick) => (
-      <motion.div className="bw-ing-wrap" key={key} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: (chips.length + i) * 0.03 }}>
-        <button type="button" className="bw-ing" onClick={onClick}>
-          <span className="bw-ing-emoji">{emojiStr}</span>
-          <span className="bw-ing-name">{label}</span>
-          <span className="bw-ing-tag bw-ing-tag--base">incluido</span>
-        </button>
-      </motion.div>
-    );
+  // Pantalla de ingredientes: se ve qué lleva y se saca tocando (todo en uno)
+  const sectionIngredientes = () => {
+    const base = isPhoto ? config.base : config.base;
+    const list = isPhoto ? infoChips.filter((n) => ingList.includes(n)) : ingList;
+    const onTap = (ing) => {
+      toggleIngrediente(ing);
+      if (isPhoto) flashHero(ing); else flashHighlight(typesForIngredient(ing));
+    };
     return (
-      <div className="bw-sec">
-        <div className="bw-sec-title">Lleva <em>· tocá uno para verlo</em></div>
-        <div className="bw-ing-grid">
-          {chips.map(({ n, base }, i) => {
-            const live = isPhoto && (tourOn ? tokenNow : heroPop) === n;
+      <>
+        {vcfg?.byId && ingList.length === 0 && <p className="bw-hint">Primero elegí la variedad.</p>}
+        <div className="bw-tiles bw-tiles--compact">
+          {base.map((n) => (
+            <div key={n} className="bw-tile bw-tile--base" aria-hidden="true">
+              <span className="bw-tile-emoji">{emojiOf(n)}</span>
+              <span className="bw-tile-name">{n}</span>
+              <span className="bw-tile-state">BASE</span>
+            </div>
+          ))}
+          {list.map((ing, i) => {
+            const off = quitados.includes(ing);
             return (
-              <motion.div
-                className="bw-ing-wrap" key={n}
-                initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.03, type: 'spring', stiffness: 380, damping: 24 }}
+              <motion.button
+                type="button" key={ing}
+                className={`bw-tile${off ? ' bw-tile--off' : ''}`}
+                onClick={() => onTap(ing)}
+                aria-pressed={!off}
+                initial={{ opacity: 0, y: 14, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: i * 0.035, type: 'spring', stiffness: 380, damping: 24 }}
+                whileTap={{ scale: 0.92 }}
               >
-                <button type="button" className={`bw-ing${live ? ' bw-ing--live' : ''}`} onClick={() => onChip(n)}>
-                  <span className="bw-ing-emoji">{emojiOf(n)}</span>
-                  <span className="bw-ing-name">{n}</span>
-                  {base && <span className="bw-ing-tag bw-ing-tag--base">base</span>}
-                </button>
-              </motion.div>
+                <span className="bw-tile-emoji">{emojiOf(ing)}</span>
+                <span className="bw-tile-name">{ing}</span>
+                <span className="bw-tile-state">{off ? 'SIN' : 'LLEVA'}</span>
+                <motion.span
+                  className="bw-tile-badge"
+                  key={off ? 'off' : 'on'}
+                  initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+                >
+                  {off ? '✕' : '✓'}
+                </motion.span>
+              </motion.button>
             );
           })}
-          {config.sides.map((sd, i) => sideChip(sd.label, sd.emoji, sd.label, i, () => flashHighlight(null)))}
-          {papasOptions && config.kind !== 'papas' && sideChip('papas', '🍟', 'Papas fritas', config.sides.length, () => flashHighlight(null, true))}
+          {config.sides.map((sd) => (
+            <div key={sd.label} className="bw-tile bw-tile--base" aria-hidden="true">
+              <span className="bw-tile-emoji">{sd.emoji}</span>
+              <span className="bw-tile-name">{sd.label}</span>
+              <span className="bw-tile-state">INCLUIDO</span>
+            </div>
+          ))}
+          {papasOptions && config.kind !== 'papas' && (
+            <div className="bw-tile bw-tile--base" aria-hidden="true">
+              <span className="bw-tile-emoji">🍟</span>
+              <span className="bw-tile-name">Papas fritas</span>
+              <span className="bw-tile-state">INCLUIDO</span>
+            </div>
+          )}
         </div>
-      </div>
+      </>
     );
   };
-
-  // Pantalla "sacar": mosaicos grandes, tocar = sacar
-  const sectionSacar = () => (
-    <>
-      <p className="bw-step-intro">Tocá los que <b>NO querés</b>. Es gratis. Si querés todo, seguí con el botón de abajo.</p>
-      {ingList.length === 0 && <p className="bw-hint">Primero elegí la opción anterior.</p>}
-      <div className="bw-tiles">
-        {ingList.map((ing, i) => {
-          const off = quitados.includes(ing);
-          return (
-            <motion.button
-              type="button" key={ing}
-              className={`bw-tile${off ? ' bw-tile--off' : ''}`}
-              onClick={() => toggleIngrediente(ing)}
-              aria-pressed={!off}
-              initial={{ opacity: 0, y: 18, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: i * 0.04, type: 'spring', stiffness: 380, damping: 22 }}
-              whileTap={{ scale: 0.92 }}
-            >
-              <span className="bw-tile-emoji">{emojiOf(ing)}</span>
-              <span className="bw-tile-name">{ing}</span>
-              <span className="bw-tile-state">{off ? 'SIN' : 'LLEVA'}</span>
-              <motion.span
-                className="bw-tile-badge"
-                key={off ? 'off' : 'on'}
-                initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-              >
-                {off ? '✕' : '✓'}
-              </motion.span>
-            </motion.button>
-          );
-        })}
-      </div>
-    </>
-  );
 
   const sectionCarne = () => (
     <>
@@ -698,40 +674,55 @@ export default function BurgerCustomizer({
     </>
   );
 
-  const sectionPapas = () => (
-    <>
-      <p className="bw-step-intro">
-        {config.kind === 'papas' ? 'Elegí el estilo de tus papas.' : 'Tus papas fritas ya vienen incluidas.'} <b>Sazonadas es gratis</b> 🧡
-      </p>
-      <div className="bw-meds">
-        {papasOptions.map((o, i) => {
-          const active = papasStyle === o.id;
-          const hot = o.id === 'sazonadas';
-          return (
-            <motion.button
-              type="button" key={o.id}
-              className={`bw-med bw-papa${active ? ' bw-med--active' : ''}${hot ? ' bw-papa--hot' : ''}`}
-              onClick={() => pickPapas(o.id)}
-              aria-pressed={active}
-              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.06, type: 'spring', stiffness: 360, damping: 26 }}
-              whileTap={{ scale: 0.96 }}
-            >
-              {active && <motion.span layoutId="bw-papa-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
-              <span className="bw-papa-emoji">{hot ? '🍟🧡' : '🍟'}</span>
-              <span className="bw-med-text">
-                <span className="bw-med-name">
-                  {o.name}
-                  {o.badge && <span className="badge badge--pulse" style={{ marginLeft: 8 }}>{o.badge}</span>}
+  // Papas + dip en una sola pantalla, compactos y sin scroll
+  const sectionAcomp = () => (
+    <div className="bw-acomp">
+      {papasOptions && (
+        <>
+          <p className="bw-step-intro">
+            {config.kind === 'papas' ? 'Elegí el estilo de tus papas.' : 'Tus papas ya vienen incluidas.'} <b>Sazonadas es gratis</b> 🧡
+          </p>
+          <div className="bw-papas-row">
+            {papasOptions.map((o) => {
+              const active = papasStyle === o.id;
+              const hot = o.id === 'sazonadas';
+              return (
+                <motion.button
+                  type="button" key={o.id}
+                  className={`bw-papa-tile${active ? ' bw-papa-tile--active' : ''}${hot ? ' bw-papa-tile--hot' : ''}`}
+                  onClick={() => pickPapas(o.id)} aria-pressed={active} whileTap={{ scale: 0.95 }}
+                >
+                  {active && <motion.span layoutId="bw-papa-glow" className="bw-med-glow" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />}
+                  {o.badge && <span className="badge badge--pulse bw-papa-tile-badge">{o.badge}</span>}
+                  <span className="bw-papa-tile-emoji">{hot ? '🍟🧡' : '🍟'}</span>
+                  <span className="bw-papa-tile-name">{o.name.replace(' 🧡', '')}</span>
+                  <span className="bw-papa-tile-desc">{o.short || o.desc}</span>
+                  <span className="bw-papa-tile-tag">{hot ? 'Gratis' : 'Incluidas'}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </>
+      )}
+      {dipsList.length > 0 && (
+        <div className="bw-dip-block">
+          <div className="bw-dip-title">🥣 ¿Querés una salsa aparte?</div>
+          {dipsList.map((e) => {
+            const n = dips[e.id] || 0;
+            return (
+              <div key={e.id} className={`bw-dip-row${n ? ' bw-dip-row--active' : ''}`}>
+                <span className="bw-dip-emoji">{e.icon}</span>
+                <span className="bw-dip-text">
+                  <span className="bw-dip-name">{e.name}</span>
+                  <span className="bw-dip-price">+{formatARS(e.precio)} c/u</span>
                 </span>
-                <span className="bw-med-desc">{o.desc}</span>
-              </span>
-              <span className="bw-med-price">{hot ? 'Gratis' : 'Incluidas'}</span>
-            </motion.button>
-          );
-        })}
-      </div>
-    </>
+                <Stepper value={n} label={e.name} onMinus={() => changeDip(e.id, -1)} onPlus={() => changeDip(e.id, 1)} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 
   const renderStep = () => {
@@ -740,43 +731,17 @@ export default function BurgerCustomizer({
         <>
           {badge && <span className="badge badge--pulse bw-info-badge">{badge}</span>}
           <p className="bw-info-desc">{desc}</p>
-          {sectionLleva()}
-          <div className="bw-info-actions">
-            {tourTokens.length > 0 && (
-              <motion.button type="button" className="bw-tour-btn" onClick={tourOn ? stopTour : startTour} whileTap={{ scale: 0.96 }}>
-                {tourOn ? '⏹ Detener' : '▶ Ver ingrediente por ingrediente'}
-              </motion.button>
-            )}
-            {!isPhoto && (
-              <button
-                type="button" className={`bw-tour-btn bw-tour-btn--ghost${explodedManual ? ' bw-tour-btn--on' : ''}`}
-                onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
-              >
-                🔍 {explodedManual ? 'Juntar capas' : 'Separar capas'}
-              </button>
-            )}
-          </div>
-          {imageUrl && !isPhoto && (
-            <motion.button
-              type="button" className={`bw-photo${photoZoom ? ' bw-photo--zoom' : ''}`}
-              onClick={() => setPhotoZoom((v) => !v)} layout
-            >
-              <img src={imageUrl} alt={`Foto real de ${name}`} />
-              <span className="bw-photo-tag">📷 Foto real · tocá para {photoZoom ? 'achicar' : 'agrandar'}</span>
-            </motion.button>
+          {(ingList.length > 0 || vcfg?.byId) && (
+            <p className="bw-step-intro">Tocá lo que <b>NO querés</b>. Es gratis.</p>
           )}
-          <button type="button" className="bw-skip" onClick={() => goTo(steps.length - 1)}>
-            ⚡ La quiero tal cual viene
-          </button>
+          {sectionIngredientes()}
         </>
       );
     }
     if (stepKey === 'variante') return sectionVariant();
-    if (stepKey === 'sacar') return sectionSacar();
     if (stepKey === 'carne') return sectionCarne();
-    if (stepKey === 'extras') return sectionCards('Sumá lo que quieras con el botón +. No hay límite.', extrasList, extras, changeExtra);
-    if (stepKey === 'dips') return sectionCards('Agregá una salsa o dip aparte. Es opcional.', dipsList, dips, changeDip);
-    if (stepKey === 'papas') return sectionPapas();
+    if (stepKey === 'extras') return sectionCards('Sumá lo que quieras con el botón +.', extrasList, extras, changeExtra);
+    if (stepKey === 'acomp') return sectionAcomp();
     return recap;
   };
 
@@ -845,25 +810,8 @@ export default function BurgerCustomizer({
                         panName={config.base[0]}
                         mainName={config.base[1]}
                       />
-                      <button
-                        type="button" className={`bw-explode${exploded ? ' bw-explode--on' : ''}`}
-                        onClick={() => { stopTour(); setExplodedManual((v) => !v); buzz(8); }}
-                      >
-                        🔍 {exploded ? 'Juntar capas' : 'Ver capas'}
-                      </button>
                     </>
                   )}
-                  <div className="bw-caption">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.span
-                        key={tokenNow || 'idle'} className="bw-caption-text"
-                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        {tourOn ? 'Mirá cada ingrediente…' : desc}
-                      </motion.span>
-                    </AnimatePresence>
-                  </div>
                 </div>
 
                 <div className="bw-panel-col">
@@ -881,8 +829,8 @@ export default function BurgerCustomizer({
                 </div>
               </div>
 
-              {/* Footer fijo: precio + atrás + botón principal grande */}
-              <footer className="bw-footer bw-footer--guided">
+              {/* Footer fijo: precio (+cantidad al final) y botones grandes */}
+              <footer className={`bw-footer bw-footer--guided${isLast ? ' bw-footer--last' : ''}`}>
                 <AnimatePresence>
                   {addedCount > 0 && (
                     <motion.div
@@ -893,22 +841,43 @@ export default function BurgerCustomizer({
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="bw-footer-price">
-                  <span className="bw-footer-label">Total</span>
-                  <RollPrice value={totalUnidad * qty} className="bw-footer-val" />
-                </div>
-                <div className="bw-footer-actions">
-                  {step > 0 && (
-                    <button type="button" className="bw-back" onClick={() => goTo(step - 1)}>← Atrás</button>
+                <div className="bw-footer-top">
+                  <div className="bw-footer-price">
+                    <span className="bw-footer-label">Total</span>
+                    <RollPrice value={totalUnidad * qty} className="bw-footer-val" />
+                  </div>
+                  {isLast && (
+                    <div className="bw-qty">
+                      <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(Math.max(1, qty - 1))} aria-label="Menos">−</button>
+                      <motion.span key={qty} className="bw-qty-val" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{qty}</motion.span>
+                      <button type="button" className="bw-qty-btn" onClick={() => onQtyChange && onQtyChange(qty + 1)} aria-label="Más">+</button>
+                    </div>
                   )}
-                  <motion.button
-                    type="button" className="bw-btn-next bw-btn-next--big"
-                    onClick={isLast ? confirm : goNext} whileTap={{ scale: 0.96 }}
-                  >
-                    <span className="bw-btn-shine" />
-                    {nextLabel}
-                  </motion.button>
                 </div>
+                {isLast ? (
+                  <div className="bw-footer-stack">
+                    <motion.button type="button" className="bw-btn-next bw-btn-next--big" onClick={confirm} whileTap={{ scale: 0.96 }}>
+                      <span className="bw-btn-shine" />
+                      {nextLabel}
+                    </motion.button>
+                    <div className="bw-footer-actions">
+                      <button type="button" className="bw-back" onClick={() => goTo(step - 1)}>← Atrás</button>
+                      {onAddAnother && (
+                        <motion.button type="button" className="bw-another bw-another--footer" onClick={addAnother} whileTap={{ scale: 0.96 }}>
+                          👥 Armar otra distinta
+                        </motion.button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bw-footer-actions">
+                    {step > 0 && <button type="button" className="bw-back" onClick={() => goTo(step - 1)}>← Atrás</button>}
+                    <motion.button type="button" className="bw-btn-next bw-btn-next--big" onClick={goNext} whileTap={{ scale: 0.96 }}>
+                      <span className="bw-btn-shine" />
+                      {nextLabel}
+                    </motion.button>
+                  </div>
+                )}
               </footer>
 
               {/* Partículas al sumar cosas */}

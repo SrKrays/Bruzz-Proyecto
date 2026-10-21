@@ -61,15 +61,16 @@ export function CartChip({ cart, onOpen }) {
 
   return (
     <button
-      className={`cart-fab-header${isEmpty ? ' cart-fab-header--empty' : ' cart-fab-header--active'}`}
+      className={`cart-fab-header cart-pill${isEmpty ? ' cart-pill--empty' : ' cart-pill--active'}`}
       onClick={onOpen}
-      aria-label="Ver mi pedido"
+      aria-label={`Ver mi pedido (${totalItems} productos)`}
     >
-      <span className="cart-fab-header-icon">🛒</span>
+      <span className="cart-pill-icon">🛒</span>
+      <span className="cart-pill-text">MI PEDIDO</span>
       {/* key cambia con totalItems → re-dispara la animación spring */}
       <motion.span
         key={totalItems}
-        className={`cart-fab-header-badge${isEmpty ? ' zero' : ''}`}
+        className={`cart-pill-badge${isEmpty ? ' zero' : ''}`}
         initial={{ scale: isEmpty ? 1 : 1.6, y: isEmpty ? 0 : -3 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 18 }}
@@ -77,6 +78,48 @@ export function CartChip({ cart, onOpen }) {
         {totalItems}
       </motion.span>
     </button>
+  );
+}
+
+// Barra fija inferior: siempre visible cuando hay productos
+export function CartBar({ cart, onOpen }) {
+  const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+  const totalPrice = cart.reduce((s, i) => s + parsePrice(i.price) * i.qty, 0);
+  return (
+    <motion.button
+      type="button" className="cart-bar" onClick={onOpen}
+      initial={{ y: 90, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 90, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+    >
+      <span className="cart-bar-left">
+        <span className="cart-bar-icon">🛒</span>
+        <span className="cart-bar-text">
+          <b>VER MI PEDIDO</b>
+          <small>{totalItems} {totalItems === 1 ? 'producto' : 'productos'}</small>
+        </span>
+      </span>
+      <span className="cart-bar-total">{formatARS(totalPrice)} <span aria-hidden="true">→</span></span>
+    </motion.button>
+  );
+}
+
+// Aviso al agregar un producto
+export function CartToast({ toast, onOpen, onClose }) {
+  return (
+    <AnimatePresence>
+      {toast && (
+        <motion.div
+          key={toast.id} className="cart-toast" role="status"
+          initial={{ y: 40, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 40, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 360, damping: 24 }}
+        >
+          <span className="cart-toast-check">✓</span>
+          <span className="cart-toast-text"><b>¡Agregado a tu pedido!</b><small>{toast.name}</small></span>
+          <button type="button" className="cart-toast-btn" onClick={onOpen}>Ver pedido</button>
+          <button type="button" className="cart-toast-x" onClick={onClose} aria-label="Cerrar">✕</button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -91,7 +134,7 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
   const isEmpty    = totalItems === 0;
 
   // En mobile el panel viene de abajo; en desktop de la derecha
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 520;
 
   return (
     <>
@@ -104,55 +147,74 @@ export function CartPanel({ cart, onClose, onCartAdd, onCartRemove, onCartClear,
         onClick={onClose}
       />
       <motion.div
-        className="cart-panel"
+        className="cart-panel cp"
         initial={isMobile ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
         animate={isMobile ? { y: 0, opacity: 1 } : { x: 0, opacity: 1 }}
         exit={isMobile ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
       >
-        <div className="cart-panel-header">
-          <span className="cart-panel-title">Mi pedido</span>
-          <button className="cart-panel-close" onClick={onClose}>✕</button>
+        <div className="cp-header">
+          <div>
+            <span className="cp-title">🛒 Mi pedido</span>
+            <span className="cp-sub">{isEmpty ? 'Todavía no agregaste nada' : `${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en tu pedido`}</span>
+          </div>
+          <button className="cp-close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
 
         {isEmpty ? (
-          <div className="cart-panel-empty">
-            <span className="cart-panel-empty-icon">🍽️</span>
-            <p>Mirá la carta y seleccioná o agregá un producto para confirmar</p>
+          <div className="cp-empty">
+            <div className="cp-empty-icon">🛒</div>
+            <h3>¡Tu pedido empieza acá!</h3>
+            <p>Elegí tus favoritos de la carta y agregalos a tu pedido.</p>
+            <button className="cp-primary" onClick={onClose}>VER LA CARTA</button>
           </div>
         ) : (
           <>
-            <ul className="cart-panel-list">
-              {cart.map((item) => (
-                <li key={item._key} className="cart-panel-item">
-                  <div className="cart-panel-item-top">
-                    <span className="cart-panel-item-name">{item.name}</span>
-                    <span className="cart-panel-item-price">
-                      {formatARS(parsePrice(item.price) * item.qty)}
-                    </span>
-                  </div>
-                  {item.note && <p className="cart-panel-item-note">↳ {item.note}</p>}
-                  {item.sintaccVariedad && <p className="cart-panel-item-note">🌾 {item.sintaccVariedad}</p>}
-                  {item.medallon && <p className="cart-panel-item-note">🌿 {item.medallon}</p>}
-                  {item.papasStyle && <p className="cart-panel-item-note">🍟 {item.papasStyle}</p>}
-                  {(item.mods || []).map((m, mi) => <p key={mi} className="cart-panel-item-note">• {m}</p>)}
-                  <div className="cart-panel-item-controls">
-                    <button className="cart-panel-ctrl" onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
-                    <span className="cart-panel-item-qty">{item.qty}</span>
-                    <button className="cart-panel-ctrl" onClick={() => onCartAdd({ ...item, qty: 1, note: item.note || '', medallon: item.medallon || '', sintaccVariedad: item.sintaccVariedad || '', papasStyle: item.papasStyle || '', mods: item.mods || [] })} aria-label="Sumar uno">+</button>
-                    <button className="cart-panel-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑</button>
-                  </div>
-                </li>
-              ))}
+            <ul className="cp-list">
+              {cart.map((item) => {
+                const mods  = (item.mods || []).filter((m) => m !== 'Receta original');
+                const sin   = mods.filter((m) => /^sin /i.test(m));
+                const extra = mods.filter((m) => !/^sin /i.test(m));
+                return (
+                  <li key={item._key} className="cp-item">
+                    <div className="cp-item-img">
+                      {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>🍽️</span>}
+                    </div>
+                    <div className="cp-item-body">
+                      <div className="cp-item-top">
+                        <span className="cp-item-name">{item.name}</span>
+                        <span className="cp-item-price">{formatARS(parsePrice(item.price) * item.qty)}</span>
+                      </div>
+                      <div className="cp-item-tags">
+                        {item.sintaccVariedad && <span className="cp-tag">🌾 {item.sintaccVariedad}</span>}
+                        {item.medallon && <span className="cp-tag">🌿 {item.medallon}</span>}
+                        {sin.map((m, mi) => <span key={`s${mi}`} className="cp-tag cp-tag--sin">❌ {m}</span>)}
+                        {extra.map((m, mi) => <span key={`e${mi}`} className="cp-tag cp-tag--extra">➕ {m}</span>)}
+                        {item.papasStyle && <span className="cp-tag">🍟 {item.papasStyle}</span>}
+                        {item.note && <span className="cp-tag">↳ {item.note}</span>}
+                        {(item.mods || []).includes('Receta original') && <span className="cp-tag cp-tag--ok">✅ Receta original</span>}
+                      </div>
+                      <div className="cp-item-controls">
+                        <div className="cp-qty">
+                          <button onClick={() => onCartRemove(item._key)} aria-label="Quitar uno">−</button>
+                          <span>{item.qty}</span>
+                          <button onClick={() => onCartAdd({ ...item, qty: 1, _silent: true })} aria-label="Sumar uno">+</button>
+                        </div>
+                        <button className="cp-del" onClick={() => { for (let i = 0; i < item.qty; i++) onCartRemove(item._key); }} aria-label="Eliminar">🗑 Quitar</button>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
 
-            <div className="cart-panel-total">
-              <span>Total</span>
-              <span className="cart-panel-total-price">{formatARS(totalPrice)}</span>
+            <div className="cp-foot">
+              <div className="cp-row"><span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span><span>{formatARS(totalPrice)}</span></div>
+              <div className="cp-row cp-row--total"><span>Total</span><span>{formatARS(totalPrice)}</span></div>
+              <button className="cp-primary" onClick={onCheckout}>CONTINUAR CON MI PEDIDO →</button>
+              <button className="cp-secondary" onClick={onClose}>＋ Seguir agregando</button>
+              <button className="cp-clear" onClick={onCartClear}>Vaciar pedido</button>
             </div>
-
-            <button className="cart-panel-order-btn" onClick={onCheckout}>📲 Confirmar pedido</button>
-            <button className="cart-panel-clear" onClick={onCartClear}>Vaciar carrito</button>
           </>
         )}
       </motion.div>
@@ -824,17 +886,6 @@ export default function Items({
           );
         })}
       </div>
-
-      {cartOpen && (
-        <CartPanel
-          cart={cart}
-          onClose={onCloseCart}
-          onCartAdd={handleConfirmAdd}
-          onCartRemove={onCartRemove}
-          onCartClear={onCartClear}
-          onCheckout={() => { onCloseCart(); onOpenCheckout(); }}
-        />
-      )}
 
       {expandedKey !== null && (
         <button
