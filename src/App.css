@@ -3820,3 +3820,26 @@ height: auto;
   .bw-footer-stack { gap: 6px; }
   .bw-added { font-size: 13px; padding: 6px 10px; }
 }
+
+/* ═══ MÓVIL · configurador de una sola pantalla (sin scroll innecesario) ═══ */
+@media (max-width: 899px) {
+  .bw-overlay { height: 100vh; height: 100dvh; }
+  .bw-shell { height: 100%; }
+  /* la caja "lleva" repetía lo que ya muestran los interruptores: en celular se oculta */
+  .bw-infobox { display: none; }
+  .bw-info-badge { align-self: flex-start; }
+  .ing-legend { display: none; }
+  /* la burger se adapta al alto real y se achica según el paso */
+  .bw-stage-col { height: clamp(190px, 28vh, 270px); height: clamp(190px, 28dvh, 270px); transition: height 0.28s ease; }
+  .bw-shell[data-step="carne"] .bw-stage-col, .bw-shell[data-step="extras"] .bw-stage-col,
+  .bw-shell[data-step="acomp"] .bw-stage-col, .bw-shell[data-step="variante"] .bw-stage-col { height: clamp(165px, 24vh, 230px); height: clamp(165px, 24dvh, 230px); }
+  .bw-shell[data-step="resumen"] .bw-stage-col { height: clamp(135px, 19vh, 190px); height: clamp(135px, 19dvh, 190px); }
+  .bw-shell[data-step="resumen"] .pb-host { min-height: 0; }
+  .pb-host { min-height: 0; }
+  /* controles grandes y fáciles de tocar */
+  .bw-tile { min-height: 78px; justify-content: center; }
+  .bw-tile-name { font-size: 14px; font-weight: 700; }
+  .bw-card, .bw-med { min-height: 62px; }
+  .bw-panel-col { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .bw-step-intro { font-size: 15px; line-height: 1.35; }
+}
