@@ -946,6 +946,7 @@ export default function Promos({ onNavigate, onShowItems, onCartAdd = () => {} }
         <span className="screen-title">
           <RevealText as="span">Promos</RevealText>
         </span>
+        <span className="cart-slot" />
       </div>
 
       {/* ── Countdown Happy Hour (horario real) ── */}

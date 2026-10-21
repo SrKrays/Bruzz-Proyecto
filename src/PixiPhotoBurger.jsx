@@ -44,7 +44,7 @@ export const PHOTO_BURGERS = {
     // destellos fijos sobre el pan (donde brilla la foto)
     stars: [[0.3, 0.13], [0.62, 0.1], [0.78, 0.23], [0.18, 0.25]],
     feather: false,   // las fotos ya vienen recortadas (fondo transparente)
-    width: 300,
+    width: 336,
   },
 };
 
@@ -67,7 +67,8 @@ const removedOf = (cfg, quitados) => {
   return s;
 };
 
-const DW = 300; const DH = 240; const BASE_Y = 212;
+// Diseño más ancho: la burger llena el escenario (en celular y en escritorio)
+const DW = 350; const DH = 262; const BASE_Y = 238; const PS = 1.12; // PS = escala del plato/sombra respecto al diseño base
 // Partículas y reflejos ambientales (bokeh, polvo, destellos, vapor, brasas, luz que sigue al dedo).
 // Apagados: la burger es la protagonista. Cambiar a true para reactivarlos.
 const AMBIENT = false;
@@ -130,10 +131,17 @@ out vec4 finalColor;
 uniform sampler2D uTexture;
 uniform sampler2D uDepth;
 uniform vec2 uOffset;
+uniform vec2 uGlint;
 void main(void){
   float d = texture(uDepth, vTextureCoord).r;
   vec2 uv = vTextureCoord + uOffset * (d - 0.5);
-  finalColor = texture(uTexture, clamp(uv, 0.001, 0.999));
+  vec4 c = texture(uTexture, clamp(uv, 0.001, 0.999));
+  // brillo que recorre la burger: solo ilumina lo claro/brillante y respeta la silueta (sin rectángulos)
+  float s = uv.x + uv.y * 0.35;
+  float band = smoothstep(0.11, 0.0, abs(s - uGlint.x));
+  float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+  c.rgb += band * uGlint.y * c.a * (0.1 + lum * lum * 1.1) * vec3(1.0, 0.92, 0.78);
+  finalColor = c;
 }`;
 
 export default function PixiPhotoBurger({
@@ -175,15 +183,13 @@ export default function PixiPhotoBurger({
         build(st, app, cfg, isLite, host, cleanups);
         st.ready = true; fit(st, host);
         // primera foto (con respaldo a la más parecida)
+        prefetch(st, cfg);
         const first = await resolveTex(st, cfg, st.want || wantName);
         if (dead) return;
         if (!first) { onError?.(new Error('no-photo')); return; }
         st.shown = first.name; setPhoto(st, st.spA, first.tex);
         st.spA.alpha = 0;
-        gsap.fromTo(st.wrapState, { jy: -8 }, { jy: 0, duration: 0.7, ease: 'power3.out' });
-        gsap.fromTo(st.sq, { x: 0.97, y: 0.97 }, { x: 1, y: 1, duration: 0.9, ease: 'power3.out' });
-        gsap.to(st.spA, { alpha: 1, duration: 0.35 });
-        prefetch(st, cfg);
+        entrance(st);
         if (st.want && st.want !== first.name) go(st, cfg, st.want, { removed: [], added: [] });
       } catch (e) { if (!dead) onError?.(e); }
     })();
@@ -250,8 +256,8 @@ function build(st, app, cfg, isLite, host, cleanups) {
   st.cfg = cfg; st.photoW = cfg.width; st.photoH = 200;
   const root = new Container(); app.stage.addChild(root); st.root = root;
 
-  const glow = new Graphics().circle(0, 0, 150).fill(radial([[0, 'rgba(255,170,60,0.5)'], [0.6, 'rgba(255,120,30,0.14)'], [1, 'rgba(255,100,20,0)']]));
-  glow.position.set(DW / 2, 110); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
+  const glow = new Graphics().circle(0, 0, 190).fill(radial([[0, 'rgba(255,176,70,0.6)'], [0.55, 'rgba(255,125,35,0.18)'], [1, 'rgba(255,100,20,0)']]));
+  glow.position.set(DW / 2, 125); glow.blendMode = 'add'; root.addChild(glow); st.glow = glow;
 
   // plato oscuro con brillo en el borde (la burger apoya sobre él)
   const plate = new Graphics();
@@ -259,7 +265,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   plate.ellipse(0, 0, 150, 24).fill(new FillGradient({ type: 'linear', start: { x: 0, y: 0 }, end: { x: 0, y: 1 }, colorStops: [{ offset: 0, color: '#4a3a2c' }, { offset: 1, color: '#1d1511' }] }));
   plate.ellipse(0, -1, 128, 18).fill(new FillGradient({ type: 'linear', start: { x: 0, y: 0 }, end: { x: 0, y: 1 }, colorStops: [{ offset: 0, color: '#2a2019' }, { offset: 1, color: '#3b2d22' }] }));
   plate.ellipse(0, -2, 148, 22).stroke({ width: 1.5, color: '#ffcf8a', alpha: 0.35 });
-  plate.position.set(DW / 2, BASE_Y - 9); root.addChild(plate); st.plate = plate;
+  plate.position.set(DW / 2, BASE_Y - 9); plate.scale.set(PS); root.addChild(plate); st.plate = plate;
 
   // bokeh que flota detrás (reemplaza al fondo de la foto)
   const bokehTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 20).fill(radial([[0, 'rgba(255,214,140,0.85)'], [0.7, 'rgba(255,170,70,0.35)'], [1, 'rgba(255,150,50,0)']])));
@@ -271,7 +277,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
   }
 
   const shadow = new Graphics().ellipse(0, 0, 118, 12).fill(radial([[0, 'rgba(0,0,0,0.6)'], [1, 'rgba(0,0,0,0)']]));
-  shadow.position.set(DW / 2, BASE_Y + 3); root.addChild(shadow); st.shadow = shadow;
+  shadow.position.set(DW / 2, BASE_Y + 3); shadow.scale.set(PS); root.addChild(shadow); st.shadow = shadow;
 
   // envoltorio animable (salto/respiración) con el filtro de parallax
   const wrap = new Container(); wrap.position.set(DW / 2, BASE_Y); root.addChild(wrap); st.wrap = wrap;
@@ -282,13 +288,13 @@ function build(st, app, cfg, isLite, host, cleanups) {
 
   st.depth = st.depthFile || makeDepthTexture();
   st.parallax = { x: 0, y: 0, tx: 0, ty: 0 };
-  if (!isLite) {
+  {
     try {
       const filter = new Filter({
         glProgram: GlProgram.from({ vertex: defaultFilterVert, fragment: FRAG, name: 'photo-parallax' }),
         resources: {
           uDepth: st.depth.source,
-          parallaxUniforms: { uOffset: { value: new Float32Array([0, 0]), type: 'vec2<f32>' } },
+          parallaxUniforms: { uOffset: { value: new Float32Array([0, 0]), type: 'vec2<f32>' }, uGlint: { value: new Float32Array([-1, 0]), type: 'vec2<f32>' } },
         },
         padding: 0,
       });
@@ -297,21 +303,21 @@ function build(st, app, cfg, isLite, host, cleanups) {
   }
 
   // brillo que recorre pan y cheddar
-  const glintMask = new Graphics(); st.glintMask = glintMask; root.addChild(glintMask);
+  const glintMask = new Graphics(); st.glintMask = glintMask;   // (sin dibujar: el brillo ahora va en el shader)
   const band = new Graphics().rect(0, 0, 60, 10).fill(new FillGradient({
     type: 'linear', start: { x: 0, y: 0 }, end: { x: 1, y: 0 },
     colorStops: [{ offset: 0, color: 'rgba(255,255,255,0)' }, { offset: 0.5, color: 'rgba(255,248,220,0.55)' }, { offset: 1, color: 'rgba(255,255,255,0)' }],
   }));
-  const glint = new Sprite(app.renderer.generateTexture(band)); glint.blendMode = 'add'; glint.width = 70; glint.rotation = 0; glint.skew.x = -0.35;
-  glint.alpha = 0; glint.mask = glintMask; root.addChild(glint); st.glint = glint;
+  const glint = new Sprite(Texture.EMPTY); glint.visible = false; st.glint = glint;
+  st.gl = { x: -0.6, k: 0 };
   const sweep = () => {
     if (!st.ready) return;
-    glint.x = DW / 2 - st.photoW / 2 - 80; glint.alpha = 0.9;
-    gsap.to(glint, { x: DW / 2 + st.photoW / 2 + 10, duration: 1.3, ease: 'power1.inOut' });
-    gsap.to(glint, { alpha: 0, duration: 0.3, delay: 1.1 });
+    st.gl.x = -0.35; st.gl.k = 0;
+    gsap.to(st.gl, { x: 1.45, duration: 1.5, ease: 'power1.inOut' });
+    gsap.timeline().to(st.gl, { k: 1, duration: 0.45 }).to(st.gl, { k: 0, duration: 0.6 }, 0.95);
   };
-  const sweepTimer = GLINT_ON ? setInterval(sweep, 5200) : 0; if (GLINT_ON) setTimeout(sweep, 1800);
-  cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(glint); });
+  const sweepTimer = GLINT_ON ? setInterval(sweep, 4200) : 0; if (GLINT_ON) setTimeout(sweep, 1200);
+  cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(st.gl); });
 
   // vapor
   const steamTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 22).fill(radial([[0, 'rgba(255,255,255,0.5)'], [1, 'rgba(255,255,255,0)']])));
@@ -377,12 +383,13 @@ function build(st, app, cfg, isLite, host, cleanups) {
       } else if (D) window.addEventListener('deviceorientation', onOri);
     } catch { /* noop */ }
   };
-  host.addEventListener('pointermove', onMove); host.addEventListener('pointerleave', onLeave);
-  host.addEventListener('pointerdown', askGyro, { once: true });
+  const ev = host.parentElement || host;   // el host puede ser transparente a los toques: escuchamos en el escenario
+  ev.addEventListener('pointermove', onMove); ev.addEventListener('pointerleave', onLeave);
+  ev.addEventListener('pointerdown', askGyro, { once: true });
   if (!(window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function')) askGyro();
   cleanups.push(() => {
-    host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
-    host.removeEventListener('pointerdown', askGyro); window.removeEventListener('deviceorientation', onOri);
+    ev.removeEventListener('pointermove', onMove); ev.removeEventListener('pointerleave', onLeave);
+    ev.removeEventListener('pointerdown', askGyro); window.removeEventListener('deviceorientation', onOri);
   });
 
   app.ticker.add((tk) => {
@@ -394,6 +401,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
     if (st.filter) {
       const u = st.filter.resources.parallaxUniforms.uniforms.uOffset;
       u[0] = -st.parallax.x * 0.014; u[1] = -st.parallax.y * 0.01;
+      const g = st.filter.resources.parallaxUniforms.uniforms.uGlint; g[0] = st.gl.x; g[1] = st.gl.k * (0.9 + st.flare * 0.5);
       st.filter.resources.parallaxUniforms.update?.();
     } else {
       wrap.x = DW / 2 + st.parallax.x * 3;
@@ -401,8 +409,8 @@ function build(st, app, cfg, isLite, host, cleanups) {
     wrap.rotation = st.parallax.x * 0.012;
     const breath = 1 + (Math.sin(t * 1.5) * 0.5 + 0.5) * 0.015;
     wrap.scale.set(st.sq.x * breath, st.sq.y * breath);
-    wrap.y = BASE_Y + st.wrapState.jy;
-    shadow.scale.set(1 - Math.abs(Math.min(0, st.wrapState.jy)) / 120, 1);
+    wrap.y = BASE_Y + st.wrapState.jy + Math.sin(t * 1.1) * 1.6 * (st.floatK ?? 1);   // flota apenas, como en una vitrina
+    shadow.scale.set(PS * (1 - Math.abs(Math.min(0, st.wrapState.jy)) / 120), PS);
     shadow.alpha = 0.9 - Math.abs(Math.min(0, st.wrapState.jy)) / 90;
 
 
@@ -427,7 +435,8 @@ function build(st, app, cfg, isLite, host, cleanups) {
       b.sp.scale.set(b.sz * (1 + Math.sin(t * 0.8 + b.ph) * 0.08)); b.sp.alpha = (0.28 + 0.2 * Math.sin(t * 0.6 + b.ph)) * (0.6 + st.flare * 0.5);
     });
     st.flare = Math.max(0, st.flare - dt * 1.5);
-    glow.alpha = (AMBIENT ? 0.75 : 0.42) + Math.sin(t * 1.6) * 0.06 + st.flare * 0.25;
+    glow.alpha = (AMBIENT ? 0.75 : 0.55) + Math.sin(t * 1.3) * 0.08 + st.flare * 0.3 + (st.entry || 0) * 0.5;
+    glow.scale.set(1 + Math.sin(t * 1.3) * 0.03 + (st.entry || 0) * 0.25);
     const sb = st.steamBase || { x: DW / 2, y: 140, w: 120 };
     st.steam.forEach((p) => {
       p.t += dt * p.sp * 3; if (p.t > 1) { p.t = 0; p.dx = Math.random() - 0.5; }
@@ -507,6 +516,24 @@ async function go(st, cfg, want, ev) {
   }
 }
 
+// Entrada al abrir el panel: la burger cae sobre el plato, se aplasta, rebota y suelta vapor
+function entrance(st) {
+  st.entry = 1; st.floatK = 0;
+  gsap.to(st, { entry: 0, duration: 1.1, ease: 'power2.out' });
+  gsap.to(st, { floatK: 1, duration: 1.2, delay: 0.6 });
+  st.spA.alpha = 0; gsap.to(st.spA, { alpha: 1, duration: 0.25 });
+  gsap.timeline()
+    .fromTo(st.wrapState, { jy: -60 }, { jy: 0, duration: 0.42, ease: 'power2.in' }, 0)
+    .fromTo(st.sq, { x: 0.96, y: 1.05 }, { x: 0.96, y: 1.05, duration: 0.001 }, 0)
+    .to(st.sq, { x: 1, y: 1, duration: 0.3 }, 0.12)
+    .to(st.sq, { x: 1.07, y: 0.92, duration: 0.08, ease: 'power2.out' }, 0.42)
+    .to(st.wrapState, { jy: -9, duration: 0.14, ease: 'power2.out' }, 0.5)
+    .to(st.sq, { x: 0.985, y: 1.02, duration: 0.14, ease: 'sine.out' }, 0.5)
+    .to(st.wrapState, { jy: 0, duration: 0.14, ease: 'power2.in' }, 0.64)
+    .to(st.sq, { x: 1, y: 1, duration: 0.25, ease: 'sine.inOut' }, 0.64)
+    .call(() => steamPuff(st, st.lite ? 3 : 5), null, 0.42);
+}
+
 // bocanada de vapor al aterrizar
 function steamPuff(st, n = 4) {
   if (!st.ready || !st.steamTex) return;
@@ -526,7 +553,7 @@ function steamPuff(st, n = 4) {
 function makePiece(st, cfg, k) {
   const def = cfg.sticker[k]; const tex = st.ok.get(`sticker:${k}`);
   if (!def || !tex) return null;
-  const w = 74; const sc = w / tex.width;
+  const w = 118; const sc = w / tex.width;
   const c = new Container();
   const sh = new Sprite(tex); sh.anchor.set(0.5); sh.scale.set(sc); sh.tint = 0x000000; sh.alpha = 0.35; sh.position.set(4, 7);
   const sp = new Sprite(tex); sp.anchor.set(0.5); sp.scale.set(sc);
@@ -547,10 +574,10 @@ function flySwap(st, cfg, res, { removed, added }) {
     const tl = gsap.timeline({ onComplete: done });
     if (out) {
       // 1) anticipación (compresión)  2) salto y vuelo de la pieza  3) crossfade arriba  4) caída + rebote + vapor
-      tl.to(st.sq, { x: 1.045, y: 0.94, duration: 0.11, ease: 'power2.out' }, 0)
+      tl.to(st.sq, { x: 1.05, y: 0.93, duration: 0.11, ease: 'power2.out' }, 0)
         .to(st.wrapState, { jy: 2, duration: 0.11, ease: 'power2.out' }, 0)
         .to(st.sq, { x: 0.965, y: 1.05, duration: 0.16, ease: 'power2.out' }, 0.11)
-        .to(st.wrapState, { jy: -22, duration: 0.2, ease: 'power2.out' }, 0.11)
+        .to(st.wrapState, { jy: -30, duration: 0.2, ease: 'power2.out' }, 0.11)
         .to(st.spB, { alpha: 1, duration: 0.13, ease: 'sine.inOut' }, 0.24)
         .to(st.wrapState, { jy: 0, duration: 0.2, ease: 'power2.in' }, 0.34)
         .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.34)
@@ -561,7 +588,7 @@ function flySwap(st, cfg, res, { removed, added }) {
         .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.71)
         .call(() => steamPuff(st, st.lite ? 3 : 5), null, 0.54);
       pieces.forEach((p, i) => {
-        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (62 + i * 14); const oy = p.py - 70 - i * 10;
+        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (78 + i * 16); const oy = p.py - 96 - i * 12;
         p.c.position.set(p.px, p.py); p.c.scale.set(0.5); p.c.alpha = 0;
         tl.to(p.c, { alpha: 1, duration: 0.08 }, 0.11)
           .to(p.c.scale, { x: 1, y: 1, duration: 0.2, ease: 'back.out(1.6)' }, 0.11)

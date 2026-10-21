@@ -3413,7 +3413,7 @@ height: auto;
 .bw-btn-next.bw-btn-next--big { flex: 1; height: 58px; font-size: 18px; border-radius: 16px; min-width: 0; padding: 0 14px; }
 @media (min-width: 900px) { .bw-step-heading { font-size: 30px; } }
 
-@media (max-width: 760px) { .bw-stage-col { height: clamp(170px, 28vh, 260px); } }
+@media (max-width: 760px) { .bw-stage-col { height: clamp(215px, 36vh, 310px); } }
 
 /* ═══ Armar otro distinto (para otra persona) ═══ */
 .bw-another-box { margin-top: 8px; padding: 16px; border-radius: 16px; background: rgba(245,200,66,0.08); border: 1px dashed rgba(245,200,66,0.55); }
@@ -3750,3 +3750,116 @@ height: auto;
 .pb-host canvas { touch-action: auto; }
 .pb-loading { display:flex; align-items:center; justify-content:center; width:100%; height:100%; min-height:240px; font-size:64px; animation: pbpulse 1s ease-in-out infinite; }
 @keyframes pbpulse { 50% { transform: scale(1.15); } }
+
+/* Escenario de la burger: foto viva más grande y con presencia (solo apilado, el escritorio usa flex:1) */
+@media (max-width: 899px) { .bw-stage-col { height: clamp(235px, 38vh, 340px); } .pb-host { min-height: 215px; } }
+@media (min-width: 900px) { .bw-left .bw-stage-col { min-height: 320px; } }
+
+/* ═══ MÓVIL · carrito compacto en la fila del título ═══ */
+.cart-slot { margin-left: auto; display: inline-flex; flex-shrink: 0; }
+.cart-pill { letter-spacing: 0.06em; }
+.cart-pill--inline { position: static !important; height: 38px; padding: 0 12px 0 10px; gap: 6px; border-width: 1.5px; box-shadow: none; }
+.cart-pill--inline.cart-pill--active { box-shadow: 0 3px 14px rgba(245,200,66,0.45); }
+.cart-pill--inline .cart-pill-icon { font-size: 17px; }
+.cart-pill--inline .cart-pill-text { font-size: 12px; }
+.cart-pill--inline .cart-pill-badge { min-width: 20px; height: 20px; font-size: 12px; padding: 0 5px; }
+@media (max-width: 480px) {
+  .cart-pill:not(.cart-pill--inline) { top: 8px; right: 8px; height: 36px; padding: 0 10px; border-width: 1.5px; }
+  .cart-pill:not(.cart-pill--inline) .cart-pill-text { display: none; }
+  .cart-pill--inline .cart-pill-text { display: inline; }
+  .back-row { gap: 10px; }
+  .screen-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* ═══ MÓVIL · panel de la burger: más aire para las opciones, menos cromo ═══ */
+@media (max-width: 899px) {
+  .bw-header { padding: 10px 14px 0; gap: 10px; }
+  .bw-title-small { display: none; }
+  .bw-title-name { font-size: 26px; }
+  .bw-header-price { margin-left: auto; font-size: 17px; padding: 5px 12px; }
+  .bw-close { width: 38px; height: 38px; font-size: 15px; }
+  .bw-progress { padding: 6px 14px 0; }
+  .bw-progress-text { font-size: 15px; margin-bottom: 5px; }
+  .bw-stage-col { height: clamp(215px, 31vh, 285px); }
+  .pb-host { min-height: 200px; }
+  .bw-panel-col { padding: 12px 14px 10px; }
+  .bw-step { gap: 10px; }
+  .bw-step-heading { font-size: 22px; }
+  .bw-step-intro { font-size: 14.5px; }
+  /* tarjetas de opciones */
+  .bw-cards, .bw-meds { gap: 8px; }
+  .bw-card { padding: 11px 12px; min-height: 66px; border-width: 1.5px; border-radius: 14px; gap: 10px; }
+  .bw-card-emoji { font-size: 30px; width: 40px; height: 40px; }
+  .bw-card-name { font-size: 17px; }
+  .bw-card-desc { font-size: 13.5px; line-height: 1.3; }
+  .bw-card-price { font-size: 14.5px; }
+  .bw-med { padding: 10px 12px; gap: 10px; border-radius: 14px; }
+  .bw-med-name { font-size: 17px; }
+  .bw-med-desc { font-size: 13px; }
+  .bw-med-price { font-size: 15px; }
+  .bw-tiles { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .bw-tile { padding: 10px 4px 8px; border-radius: 14px; gap: 4px; }
+  .bw-tile-emoji { font-size: 26px; }
+  .bw-tile-name { font-size: 13px; }
+  .bw-tile-badge { width: 20px; height: 20px; top: 5px; right: 5px; font-size: 11px; }
+  .bw-step-btn, .bw-qty-btn { min-width: 44px; min-height: 44px; font-size: 22px; }
+  /* pie: total + botones en UNA fila (pasos 1-3) */
+  .bw-footer.bw-footer--guided:not(.bw-footer--last) { flex-direction: row; align-items: center; gap: 10px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .bw-footer--guided:not(.bw-footer--last) .bw-footer-top { flex: 0 0 auto; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-footer-price { flex-direction: column; align-items: flex-start; gap: 0; flex: none; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-footer-label { font-size: 12px; font-weight: 700; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-footer-val { font-size: 24px; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-footer-actions { flex: 1; min-width: 0; gap: 8px; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-btn-next.bw-btn-next--big { height: 52px; font-size: 17px; border-radius: 14px; padding: 0 10px; }
+  .bw-footer--guided:not(.bw-footer--last) .bw-back { height: 52px; padding: 0 14px; font-size: 16px; border-radius: 14px; }
+  /* último paso: más compacto */
+  .bw-footer.bw-footer--last { gap: 6px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .bw-footer--guided .bw-footer-val { font-size: 26px; }
+  .bw-footer--last .bw-btn-next--big { height: 52px; font-size: 18px; border-radius: 14px; }
+  .bw-footer--last .bw-back, .bw-another--footer { height: 46px; font-size: 16px; border-radius: 14px; }
+  .bw-footer-stack { gap: 6px; }
+  .bw-added { font-size: 13px; padding: 6px 10px; }
+}
+
+/* ═══ MÓVIL · configurador de una sola pantalla (sin scroll innecesario) ═══ */
+@media (max-width: 899px) {
+  .bw-overlay { height: 100vh; height: 100dvh; }
+  .bw-shell { height: 100%; }
+  /* la caja "lleva" repetía lo que ya muestran los interruptores: en celular se oculta */
+  .bw-infobox { display: none; }
+  .bw-info-badge { align-self: flex-start; }
+  .ing-legend { display: none; }
+  /* la burger se adapta al alto real y se achica según el paso */
+  .bw-stage-col { height: clamp(190px, 28vh, 270px); height: clamp(190px, 28dvh, 270px); transition: height 0.28s ease; }
+  .bw-shell[data-step="carne"] .bw-stage-col, .bw-shell[data-step="extras"] .bw-stage-col,
+  .bw-shell[data-step="acomp"] .bw-stage-col, .bw-shell[data-step="variante"] .bw-stage-col { height: clamp(165px, 24vh, 230px); height: clamp(165px, 24dvh, 230px); }
+  .bw-shell[data-step="resumen"] .bw-stage-col { height: clamp(135px, 19vh, 190px); height: clamp(135px, 19dvh, 190px); }
+  .bw-shell[data-step="resumen"] .pb-host { min-height: 0; }
+  .pb-host { min-height: 0; }
+  /* controles grandes y fáciles de tocar */
+  .bw-tile { min-height: 78px; justify-content: center; }
+  .bw-tile-name { font-size: 14px; font-weight: 700; }
+  .bw-card, .bw-med { min-height: 62px; }
+  .bw-panel-col { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .bw-step-intro { font-size: 15px; line-height: 1.35; }
+}
+
+/* ═══ MÓVIL · burger de tamaño FIJO en todos los pasos (nada de bandas ni saltos de tamaño) ═══ */
+@media (max-width: 899px) {
+  .bw-stage-col,
+  .bw-shell[data-step] .bw-stage-col {
+    height: clamp(205px, 27vh, 245px); height: clamp(205px, 27dvh, 245px); transition: none;
+  }
+  /* el lienzo se extiende 44px sobre el escenario: el salto y la pieza que vuela no se cortan arriba */
+  .pb-host {
+    position: absolute; left: 0; right: 0; bottom: 0; top: -44px; width: auto; height: auto; min-height: 0;
+    overflow: visible; pointer-events: none; z-index: 2;
+  }
+}
+
+/* ═══ MÓVIL · la burger no pisa el título ni el progreso ═══ */
+@media (max-width: 899px) {
+  .bw-header, .bw-progress { position: relative; z-index: 3; }
+  .bw-stage-col { margin-top: 6px; }
+  .pb-host { top: -20px; }
+}

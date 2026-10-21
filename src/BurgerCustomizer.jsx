@@ -780,7 +780,7 @@ export default function BurgerCustomizer({
             transition={{ duration: 0.22 }}
           >
             <motion.div
-              className="bw-shell" role="dialog" aria-modal="true" aria-label={`${kindText.small} ${name}`}
+              className="bw-shell" data-step={stepKey} role="dialog" aria-modal="true" aria-label={`${kindText.small} ${name}`}
               initial={{ y: 80, scale: 0.96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 80, scale: 0.97, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
