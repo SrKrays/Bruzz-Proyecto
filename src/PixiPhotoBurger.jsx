@@ -71,6 +71,9 @@ const DW = 300; const DH = 240; const BASE_Y = 212;
 // Partículas y reflejos ambientales (bokeh, polvo, destellos, vapor, brasas, luz que sigue al dedo).
 // Apagados: la burger es la protagonista. Cambiar a true para reactivarlos.
 const AMBIENT = false;
+// Vida en reposo permitida: vapor suave y brillo que recorre pan y cheddar (sin bokeh/polvo/brasas)
+const STEAM_ON = true;
+const GLINT_ON = true;
 
 const radial = (stops) => new FillGradient({
   type: 'radial', center: { x: 0.5, y: 0.5 }, innerRadius: 0, outerCenter: { x: 0.5, y: 0.5 }, outerRadius: 0.5,
@@ -139,7 +142,14 @@ export default function PixiPhotoBurger({
   const hostRef = useRef(null);
   const S = useRef({ ready: false, want: null, shown: null, busy: false, ok: new Map(), bad: new Set() });
   const cfg = PHOTO_BURGERS[photoLive];
-  const wantName = comboName(cfg.order, removedOf(cfg, quitados));
+  const removedSet = removedOf(cfg, quitados);
+  // Orden en que se fueron sacando: la foto que se muestra es la del ÚLTIMO sacado que siga activo
+  const orderRef = useRef([]); const prevRef = useRef(new Set());
+  orderRef.current = orderRef.current.filter((k) => removedSet.has(k));
+  cfg.order.forEach((k) => { if (removedSet.has(k) && !orderRef.current.includes(k)) orderRef.current.push(k); });
+  const last = orderRef.current[orderRef.current.length - 1];
+  const wantName = last ? `sin-${last}` : 'base';
+  const removedKey = [...removedSet].sort().join(',');
 
   useEffect(() => {
     const host = hostRef.current; const st = S.current;
@@ -174,7 +184,7 @@ export default function PixiPhotoBurger({
         gsap.fromTo(st.sq, { x: 0.97, y: 0.97 }, { x: 1, y: 1, duration: 0.9, ease: 'power3.out' });
         gsap.to(st.spA, { alpha: 1, duration: 0.35 });
         prefetch(st, cfg);
-        if (st.want && st.want !== first.name) go(st, cfg, st.want);
+        if (st.want && st.want !== first.name) go(st, cfg, st.want, { removed: [], added: [] });
       } catch (e) { if (!dead) onError?.(e); }
     })();
 
@@ -194,8 +204,11 @@ export default function PixiPhotoBurger({
   useEffect(() => {
     const st = S.current;
     st.want = wantName;
-    if (st.ready && st.shown) go(st, cfg, wantName);
-  }, [wantName]); // eslint-disable-line react-hooks/exhaustive-deps
+    const prev = prevRef.current;
+    const ev = { removed: [...removedSet].filter((k) => !prev.has(k)), added: [...prev].filter((k) => !removedSet.has(k)) };
+    prevRef.current = new Set(removedSet);
+    if (st.ready && st.shown) go(st, cfg, wantName, ev);
+  }, [removedKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // brillo extra al tocar algo
   useEffect(() => { const st = S.current; if (st.ready && bounceKey > 0) st.flare = 1; }, [bounceKey]);
@@ -297,13 +310,14 @@ function build(st, app, cfg, isLite, host, cleanups) {
     gsap.to(glint, { x: DW / 2 + st.photoW / 2 + 10, duration: 1.3, ease: 'power1.inOut' });
     gsap.to(glint, { alpha: 0, duration: 0.3, delay: 1.1 });
   };
-  const sweepTimer = AMBIENT ? setInterval(sweep, 5200) : 0; if (AMBIENT) setTimeout(sweep, 1400);
+  const sweepTimer = GLINT_ON ? setInterval(sweep, 5200) : 0; if (GLINT_ON) setTimeout(sweep, 1800);
   cleanups.push(() => { clearInterval(sweepTimer); gsap.killTweensOf(glint); });
 
   // vapor
   const steamTex = app.renderer.generateTexture(new Graphics().circle(0, 0, 22).fill(radial([[0, 'rgba(255,255,255,0.5)'], [1, 'rgba(255,255,255,0)']])));
   const steam = new Container(); root.addChild(steam); st.steam = [];
-  const N = AMBIENT ? (isLite ? 4 : 8) : 0;
+  st.steamTex = steamTex;
+  const N = STEAM_ON ? (isLite ? 3 : 5) : 0;
   for (let i = 0; i < N; i++) {
     const s = new Sprite(steamTex); s.anchor.set(0.5); s.alpha = 0; steam.addChild(s);
     st.steam.push({ s, t: i / N, sp: 0.1 + Math.random() * 0.05, dx: (Math.random() - 0.5), ph: Math.random() * 6 });
@@ -418,7 +432,7 @@ function build(st, app, cfg, isLite, host, cleanups) {
     st.steam.forEach((p) => {
       p.t += dt * p.sp * 3; if (p.t > 1) { p.t = 0; p.dx = Math.random() - 0.5; }
       p.s.x = sb.x + p.dx * sb.w * 0.6 + Math.sin(t * 1.4 + p.ph) * 12 * p.t;
-      p.s.y = sb.y - p.t * 90; p.s.alpha = Math.sin(p.t * Math.PI) * 0.42; p.s.scale.set(0.6 + p.t * 1.5);
+      p.s.y = sb.y - p.t * 90; p.s.alpha = Math.sin(p.t * Math.PI) * 0.26; p.s.scale.set(0.6 + p.t * 1.5);
     });
     st.embers.forEach((p) => {
       p.t += dt * p.sp; if (p.t > 1) { p.t = 0; p.x0 = DW / 2 + (Math.random() - 0.5) * 230; }
@@ -456,8 +470,12 @@ async function resolveTex(st, cfg, name) {
   return null;
 }
 function prefetch(st, cfg) {
-  // base + las 5 variantes de "sin 1 ingrediente" en segundo plano
-  [...cfg.order.map((k) => `sin-${k}`)].forEach((n, i) => setTimeout(() => { if (st.ready) fetchCombo(st, cfg, n); }, 600 + i * 350));
+  // precarga inmediata (en paralelo): todas las fotos "sin" y las piezas que vuelan → el crossfade nunca parpadea
+  cfg.order.forEach((k) => {
+    fetchCombo(st, cfg, `sin-${k}`);
+    const def = cfg.sticker[k];
+    if (def && !st.ok.has(`sticker:${k}`)) loadTex(baseUrl() + cfg.stickerDir + def.f).then((t) => st.ok.set(`sticker:${k}`, t)).catch(() => {});
+  });
 }
 
 // ════════ el salto ════════
@@ -467,40 +485,112 @@ function diffKeys(a, b) {
   return { removed: [...B].filter((x) => !A.has(x)), added: [...A].filter((x) => !B.has(x)) };
 }
 
-async function go(st, cfg, want) {
-  if (st.busy) { st.queued = want; return; }
-  if (!st.ready || want === st.shown) return;
+async function go(st, cfg, want, ev) {
+  const evs = ev || { removed: [], added: [] };
+  if (st.busy) {
+    const q = st.queued;
+    st.queued = { want, ev: { removed: [...(q?.ev.removed || []), ...evs.removed], added: [...(q?.ev.added || []), ...evs.added] } };
+    return;
+  }
+  if (!st.ready) return;
+  if (want === st.shown && !evs.removed.length && !evs.added.length) return;
   st.busy = true;
   try {
     const res = await resolveTex(st, cfg, want);
-    if (!res || res.name === st.shown) {
-      // no hay foto distinta: solo el salto + sticker
-      jumpOnly(st);
-      await new Promise((r) => setTimeout(r, 800));
-      return;
-    }
-    const prevShown = st.shown;
-    const dk = diffKeys(prevShown, want);
-    // ¿un solo ingrediente con sprite real? → extracción física (sin saltar toda la burger)
-    if (dk.removed.length + dk.added.length === 1) {
-      const key = dk.removed[0] || dk.added[0]; const removing = dk.removed.length === 1;
-      const ok = cfg.extract?.[key] && res.name === want && (removing ? prevShown === 'base' : want === 'base');
-      if (ok && await extractMove(st, cfg, key, removing, res)) return;
-    }
-    // combinación sin extracción real: fundido suave entre las dos fotos + asentamiento mínimo (sin saltos ni stickers)
-    const apexDone = new Promise((resolve) => {
-      setPhoto(st, st.spB, res.tex); st.spB.alpha = 0;
-      const tl = gsap.timeline({ onComplete: () => { setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0; resolve(); } });
-      tl.to(st.spB, { alpha: 1, duration: 0.38, ease: 'sine.inOut' }, 0)
-        .to(st.sq, { x: 1.006, y: 0.994, duration: 0.15, ease: 'sine.out' }, 0.1)
-        .to(st.sq, { x: 1, y: 1, duration: 0.45, ease: 'sine.inOut' }, 0.25);
-    });
+    if (!res) { jumpOnly(st); await new Promise((r) => setTimeout(r, 700)); return; }
+    await flySwap(st, cfg, res, evs);
     st.shown = res.name;
-    await apexDone;
   } finally {
     st.busy = false;
-    if (st.queued && st.queued !== st.shown) { const q = st.queued; st.queued = null; go(st, cfg, q); } else st.queued = null;
+    const q = st.queued; st.queued = null;
+    if (q) go(st, cfg, q.want, q.ev);
   }
+}
+
+// bocanada de vapor al aterrizar
+function steamPuff(st, n = 4) {
+  if (!st.ready || !st.steamTex) return;
+  const sb = st.steamBase || { x: DW / 2, y: 140, w: 120 };
+  for (let i = 0; i < n; i++) {
+    const sp = new Sprite(st.steamTex); sp.anchor.set(0.5);
+    sp.position.set(sb.x + (Math.random() - 0.5) * sb.w * 0.7, sb.y + 8); sp.alpha = 0; sp.scale.set(0.5);
+    st.fxTop.addChild(sp);
+    const d = i * 0.05;
+    gsap.to(sp, { y: sp.y - 46 - Math.random() * 26, x: sp.x + (Math.random() - 0.5) * 22, duration: 0.95, delay: d, ease: 'sine.out' });
+    gsap.to(sp.scale, { x: 1.5 + Math.random() * 0.6, y: 1.5 + Math.random() * 0.6, duration: 0.95, delay: d, ease: 'sine.out' });
+    gsap.timeline({ delay: d, onComplete: () => sp.destroy() }).to(sp, { alpha: 0.4, duration: 0.18 }).to(sp, { alpha: 0, duration: 0.77, ease: 'sine.in' });
+  }
+}
+
+// Pieza limpia (dilusso-capas) con sombra
+function makePiece(st, cfg, k) {
+  const def = cfg.sticker[k]; const tex = st.ok.get(`sticker:${k}`);
+  if (!def || !tex) return null;
+  const w = 74; const sc = w / tex.width;
+  const c = new Container();
+  const sh = new Sprite(tex); sh.anchor.set(0.5); sh.scale.set(sc); sh.tint = 0x000000; sh.alpha = 0.35; sh.position.set(4, 7);
+  const sp = new Sprite(tex); sp.anchor.set(0.5); sp.scale.set(sc);
+  c.addChild(sh, sp); st.stickers.addChild(c);
+  const W = st.photoW; const H = st.photoH;
+  return { c, sc, px: DW / 2 - W / 2 + def.at[0] * W, py: BASE_Y - H + def.at[1] * H };
+}
+
+/** Salto con peso: anticipación → vuela la pieza → crossfade en el punto más alto → aterriza con rebote + vapor. */
+function flySwap(st, cfg, res, { removed, added }) {
+  const out = removed.length > 0;
+  const keys = out ? removed : added;
+  const pieces = keys.map((k) => makePiece(st, cfg, k)).filter(Boolean);
+  setPhoto(st, st.spB, res.tex); st.spB.alpha = 0;
+  return new Promise((resolve) => {
+    const kill = () => pieces.forEach((p) => { try { p.c.destroy({ children: true }); } catch { /* noop */ } });
+    const done = () => { setPhoto(st, st.spA, res.tex); st.spA.alpha = 1; st.spB.alpha = 0; kill(); resolve(); };
+    const tl = gsap.timeline({ onComplete: done });
+    if (out) {
+      // 1) anticipación (compresión)  2) salto y vuelo de la pieza  3) crossfade arriba  4) caída + rebote + vapor
+      tl.to(st.sq, { x: 1.045, y: 0.94, duration: 0.11, ease: 'power2.out' }, 0)
+        .to(st.wrapState, { jy: 2, duration: 0.11, ease: 'power2.out' }, 0)
+        .to(st.sq, { x: 0.965, y: 1.05, duration: 0.16, ease: 'power2.out' }, 0.11)
+        .to(st.wrapState, { jy: -22, duration: 0.2, ease: 'power2.out' }, 0.11)
+        .to(st.spB, { alpha: 1, duration: 0.13, ease: 'sine.inOut' }, 0.24)
+        .to(st.wrapState, { jy: 0, duration: 0.2, ease: 'power2.in' }, 0.34)
+        .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.34)
+        .to(st.sq, { x: 1.06, y: 0.93, duration: 0.07, ease: 'power2.out' }, 0.54)
+        .to(st.wrapState, { jy: -5, duration: 0.1, ease: 'power2.out' }, 0.61)
+        .to(st.sq, { x: 0.99, y: 1.015, duration: 0.1, ease: 'sine.out' }, 0.61)
+        .to(st.wrapState, { jy: 0, duration: 0.11, ease: 'power2.in' }, 0.71)
+        .to(st.sq, { x: 1, y: 1, duration: 0.2, ease: 'sine.inOut' }, 0.71)
+        .call(() => steamPuff(st, st.lite ? 3 : 5), null, 0.54);
+      pieces.forEach((p, i) => {
+        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (62 + i * 14); const oy = p.py - 70 - i * 10;
+        p.c.position.set(p.px, p.py); p.c.scale.set(0.5); p.c.alpha = 0;
+        tl.to(p.c, { alpha: 1, duration: 0.08 }, 0.11)
+          .to(p.c.scale, { x: 1, y: 1, duration: 0.2, ease: 'back.out(1.6)' }, 0.11)
+          .to(p.c, { x: ox, y: oy, rotation: sgn * 1.1, duration: 0.5, ease: 'power2.out' }, 0.11)
+          .to(p.c, { y: oy + 26, alpha: 0, duration: 0.3, ease: 'power1.in' }, 0.5)
+          .to(p.c.scale, { x: 0.75, y: 0.75, duration: 0.3 }, 0.5);
+      });
+    } else {
+      // volver a poner: la pieza cae desde arriba, la burger se aplasta, crossfade y rebote
+      tl.to(st.sq, { x: 1.02, y: 0.98, duration: 0.1, ease: 'sine.out' }, 0.2)
+        .to(st.sq, { x: 1.06, y: 0.92, duration: 0.07, ease: 'power2.out' }, 0.38)
+        .to(st.wrapState, { jy: 3, duration: 0.07, ease: 'power2.out' }, 0.38)
+        .to(st.spB, { alpha: 1, duration: 0.13, ease: 'sine.inOut' }, 0.38)
+        .to(st.wrapState, { jy: -7, duration: 0.12, ease: 'power2.out' }, 0.45)
+        .to(st.sq, { x: 0.985, y: 1.02, duration: 0.12, ease: 'sine.out' }, 0.45)
+        .to(st.wrapState, { jy: 0, duration: 0.13, ease: 'power2.in' }, 0.57)
+        .to(st.sq, { x: 1, y: 1, duration: 0.22, ease: 'sine.inOut' }, 0.57)
+        .call(() => steamPuff(st, 2), null, 0.7);
+      pieces.forEach((p, i) => {
+        const sgn = p.px < DW / 2 ? -1 : 1; const ox = p.px + sgn * (46 + i * 12); const oy = p.py - 96 - i * 12;
+        p.c.position.set(ox, oy); p.c.rotation = sgn * 1.0; p.c.alpha = 0; p.c.scale.set(0.9);
+        tl.to(p.c, { alpha: 1, duration: 0.1 }, 0)
+          .to(p.c, { x: p.px, y: p.py, rotation: 0, duration: 0.38, ease: 'power2.in' }, 0)
+          .to(p.c.scale, { x: 0.6, y: 0.6, duration: 0.38, ease: 'power2.in' }, 0)
+          .to(p.c, { alpha: 0, duration: 0.1 }, 0.33);
+      });
+    }
+    if (!pieces.length) tl.to({}, { duration: 0.01 }, 0.95);
+  });
 }
 
 
